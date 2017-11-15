@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.cs477.dormbuddy.MapBuddyActivity">
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Map Buddy"
+        android:textSize="36sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="10dp"
+        android:textAlignment="center"/>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <GridLayout
+            android:layout_marginBottom="10dp"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical">
+            <!--two/three rectangular maps, at least one dorm map and one campus map, clickable to expand-->
+            <ImageButton
+                android:contentDescription="Dorm Map"
+                android:layout_marginTop="10dp"
+                android:src="@drawable/buddy"
+                android:layout_height="160dp"
+                android:layout_width="fill_parent"
+                android:onClick="mapClicked"/>
+            <ImageButton
+                android:contentDescription="Campus Map"
+                android:layout_marginTop="10dp"
+                android:src="@drawable/buddy"
+                android:layout_height="160dp"
+                android:layout_width="fill_parent"
+                android:onClick="mapClicked"/>
+            <ImageButton
+                android:contentDescription="Fairfax Map"
+                android:layout_marginTop="10dp"
+                android:src="@drawable/buddy"
+                android:layout_height="160dp"
+                android:layout_width="fill_parent"
+                android:onClick="mapClicked"/>
+        </GridLayout>
+    </ScrollView>
+</LinearLayout>

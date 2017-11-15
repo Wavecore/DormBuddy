@@ -1,9 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.cs477.dormbuddy.CycleSettingsActivity">
-
-</android.support.constraint.ConstraintLayout>
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Cycle Preferences"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="10dp"
+        android:textAlignment="center"/>
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Washer Preferences"
+        android:textSize="24sp"
+        android:layout_marginBottom="10dp"/>
+    <ListView
+        android:id="@+id/washerPreferences"
+        android:layout_width="wrap_content"
+        android:layout_height="160dp" />
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Dryer Preferences"
+        android:textSize="24sp"
+        android:layout_marginBottom="10dp"/>
+    <ListView
+        android:id="@+id/dryerPreferences"
+        android:layout_width="wrap_content"
+        android:layout_height="160dp" />
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add New Preference"
+            android:textColor="@color/colorWhite"
+            android:backgroundTint="@color/colorAccent"/>
+    </LinearLayout>
+</LinearLayout>

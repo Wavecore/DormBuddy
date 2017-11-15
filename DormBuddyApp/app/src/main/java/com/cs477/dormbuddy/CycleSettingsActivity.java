@@ -2,6 +2,7 @@ package com.cs477.dormbuddy;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 
 public class CycleSettingsActivity extends AppCompatActivity {
 
