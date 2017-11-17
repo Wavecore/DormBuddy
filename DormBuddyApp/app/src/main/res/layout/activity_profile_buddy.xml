@@ -80,12 +80,11 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
-
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="24sp"
         android:backgroundTint="@color/colorAmber"
-        android:text="Change Housing"
-        android:onClick="changeHousingClicked"/>
+        android:onClick="changeHousingClicked"
+        android:text="Change Residence"
+        android:textSize="24sp" />
 </LinearLayout>
