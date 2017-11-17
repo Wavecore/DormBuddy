@@ -8,43 +8,49 @@
         android:id="@+id/landingPageGridView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:rowCount="3"
-        android:orientation="vertical"
+        android:columnCount="2"
+        android:orientation="horizontal"
         style="@style/Theme.AppCompat.DayNight">
         <ImageButton
             android:contentDescription="Laundry Buddy"
-            android:src="@drawable/buddy"
+            android:src="@drawable/laundry_machine"
             android:id="@+id/laundryBuddyImageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+
+            android:scaleType="fitXY"
             android:onClick="buddyClicked"/>
         <ImageButton
             android:contentDescription="Map Buddy"
-            android:src="@drawable/buddy"
+            android:src="@drawable/map"
             android:id="@+id/mapBuddyImageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:scaleType="fitXY"
             android:onClick="buddyClicked"/>
         <ImageButton
             android:contentDescription="Study Buddy"
-            android:src="@drawable/buddy"
+            android:src="@drawable/book"
             android:id="@+id/studyBuddyImageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:scaleType="fitXY"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
             android:onClick="buddyClicked"/>
         <ImageButton
             android:contentDescription="Event Buddy"
-            android:src="@drawable/buddy"
+            android:src="@drawable/event"
             android:id="@+id/eventBuddyImageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:scaleType="fitXY"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
             android:onClick="buddyClicked"/>
         <ImageButton
             android:contentDescription="Profile Buddy"
             android:src="@drawable/buddy"
             android:id="@+id/profileBuddyImageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:scaleType="fitXY"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
             android:onClick="buddyClicked"/>
     </GridLayout>
 </ScrollView>
