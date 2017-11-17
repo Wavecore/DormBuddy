@@ -1,9 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
     tools:context="com.cs477.dormbuddy.EventBuddyActivity">
-
-</android.support.constraint.ConstraintLayout>
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Event Buddy"
+        android:textSize="36sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="10dp"
+        android:textAlignment="center"/>
+    <ListView
+        android:id="@+id/eventList"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:background="@color/slightlyGray">
+    </ListView>
+    <!--This button will only be visible to administrators-->
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/colorAmber"
+        android:text="Create An Event"
+        android:onClick="createEventClicked"/>
+</LinearLayout>

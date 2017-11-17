@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <!-- for dorm buddy's local user database -->
+    <uses-permission android:name= "android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
         android:allowBackup="true"
@@ -17,20 +19,21 @@
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
+                <!--Launched will may be become CredentialsActivity?-->
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".CredentialsActivity"
             android:label="@string/title_activity_credentials" />
-        <activity android:name=".SelectBuildingActivity" />
+        <activity android:name=".RegisterActivity" />
         <activity android:name=".LaundryBuddyActivity" />
         <activity android:name=".CycleSettingsActivity" />
         <activity android:name=".StudyBuddyActivity" />
         <activity android:name=".EventBuddyActivity" />
-        <activity android:name=".StartEventActivity" />
-        <activity android:name=".ProfileActivity"></activity>
+        <activity android:name=".CreateEventActivity" />
+        <activity android:name=".ProfileBuddyActivity" />
+        <activity android:name=".MapBuddyActivity" />
     </application>
 
 </manifest>

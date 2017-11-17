@@ -1,18 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container_scroll_view"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.cs477.dormbuddy.MainActivity">
-
-    <TextView
-        android:layout_width="wrap_content"
+    android:layout_height="match_parent" >
+    <!--elements inside this grid view are buddy clickable images (e.g: Laundry Buddy)-->
+    <GridLayout
+        android:id="@+id/landingPageGridView"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-</android.support.constraint.ConstraintLayout>
+        android:rowCount="3"
+        android:orientation="vertical"
+        style="@style/Theme.AppCompat.DayNight">
+        <ImageButton
+            android:contentDescription="Laundry Buddy"
+            android:src="@drawable/buddy"
+            android:id="@+id/laundryBuddyImageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="buddyClicked"/>
+        <ImageButton
+            android:contentDescription="Map Buddy"
+            android:src="@drawable/buddy"
+            android:id="@+id/mapBuddyImageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="buddyClicked"/>
+        <ImageButton
+            android:contentDescription="Study Buddy"
+            android:src="@drawable/buddy"
+            android:id="@+id/studyBuddyImageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="buddyClicked"/>
+        <ImageButton
+            android:contentDescription="Event Buddy"
+            android:src="@drawable/buddy"
+            android:id="@+id/eventBuddyImageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="buddyClicked"/>
+        <ImageButton
+            android:contentDescription="Profile Buddy"
+            android:src="@drawable/buddy"
+            android:id="@+id/profileBuddyImageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="buddyClicked"/>
+    </GridLayout>
+</ScrollView>

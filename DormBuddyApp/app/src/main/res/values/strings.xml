@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">DormBuddy</string>
+    <string name="app_name">Dorm Buddy</string>
     <string name="title_activity_credentials">Log In</string>
 
     <!-- Strings related to login -->
