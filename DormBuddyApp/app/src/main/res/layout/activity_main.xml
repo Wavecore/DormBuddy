@@ -19,13 +19,6 @@
             android:layout_height="wrap_content"
             android:onClick="buddyClicked"/>
         <ImageButton
-            android:contentDescription="Map Buddy"
-            android:src="@drawable/buddy"
-            android:id="@+id/mapBuddyImageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="buddyClicked"/>
-        <ImageButton
             android:contentDescription="Study Buddy"
             android:src="@drawable/buddy"
             android:id="@+id/studyBuddyImageButton"
@@ -33,16 +26,23 @@
             android:layout_height="wrap_content"
             android:onClick="buddyClicked"/>
         <ImageButton
-            android:contentDescription="Event Buddy"
-            android:src="@drawable/buddy"
-            android:id="@+id/eventBuddyImageButton"
+            android:contentDescription="Profile Buddy"
+            android:src="@drawable/greenbuddy"
+            android:id="@+id/profileBuddyImageButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="buddyClicked"/>
         <ImageButton
-            android:contentDescription="Profile Buddy"
+            android:contentDescription="Map Buddy"
             android:src="@drawable/buddy"
-            android:id="@+id/profileBuddyImageButton"
+            android:id="@+id/mapBuddyImageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="buddyClicked"/>
+        <ImageButton
+            android:contentDescription="Event Buddy"
+            android:src="@drawable/buddy"
+            android:id="@+id/eventBuddyImageButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="buddyClicked"/>
