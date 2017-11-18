@@ -19,9 +19,6 @@ import android.widget.TextView;
 
 public class DisplayEventFragment extends DialogFragment {
 
-    private AlertDialog.Builder builder;
-    private Dialog dialog;
-
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         super.onCreateDialog(savedInstanceState);
@@ -31,11 +28,8 @@ public class DisplayEventFragment extends DialogFragment {
         String when = getArguments().getString("when");
         String description = getArguments().getString("description");
         boolean authorization = getArguments().getBoolean("authorization");
-        builder = new AlertDialog.Builder(getActivity());
-        // Get the layout inflater
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        // Inflate and set the layout for the dialog
-        // Pass null as the parent view because its going in the dialog layout
         View v = inflater.inflate(R.layout.fragment_display_event,null);
         if(title != null && !title.isEmpty()) {
             TextView eventTitle = (TextView) v.findViewById(R.id.eventName);
@@ -58,14 +52,12 @@ public class DisplayEventFragment extends DialogFragment {
             TextView eventDescription = (TextView) v.findViewById(R.id.eventDescription);
             eventDescription.setText(description);
         }
-
-         builder.setView(v);
-                // Add action buttons
+        builder.setView(v);
         if(authorization)
              builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int id) {
-                            // sign in the user ...
+                            //TODO: Implement delete event functionality
                         }
                     });
          builder.setNegativeButton("Close", new DialogInterface.OnClickListener() {
@@ -73,8 +65,7 @@ public class DisplayEventFragment extends DialogFragment {
                         dialog.cancel();
                     }
                 });
-        dialog = builder.create();
-        return dialog;
+        return builder.create();
     }
 
     static DisplayEventFragment newInstance(String title, int image, String where, String when, String description, boolean authorization){
@@ -88,27 +79,6 @@ public class DisplayEventFragment extends DialogFragment {
         args.putBoolean("authorization",authorization);
         display.setArguments(args);
         return display;
-    }
-
-    public void updateValues(String title, Drawable image, String where, String when, String description){
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View v = inflater.inflate(R.layout.fragment_display_event,null,false);
-        //Dialog v = dialog;
-        TextView eventTitle = (TextView) v.findViewById(R.id.eventName);
-        TextView eventWhere = (TextView) v.findViewById(R.id.eventLocation);
-        TextView eventWhen = (TextView) v.findViewById(R.id.eventTime);
-        TextView eventDescription = (TextView) v.findViewById(R.id.eventDescription);
-        ImageView eventImage = (ImageView) v.findViewById(R.id.eventImage);
-        if(title != null && !title.isEmpty())
-            eventTitle.setText(title);
-        if(image != null)
-            eventImage.setImageDrawable(image);
-        if(where != null && !where.isEmpty())
-            eventWhere.setText(where);
-        if(when != null && !when.isEmpty())
-            eventWhen.setText(when);
-        if(description != null && !description.isEmpty())
-            eventDescription.setText(description);
     }
 
 }

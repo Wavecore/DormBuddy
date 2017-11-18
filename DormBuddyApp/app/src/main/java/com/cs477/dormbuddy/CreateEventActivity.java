@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.media.Image;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
@@ -18,10 +20,22 @@ import java.io.InputStream;
 
 public class CreateEventActivity extends AppCompatActivity {
     static final int PICK_IMAGE = 1;
+    ImageButton imageButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_event);
+        imageButton =  (ImageButton)findViewById(R.id.createEventImageButton);
+        imageButton.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                BitmapDrawable drawable = (BitmapDrawable) imageButton.getDrawable();
+                DisplayImageFragment newFragment = DisplayImageFragment.newInstance(drawable.getBitmap());
+                newFragment.show(getSupportFragmentManager(),"DisplayImage");
+                return true;
+            }
+        });
     }
 
     public void selectImage(View v){
@@ -45,8 +59,7 @@ public class CreateEventActivity extends AppCompatActivity {
                 final Uri imageUri = data.getData();
                 final InputStream imageStream = getContentResolver().openInputStream(imageUri);
                 final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-                ImageButton image_view = (ImageButton) findViewById(R.id.createEventImageButton);
-                image_view.setImageBitmap(selectedImage);
+                imageButton.setImageBitmap(selectedImage);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
                 Toast.makeText(CreateEventActivity.this, "Something went wrong", Toast.LENGTH_LONG).show();

@@ -16,7 +16,7 @@ public class EventBuddyActivity extends AppCompatActivity {
         setContentView(R.layout.activity_event_buddy);
 
         DisplayEventFragment newFragment = DisplayEventFragment.newInstance("Test",R.drawable.laundry_machine,"here","now","Roses are read\nViolets are violet\n You had one job\n Don't fck it up\n",false);
-        newFragment.show(getSupportFragmentManager(),"here");
+        newFragment.show(getSupportFragmentManager(),"DisplayEvent");
     }
 
     public void createEventClicked(View view) {
