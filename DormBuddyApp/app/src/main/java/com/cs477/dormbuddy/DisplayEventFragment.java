@@ -2,8 +2,10 @@ package com.cs477.dormbuddy;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,6 +16,7 @@ import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -36,9 +39,18 @@ public class DisplayEventFragment extends DialogFragment {
             eventTitle.setText(title);
         }
         if(imageID != 0) {
-            ImageView eventImage = (ImageView) v.findViewById(R.id.eventImage);
+            final ImageView eventImage = (ImageView) v.findViewById(R.id.eventImage);
             Drawable image = ContextCompat.getDrawable(getContext(),imageID);
             eventImage.setImageDrawable(image);
+            eventImage.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    BitmapDrawable drawable = (BitmapDrawable) eventImage.getDrawable();
+                    DisplayImageFragment newFragment = DisplayImageFragment.newInstance(drawable.getBitmap());
+                    newFragment.show(getActivity().getSupportFragmentManager(),"DisplayImage");
+                    return true;
+                }
+            });
         }
         if(where != null && !where.isEmpty()) {
             TextView eventWhere = (TextView) v.findViewById(R.id.eventLocation);
@@ -52,6 +64,7 @@ public class DisplayEventFragment extends DialogFragment {
             TextView eventDescription = (TextView) v.findViewById(R.id.eventDescription);
             eventDescription.setText(description);
         }
+
         builder.setView(v);
         if(authorization)
              builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {

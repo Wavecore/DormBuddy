@@ -14,18 +14,21 @@
         android:textSize="36sp"
         android:textStyle="bold"
         android:layout_marginBottom="10dp"
+        android:layout_weight="1"
         android:textAlignment="center"/>
     <ListView
         android:id="@+id/eventList"
         android:layout_width="match_parent"
         android:layout_height="400dp"
+        android:layout_weight="1"
         android:background="@color/slightlyGray">
     </ListView>
     <!--This button will only be visible to administrators-->
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/colorAmber"
         android:text="Create An Event"
+        android:layout_weight="1"
         android:onClick="createEventClicked"/>
 </LinearLayout>
