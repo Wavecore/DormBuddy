@@ -16,20 +16,20 @@
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textSize="22sp"
+        android:textSize="26sp"
         android:text="Building"
         android:textAlignment="center"/>
     <Spinner
         android:id="@+id/buildingSpinner"
         android:layout_width="fill_parent"
-        android:layout_height="36dp"
+        android:layout_height="wrap_content"
         android:layout_marginEnd="60dp"
         android:layout_marginStart="60dp"
         android:textAlignment="center"/>
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textSize="24sp"
+        android:textSize="26sp"
         android:text="Room"
         android:textAlignment="center"/>
     <EditText
