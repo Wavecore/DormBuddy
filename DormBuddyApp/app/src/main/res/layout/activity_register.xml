@@ -20,7 +20,7 @@
         android:text="Building"
         android:textAlignment="center"/>
     <Spinner
-        android:id="@+id/buildingList"
+        android:id="@+id/buildingSpinner"
         android:layout_width="fill_parent"
         android:layout_height="36dp"
         android:layout_marginEnd="60dp"
@@ -33,17 +33,18 @@
         android:text="Room"
         android:textAlignment="center"/>
     <EditText
+        android:id="@+id/roomNumber"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:textSize="24sp"
         android:layout_marginEnd="80dp"
         android:layout_marginStart="80dp"/>
     <Button
+        android:id="@+id/registerOrUpdate"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="Register"
         android:textSize="28sp"
         android:layout_marginEnd="100dp"
-        android:layout_marginStart="100dp"
-        android:onClick="onRegisterClicked"/>
+        android:layout_marginStart="100dp" />
 </LinearLayout>

@@ -14,6 +14,29 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string-array name="GMU_houses">
+        <item>Beacon Hall</item>
+        <item>Blue Ridge</item>
+        <item>The Commons</item>
+        <item>Commonwealth</item>
+        <item>Dominion</item>
+        <item>Eastern Shore</item>
+        <item>Hampton Roads</item>
+        <item>Liberty Square</item>
+        <item>Northern Neck</item>
+        <item>Piedmont</item>
+        <item>Potomac Heights</item>
+        <item>Presidents Park</item>
+        <item>Sandbridge</item>
+        <item>Tidewater</item>
+        <item>Rogers</item>
+        <item>Smithsonian-Mason Conservation Center</item>
+        <item>Student Apartments</item>
+        <item>Townhouse Building A</item>
+        <item>Townhouse Building B</item>
+        <item>Townhouse Building C</item>
+        <item>Whitetop Hall</item>
+    </string-array>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

@@ -17,10 +17,12 @@
         android:layout_marginBottom="10dp"
         android:textAlignment="center"/>
     <ImageView
+        android:id="@+id/userImage"
         android:contentDescription="User Profile Image"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:src="@drawable/buddy"/>
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:onClick="uploadImage"
+        android:src="@drawable/buddy"/> <!--easter egg buddy-->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
@@ -32,6 +34,7 @@
             android:text="Name: "/>
         <TextView
             android:id="@+id/nameText"
+            android:textSize="26sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>
@@ -47,6 +50,7 @@
             android:text="G#: "/>
         <TextView
             android:id="@+id/gNumberText"
+            android:textSize="26sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>
@@ -62,6 +66,7 @@
             android:text="Building: "/>
         <TextView
             android:id="@+id/buildingText"
+            android:textSize="26sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>
@@ -76,6 +81,7 @@
             android:text="Room: "/>
         <TextView
             android:id="@+id/roomText"
+            android:textSize="26sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>
@@ -86,5 +92,13 @@
         android:backgroundTint="@color/colorAmber"
         android:onClick="changeHousingClicked"
         android:text="Change Residence"
+        android:textSize="24sp" />
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorWhite"
+        android:backgroundTint="@color/darkRed"
+        android:onClick="logoutClicked"
+        android:text="Log Out"
         android:textSize="24sp" />
 </LinearLayout>
