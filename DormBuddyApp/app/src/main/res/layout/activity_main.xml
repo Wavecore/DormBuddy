@@ -21,7 +21,8 @@
 
             android:onClick="buddyClicked"
             android:scaleType="fitXY"
-            android:src="@drawable/laundry_machine" />
+            android:src="@drawable/laundry_machine"
+            android:layout_rowWeight="1"/>
 
         <ImageButton
             android:id="@+id/mapBuddyImageButton"
@@ -31,7 +32,8 @@
             android:contentDescription="Map Buddy"
             android:onClick="buddyClicked"
             android:scaleType="fitXY"
-            android:src="@drawable/map" />
+            android:src="@drawable/map"
+            android:layout_rowWeight="1"/>
 
         <ImageButton
             android:id="@+id/studyBuddyImageButton"
@@ -41,7 +43,8 @@
             android:contentDescription="Study Buddy"
             android:onClick="buddyClicked"
             android:scaleType="fitXY"
-            android:src="@drawable/book" />
+            android:src="@drawable/book"
+            android:layout_rowWeight="1" />
 
         <ImageButton
             android:id="@+id/eventBuddyImageButton"
@@ -51,7 +54,8 @@
             android:contentDescription="Event Buddy"
             android:onClick="buddyClicked"
             android:scaleType="fitXY"
-            android:src="@drawable/event" />
+            android:src="@drawable/event"
+            android:layout_rowWeight="1" />
 
         <ImageButton
             android:id="@+id/profileBuddyImageButton"
@@ -61,6 +65,7 @@
             android:contentDescription="Profile Buddy"
             android:onClick="buddyClicked"
             android:scaleType="fitXY"
-            android:src="@drawable/buddy" />
+            android:src="@drawable/buddy"
+            android:layout_rowWeight="1" />
     </GridLayout>
 </ScrollView>
