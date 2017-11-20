@@ -11,40 +11,56 @@
         android:rowCount="3"
         android:orientation="vertical"
         style="@style/Theme.AppCompat.DayNight">
+
         <ImageButton
-            android:contentDescription="Laundry Buddy"
-            android:src="@drawable/buddy"
             android:id="@+id/laundryBuddyImageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="buddyClicked"/>
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="Laundry Buddy"
+
+            android:onClick="buddyClicked"
+            android:scaleType="fitXY"
+            android:src="@drawable/laundry_machine" />
+
         <ImageButton
-            android:contentDescription="Study Buddy"
-            android:src="@drawable/buddy"
-            android:id="@+id/studyBuddyImageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="buddyClicked"/>
-        <ImageButton
-            android:contentDescription="Profile Buddy"
-            android:src="@drawable/greenbuddy"
-            android:id="@+id/profileBuddyImageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="buddyClicked"/>
-        <ImageButton
-            android:contentDescription="Map Buddy"
-            android:src="@drawable/buddy"
             android:id="@+id/mapBuddyImageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="buddyClicked"/>
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="Map Buddy"
+            android:onClick="buddyClicked"
+            android:scaleType="fitXY"
+            android:src="@drawable/map" />
+
         <ImageButton
-            android:contentDescription="Event Buddy"
-            android:src="@drawable/buddy"
+            android:id="@+id/studyBuddyImageButton"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="Study Buddy"
+            android:onClick="buddyClicked"
+            android:scaleType="fitXY"
+            android:src="@drawable/book" />
+
+        <ImageButton
             android:id="@+id/eventBuddyImageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="buddyClicked"/>
-    </GridLayout>
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="Event Buddy"
+            android:onClick="buddyClicked"
+            android:scaleType="fitXY"
+            android:src="@drawable/event" />
+
+        <ImageButton
+            android:id="@+id/profileBuddyImageButton"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="Profile Buddy"
+            android:onClick="buddyClicked"
+            android:scaleType="fitXY"
+            android:src="@drawable/buddy" />
+   </GridLayout>
 </ScrollView>

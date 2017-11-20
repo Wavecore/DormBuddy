@@ -8,7 +8,9 @@
     tools:context="com.cs477.dormbuddy.CreateEventActivity">
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -16,46 +18,59 @@
             android:textStyle="bold"
             android:text="Title: "/>
         <EditText
-            android:id="@+id/machineName"
-            android:layout_width="wrap_content"
+            android:id="@+id/eventNameEdit"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textSize="30sp"
-            android:hint="Event Title" />
+            android:hint="Enter Title" />
     </LinearLayout>
     <!--Event image is either a generic EVENT! we use or one uploaded by user-->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="26sp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
         android:textStyle="bold"
         android:text="Image: "/>
-    <ImageView
-        android:contentDescription="Upload an Event Image"
-        android:src="@drawable/buddy"
-        android:id="@+id/eventImage"
-        android:layout_marginTop="10dp"
+
+    <ImageButton
+        android:id="@+id/createEventImageButton"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_gravity="center_horizontal"
         android:layout_marginBottom="10dp"
-        android:layout_width="fill_parent"
-        android:layout_height="120dp" />
+        android:layout_marginTop="10dp"
+        android:background="@android:color/transparent"
+        android:onClick="selectImage"
+        android:scaleType="fitXY"
+        app:srcCompat="@drawable/event" />
+
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="26sp"
             android:textStyle="bold"
             android:text="Location: "/>
-        <EditText
+
+        <Spinner
             android:id="@+id/eventLocation"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:hint="Enter Location"/>
+            android:textAlignment="center"
+            android:hint="Select Location"
+            />
     </LinearLayout>
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -69,32 +84,35 @@
             android:textSize="20sp"
             android:hint="Date (Not an edittext probably)"/>
     </LinearLayout>
-    <LinearLayout
+    <TextView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:text="Description"/>
-        <EditText
-            android:id="@+id/eventDescription"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:hint="Enter a description"/>
-    </LinearLayout>
-    <LinearLayout
+        android:layout_height="wrap_content"
+        android:text="Description"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"/>
+
+    <EditText
+        android:inputType="textMultiLine"
+        android:id="@+id/eventDescription"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center_horizontal">
-        <!--This button will only be visible to administrators-->
+        android:layout_height="fill_parent"
+        android:scrollbars="vertical"
+        android:hint="Enter a description"
+        android:layout_weight="1"
+        android:textSize="20sp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"/>
         <Button
             android:id="@+id/startButton"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
             android:backgroundTint="@color/colorGreen"
-            android:text="Start Event"/>
-    </LinearLayout>
+            android:text="Start Event"
+            android:layout_weight="0"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            />
 </LinearLayout>
