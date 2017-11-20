@@ -6,7 +6,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
 import static com.cs477.dormbuddy.LocalUserHelper.FULL_NAME;
@@ -33,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
             mCursor.moveToPosition(0);
             int isLoggedIn = mCursor.getInt(2);
             if (isLoggedIn == 1) {
+                Toast.makeText(this, "Greetings, buddy " + mCursor.getString(1), Toast.LENGTH_SHORT).show(); //welcome message
                 //user is logged in, therefore show activity_main
                 return;
             } else {
@@ -65,6 +65,6 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Error Retrieving Page", Toast.LENGTH_SHORT).show();
                 return;
         }
-        startActivity(intent);
+        startActivity(intent); //main activity never ends
     }
 }
