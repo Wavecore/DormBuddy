@@ -1,41 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center_horizontal"
     tools:context="com.cs477.dormbuddy.StudyBuddyActivity">
     <TextView
+        android:id="@+id/StudyBuddyTextView"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="Study Buddy"
         android:textSize="36sp"
         android:textStyle="bold"
         android:layout_marginBottom="10dp"
-        android:layout_weight="1"
+        android:layout_alignParentTop="true"
         android:textAlignment="center"/>
     <TextView
+        android:id="@+id/MyReservationTextView"
+        android:layout_below="@+id/StudyBuddyTextView"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:textSize="24sp"
         android:text="My Reservations"
-        android:layout_weight="1"
         android:layout_marginBottom="10dp"/>
     <ListView
         android:id="@+id/reservationList"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="400dp"
         android:background="@color/slightlyGray"
-        android:layout_weight="40"
+        android:layout_below="@+id/MyReservationTextView"
+        android:layout_above="@+id/roomReservationButton"
         >
 
     </ListView>
     <Button
+        android:id="@+id/roomReservationButton"
+        android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/colorAmber"
-        android:text="Reserve a Room"
-        android:layout_weight="1"/>
-</LinearLayout>
+        android:text="Reserve a Room"/>
+</RelativeLayout>
