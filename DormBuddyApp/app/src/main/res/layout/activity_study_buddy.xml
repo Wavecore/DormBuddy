@@ -26,7 +26,7 @@
     <ListView
         android:id="@+id/reservationList"
         android:layout_width="fill_parent"
-        android:layout_height="400dp"
+        android:layout_height="fill_parent"
         android:background="@color/slightlyGray"
         android:layout_below="@+id/MyReservationTextView"
         android:layout_above="@+id/roomReservationButton"
