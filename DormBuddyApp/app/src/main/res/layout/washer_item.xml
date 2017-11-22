@@ -30,8 +30,8 @@
         <ImageView
             android:contentDescription="Machine Status"
             android:id="@+id/washerStatus"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true"
             android:layout_marginEnd="10dp"
@@ -41,8 +41,8 @@
         <ImageView
             android:contentDescription="Machine Condition"
             android:id="@+id/washerCondition"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_alignTop="@+id/washerStatus"
             android:layout_toStartOf="@+id/washerStatus"
             android:layout_marginEnd="2dp"
