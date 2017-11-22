@@ -26,7 +26,6 @@
                 android:scaleType="fitXY"
                 android:onClick="buddyClicked"
                 android:src="@drawable/laundry_machine" />
-
             <ImageButton
                 android:id="@+id/mapBuddyImageButton"
                 android:layout_height="wrap_content"
@@ -54,6 +53,7 @@
                 android:scaleType="fitXY"
                 android:layout_weight="1"
                 android:src="@drawable/book" />
+
             <ImageButton
                 android:id="@+id/eventBuddyImageButton"
                 android:layout_height="wrap_content"

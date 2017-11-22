@@ -102,6 +102,7 @@ public class RegisterActivity extends AppCompatActivity {
         db.insert(TABLE_NAME, null, cv);
         db.close();
         mCursor.close();
+        startActivity(new Intent(this, MainActivity.class));
         finish();
     }
 
@@ -115,6 +116,7 @@ public class RegisterActivity extends AppCompatActivity {
         db.update(TABLE_NAME, cv, _ID + "=" + storedGNumber, null);
         db.close();
         mCursor.close();
+        startActivity(new Intent(this, MainActivity.class));
         finish();
     }
 
