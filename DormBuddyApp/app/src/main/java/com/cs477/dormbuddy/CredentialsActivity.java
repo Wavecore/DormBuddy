@@ -6,6 +6,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -35,6 +36,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.Manifest.permission.READ_CONTACTS;
+import static com.cs477.dormbuddy.LocalUserHelper.FULL_NAME;
+import static com.cs477.dormbuddy.LocalUserHelper.LOGGED_IN;
+import static com.cs477.dormbuddy.LocalUserHelper.TABLE_NAME;
+import static com.cs477.dormbuddy.LocalUserHelper._ID;
 
 /**
  * A login screen that offers login via email/password.
@@ -63,11 +68,30 @@ public class CredentialsActivity extends AppCompatActivity implements LoaderCall
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private SQLiteDatabase db = null;
+    private LocalUserHelper dbHelper = null;
+    private Cursor mCursor;
+    final static String[] columns = { LOGGED_IN };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_credentials);
+        dbHelper = new LocalUserHelper(this);
+        db = dbHelper.getWritableDatabase();
+        mCursor = db.query(TABLE_NAME, columns, null, new String[] {}, null, null,
+                null);
+        try { //if the user ever logged in, there will be a row in the database, but check that they didnt log out
+            mCursor.moveToPosition(0);
+            int isLoggedIn = mCursor.getInt(0);
+            if (isLoggedIn == 1) {
+                //user is logged in, therefore show activity_main
+                startActivity(new Intent(this,MainActivity.class));
+                return;
+            }
+        } catch (Exception e) { //otherwise direct to login
+            System.out.println("Not Logged in. Please log in first");
+        }
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();

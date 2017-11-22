@@ -10,7 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 //database helper that keeps user logged in and displays their preferences
 public class LocalUserHelper extends SQLiteOpenHelper {
-    final static private Integer VERSION = 2;
+    final static private Integer VERSION = 5;
     final static String TABLE_NAME = "dormbuddy_user";
     final static String _ID = "_id";
     final static String FULL_NAME = "student_name";
