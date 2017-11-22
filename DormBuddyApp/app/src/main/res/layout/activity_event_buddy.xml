@@ -1,34 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center_horizontal"
     tools:context="com.cs477.dormbuddy.EventBuddyActivity">
     <TextView
+        android:id="@+id/EventBuddyTextView"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="Event Buddy"
         android:textSize="36sp"
         android:textStyle="bold"
         android:layout_marginBottom="10dp"
-        android:layout_weight="1"
+        android:layout_alignParentTop="true"
         android:textAlignment="center"/>
     <ListView
+        android:layout_below="@+id/EventBuddyTextView"
         android:id="@+id/eventList"
         android:layout_width="match_parent"
-        android:layout_height="400dp"
-        android:layout_weight="1"
-        android:background="@color/slightlyGray">
+        android:layout_height="fill_parent"
+        android:layout_above="@+id/eventCreationButton"
+        android:background="@drawable/empty">
     </ListView>
     <!--This button will only be visible to administrators-->
     <Button
+        android:id="@+id/eventCreationButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/colorAmber"
         android:text="Create An Event"
-        android:layout_weight="1"
+        android:layout_alignParentBottom="true"
         android:onClick="createEventClicked"/>
-</LinearLayout>
+</RelativeLayout>
