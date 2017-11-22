@@ -3,6 +3,7 @@ package com.cs477.dormbuddy;
 import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -40,11 +41,23 @@ public class LaundryBuddyActivity extends AppCompatActivity {
         LinearLayoutManager horizontalLayout2 = new LinearLayoutManager(this);
         horizontalLayout2.setOrientation(LinearLayoutManager.HORIZONTAL);
         /////////fill arraylists here///////
-        washers.add("HI");
-        washers.add("HI Number 2");
-        washers.add("HI3");
-        dryers.add("hello");
-        dryers.add("sup");
+        washers.add("HI24");
+        washers.add("HI23");
+        washers.add("HI35");
+        washers.add("HI36");
+        washers.add("HI33");
+        washers.add("HI31");
+        washers.add("HI41");
+        washers.add("HI51");
+        washers.add("HI61");
+        washers.add("HI71");
+        washers.add("HI21");
+        washers.add("HI11");
+        washers.add("HI61");
+        washers.add("HI71");
+        dryers.add("Hello");
+        dryers.add("Sup");
+        dryers.add("Buddy");
         ///////////////////////////////////
         washerAdapter = new LaundryAdapter(washers, true);
         dryerAdapter = new LaundryAdapter(dryers, false);
@@ -52,6 +65,9 @@ public class LaundryBuddyActivity extends AppCompatActivity {
         dryerList.setAdapter(dryerAdapter);
         laundryList.setLayoutManager(horizontalLayout);
         dryerList.setLayoutManager(horizontalLayout2);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(laundryList.getContext(),
+                horizontalLayout.getOrientation());
+        laundryList.addItemDecoration(dividerItemDecoration);
     }
 
 

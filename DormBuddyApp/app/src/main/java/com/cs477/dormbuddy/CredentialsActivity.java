@@ -87,6 +87,7 @@ public class CredentialsActivity extends AppCompatActivity implements LoaderCall
             if (isLoggedIn == 1) {
                 //user is logged in, therefore show activity_main
                 startActivity(new Intent(this,MainActivity.class));
+                finish();
                 return;
             }
         } catch (Exception e) { //otherwise direct to login
