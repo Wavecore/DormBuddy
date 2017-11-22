@@ -6,23 +6,27 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="com.cs477.dormbuddy.CreateEventActivity">
+
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp">
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp">
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="Title: "
             android:textSize="30sp"
-            android:textStyle="bold"
-            android:text="Title: "/>
+            android:textStyle="bold" />
+
         <EditText
             android:id="@+id/eventNameEdit"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:textSize="30sp"
-            android:hint="Enter Title" />
+            android:hint="Enter Title"
+            android:singleLine="true"
+            android:textSize="30sp" />
     </LinearLayout>
     <!--Event image is either a generic EVENT! we use or one uploaded by user-->
     <TextView
@@ -47,42 +51,47 @@
         app:srcCompat="@drawable/event" />
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp">
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp">
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="Location: "
             android:textSize="26sp"
-            android:textStyle="bold"
-            android:text="Location: "/>
+            android:textStyle="bold" />
 
         <Spinner
             android:id="@+id/eventLocation"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:textAlignment="center"
             android:hint="Select Location"
-            />
+            android:textAlignment="center" />
     </LinearLayout>
+
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp">
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp">
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="Time: "
             android:textSize="26sp"
-            android:textStyle="bold"
-            android:text="Time: "/>
+            android:textStyle="bold" />
+
         <EditText
             android:id="@+id/eventTime"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:hint="Date (Not an edittext probably)"/>
+            android:hint="Time"
+            android:focusable="false"
+            android:inputType="datetime"
+            android:textSize="20sp" />
     </LinearLayout>
     <TextView
         android:layout_width="wrap_content"

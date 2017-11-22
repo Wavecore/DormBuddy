@@ -1,5 +1,7 @@
 package com.cs477.dormbuddy;
 
+import android.app.FragmentManager;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -10,13 +12,17 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Calendar;
 
 public class CreateEventActivity extends AppCompatActivity {
     static final int PICK_IMAGE = 1;
@@ -24,6 +30,7 @@ public class CreateEventActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        FragmentManager fm = getFragmentManager();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_event);
         imageButton =  (ImageButton)findViewById(R.id.createEventImageButton);
@@ -34,6 +41,25 @@ public class CreateEventActivity extends AppCompatActivity {
                 DisplayImageFragment newFragment = DisplayImageFragment.newInstance(drawable.getBitmap());
                 newFragment.show(getSupportFragmentManager(),"DisplayImage");
                 return true;
+            }
+        });
+        final EditText editText = (EditText)findViewById(R.id.eventTime);
+        editText.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                //TODO: SELECT TIME SLOT INSTEAD OF TIME, CREATE DIALOG FRAGMENT
+                Calendar mcurrentTime = Calendar.getInstance();
+                int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
+                int minute = mcurrentTime.get(Calendar.MINUTE);
+                TimePickerDialog mTimePicker;
+                mTimePicker = new TimePickerDialog(CreateEventActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
+                        editText.setText( selectedHour + ":" + selectedMinute);
+                    }
+                }, hour, minute, true);//Yes 24 hour time
+                mTimePicker.setTitle("Select Time");
+                mTimePicker.show();
             }
         });
     }

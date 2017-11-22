@@ -54,8 +54,6 @@
                 android:scaleType="fitXY"
                 android:layout_weight="1"
                 android:src="@drawable/book" />
-
-<<<<<<< HEAD
             <ImageButton
                 android:id="@+id/eventBuddyImageButton"
                 android:layout_height="wrap_content"

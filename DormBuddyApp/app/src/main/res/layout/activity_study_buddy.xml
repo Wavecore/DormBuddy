@@ -26,13 +26,11 @@
     <ListView
         android:id="@+id/reservationList"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:background="@color/slightlyGray"
+        android:layout_height="400dp"
+        android:background="@drawable/empty"
         android:layout_below="@+id/MyReservationTextView"
         android:layout_above="@+id/roomReservationButton"
-        >
-
-    </ListView>
+        />
     <Button
         android:id="@+id/roomReservationButton"
         android:layout_alignParentBottom="true"
