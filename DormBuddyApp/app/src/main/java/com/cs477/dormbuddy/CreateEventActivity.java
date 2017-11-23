@@ -38,8 +38,8 @@ public class CreateEventActivity extends AppCompatActivity {
             @Override
             public boolean onLongClick(View view) {
                 BitmapDrawable drawable = (BitmapDrawable) imageButton.getDrawable();
-                DisplayImageFragment newFragment = DisplayImageFragment.newInstance(drawable.getBitmap());
-                newFragment.show(getSupportFragmentManager(),"DisplayImage");
+                DisplayImageFragment displayImageFragment = DisplayImageFragment.newInstance(drawable.getBitmap());
+                displayImageFragment.show(getSupportFragmentManager(),"DisplayImage");
                 return true;
             }
         });
@@ -47,19 +47,12 @@ public class CreateEventActivity extends AppCompatActivity {
         editText.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
+                SelectTimeSlotFragment selectTimeSlotFragment = SelectTimeSlotFragment.newInstance();
                 //TODO: SELECT TIME SLOT INSTEAD OF TIME, CREATE DIALOG FRAGMENT
                 Calendar mcurrentTime = Calendar.getInstance();
                 int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
                 int minute = mcurrentTime.get(Calendar.MINUTE);
-                TimePickerDialog mTimePicker;
-                mTimePicker = new TimePickerDialog(CreateEventActivity.this, new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                        editText.setText( selectedHour + ":" + selectedMinute);
-                    }
-                }, hour, minute, true);//Yes 24 hour time
-                mTimePicker.setTitle("Select Time");
-                mTimePicker.show();
+                selectTimeSlotFragment.show(getSupportFragmentManager(),"SelectTime");
             }
         });
     }

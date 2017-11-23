@@ -37,7 +37,9 @@
         <item>Townhouse Building C</item>
         <item>Whitetop Hall</item>
     </string-array>
-
+    <string-array name="TimeSlots">
+        <item>12:00 AM - 12:15 AM</item>
+    </string-array>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
