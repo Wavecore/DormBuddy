@@ -16,8 +16,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".CredentialsActivity"
-            android:label="@string/title_activity_credentials">
+        <activity android:name=".CredentialsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <!--Launched will may be become CredentialsActivity?-->
@@ -27,7 +26,11 @@
         <activity
             android:name=".MainActivity" />
         <activity android:name=".RegisterActivity" />
-        <activity android:name=".LaundryBuddyActivity" />
+        <activity
+            android:name=".LaundryBuddyActivity"
+            android:screenOrientation="portrait"
+            android:label="Laundry Buddy"
+            />
         <activity android:name=".CycleSettingsActivity" />
         <activity android:name=".StudyBuddyActivity" />
         <activity android:name=".EventBuddyActivity" />
