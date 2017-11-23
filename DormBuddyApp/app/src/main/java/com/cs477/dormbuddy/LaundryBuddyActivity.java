@@ -1,20 +1,17 @@
 package com.cs477.dormbuddy;
 
-import android.content.Context;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
-import android.widget.GridView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -76,10 +73,33 @@ public class LaundryBuddyActivity extends AppCompatActivity {
 
     }
 
-    public class LaundryHolder extends RecyclerView.ViewHolder {
-        public TextView machineName;
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.custom_menu, menu);
+        return true;
+    }
 
-        public LaundryHolder(View v) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.gear) {
+            startActivity(new Intent(this, CycleSettingsActivity.class));
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    class LaundryHolder extends RecyclerView.ViewHolder {
+        TextView machineName;
+
+        LaundryHolder(View v) {
             super(v);
             machineName = (TextView) v.findViewById(R.id.machineName);
             v.setOnClickListener(new View.OnClickListener() {
@@ -91,11 +111,11 @@ public class LaundryBuddyActivity extends AppCompatActivity {
         }
     }
 
-    public class LaundryAdapter extends RecyclerView.Adapter<LaundryHolder> {
+    class LaundryAdapter extends RecyclerView.Adapter<LaundryHolder> {
         private ArrayList<String> machineNames;
         private boolean isWasher;
 
-        public LaundryAdapter(ArrayList<String> data, boolean isWasher) {
+        LaundryAdapter(ArrayList<String> data, boolean isWasher) {
             machineNames = data;
             this.isWasher = isWasher;
         }
@@ -122,5 +142,6 @@ public class LaundryBuddyActivity extends AppCompatActivity {
         public int getItemCount() {
             return machineNames.size();
         }
+
     }
 }

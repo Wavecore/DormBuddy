@@ -43,6 +43,7 @@
             android:layout_height="wrap_content"
             android:text="Add New Preference"
             android:textColor="@color/colorWhite"
-            android:backgroundTint="@color/colorAccent"/>
+            android:backgroundTint="@color/colorAccent"
+            android:onClick="onAddPreferenceClicked"/>
     </LinearLayout>
 </LinearLayout>
