@@ -37,7 +37,24 @@
         <item>Townhouse Building C</item>
         <item>Whitetop Hall</item>
     </string-array>
-
+    <string-array name="TimeSlots">
+        <item>12:00 AM - 12:15 AM</item>
+        <item>12:15 AM - 12:30 AM</item>
+        <item>12:30 AM - 12:45 AM</item>
+        <item>12:45 AM - 1:00 AM</item>
+        <item>1:00 AM - 1:15 AM</item>
+        <item>1:15 AM - 1:30 AM</item>
+        <item>1:30 AM - 1:45 AM</item>
+        <item>1:45 AM - 2:00 AM</item>
+        <item>2:00 AM - 2:15 AM</item>
+        <item>2:15 AM - 2:30 AM</item>
+        <item>2:30 AM - 2:45 AM</item>
+        <item>2:45 AM - 3:00 AM</item>
+        <item>3:00 AM - 3:15 AM</item>
+        <item>3:15 AM - 3:30 AM</item>
+        <item>3:30 AM - 3:45 AM</item>
+        <item>3:45 AM - 4:00 AM</item>
+    </string-array>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
