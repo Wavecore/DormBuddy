@@ -37,7 +37,7 @@ import static com.cs477.dormbuddy.LocalUserHelper.WASHER_TEMPLATE_4;
 import static com.cs477.dormbuddy.LocalUserHelper.WASHER_TEMPLATE_5;
 import static com.cs477.dormbuddy.LocalUserHelper._ID;
 
-public class CycleTemplatesActivity extends AppCompatActivity implements AddTemplateFragment.AddTemplateDoneListener {
+public class CycleTemplatesActivity extends AppCompatActivity implements AddTemplateFragment.AddTemplateDoneListener, EditTemplateFragment.EditTemplateDoneListener {
     private SQLiteDatabase db = null;
     private LocalUserHelper dbHelper = null;
     private Cursor mCursor;
@@ -161,6 +161,19 @@ public class CycleTemplatesActivity extends AppCompatActivity implements AddTemp
         }
     }
 
+    //handler for edit template returning
+    @Override
+    public void onTemplateReplaced(String newTemplateName, int position) {
+        insertInDatabase(newTemplateName, position);
+        if (position % 2 == 0) {
+            Toast.makeText(this, "Washer Template modified successfully!",
+                    Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Dryer Template  modified successfully!",
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private String insertTemplateToLocalServer(String templateName, boolean isWasher) {
         /////////////////////////////////Extracts template name//////////
         String actualName = (isWasher) ?
@@ -193,18 +206,30 @@ public class CycleTemplatesActivity extends AppCompatActivity implements AddTemp
                         washerTemplateList.remove(washerTemplateList.size()-1);
                     washerTemplateList.add(templateString);
                     washerTemplateAdapter.notifyDataSetChanged();
-                    selectedWasherTemplate.setText(currentMachineName);
                 } else {
                     if (dryerTemplateList.size() == 5)
                         dryerTemplateList.remove(dryerTemplateList.size()-1);
                     dryerTemplateList.add(templateString);
                     dryerTemplateAdapter.notifyDataSetChanged();
-                    selectedDryerTemplate.setText(currentMachineName);
                 }
                 return laundryMachine0 + 2*i; //this is the column number
             }
         }
         return -1;
+    }
+
+    private void insertInDatabase(String newString, int position) {
+        ContentValues cv = new ContentValues(1);
+        cv.put(columns[position], newString);
+        db.update(TABLE_NAME, cv, _ID + "=" + storedGNumber, null); //updates the database
+        int actual = (position-4)/2; //actual position in the adapter list
+        if (position % 2 == 0) {
+            washerTemplateList.set(actual, newString);
+            washerTemplateAdapter.notifyDataSetChanged();
+        } else {
+            dryerTemplateList.set(actual, newString);
+            dryerTemplateAdapter.notifyDataSetChanged();
+        }
     }
 
     public void updateSelected(int position, boolean isWasher) {
@@ -226,6 +251,15 @@ public class CycleTemplatesActivity extends AppCompatActivity implements AddTemp
 
         db.update(TABLE_NAME, cv, _ID + "=" + storedGNumber, null); //updates the database
         selectedTemplate.setText(actualName);
+    }
+
+    public void launchEditFragment(int position, boolean isWasher) {
+        TemplateAdapter adapter = (isWasher) ? washerTemplateAdapter : dryerTemplateAdapter;
+        String templateString = adapter.getItem(position);
+        int offset = (isWasher) ? 4 : 5;
+        position = position*2 + offset;
+        EditTemplateFragment newFragment = EditTemplateFragment.newInstance(templateString, position);
+        newFragment.show(getSupportFragmentManager(),"EditTemplateFragment");
     }
 
     //holder for template elements
@@ -275,7 +309,7 @@ public class CycleTemplatesActivity extends AppCompatActivity implements AddTemp
             v.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    Toast.makeText(CycleTemplatesActivity.this, "Template item long clicked", Toast.LENGTH_SHORT).show();
+                    launchEditFragment(getLayoutPosition(), isWasher);
                     return true;
                 }
             });
@@ -331,6 +365,8 @@ public class CycleTemplatesActivity extends AppCompatActivity implements AddTemp
         }
 
         public String getName(int position) { return retrieveActualNameAndSettings(templates.get(position), isWasher)[0]; }
+
+        public String getItem(int position) { return templates.get(position); }
 
         private String[] retrieveActualNameAndSettings(String templateName, boolean isWasher) {
             String actualName = (isWasher) ?
