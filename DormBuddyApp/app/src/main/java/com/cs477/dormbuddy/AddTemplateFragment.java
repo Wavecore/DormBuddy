@@ -2,12 +2,16 @@ package com.cs477.dormbuddy;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -16,23 +20,31 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
+import java.sql.RowId;
+
+import static com.cs477.dormbuddy.LocalUserHelper.ROOM_NUMBER;
+import static com.cs477.dormbuddy.LocalUserHelper.SELECTED_DRYER_TEMPLATE;
+import static com.cs477.dormbuddy.LocalUserHelper.SELECTED_WASHER_TEMPLATE;
+import static com.cs477.dormbuddy.LocalUserHelper.TABLE_NAME;
+import static com.cs477.dormbuddy.LocalUserHelper._ID;
+
 /* using enums didnt work out as implicit int casting is not possible, much more work than needed
-import com.cs477.dormbuddy.CycleSettingsActivity.WASHER_SOIL;
-import com.cs477.dormbuddy.CycleSettingsActivity.WASHER_CYCLE;
-import com.cs477.dormbuddy.CycleSettingsActivity.WASHER_TEMPERATURE;
-import com.cs477.dormbuddy.CycleSettingsActivity.WASHER_SMALL_LOAD;
-import com.cs477.dormbuddy.CycleSettingsActivity.DRYER_TEMPERATURE;
-import com.cs477.dormbuddy.CycleSettingsActivity.DRYER_TEMPERATURE;
+import com.cs477.dormbuddy.CycleTemplatesActivity.WASHER_SOIL;
+import com.cs477.dormbuddy.CycleTemplatesActivity.WASHER_CYCLE;
+import com.cs477.dormbuddy.CycleTemplatesActivity.WASHER_TEMPERATURE;
+import com.cs477.dormbuddy.CycleTemplatesActivity.WASHER_SMALL_LOAD;
+import com.cs477.dormbuddy.CycleTemplatesActivity.DRYER_TEMPERATURE;
+import com.cs477.dormbuddy.CycleTemplatesActivity.DRYER_TEMPERATURE;
 */
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
  * to handle interaction events.
- * Use the {@link AddPreferenceFragment#newInstance} factory method to
+ * Use the {@link AddTemplateFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class AddPreferenceFragment extends DialogFragment {
+public class AddTemplateFragment extends DialogFragment {
     // private OnFragmentInteractionListener mListener;
     //all views with text + button group
     LinearLayout dryerTemp, delicates, soil, cycle, washerTemp, smallLoad;
@@ -48,7 +60,7 @@ public class AddPreferenceFragment extends DialogFragment {
             washerHot, washerWarm, washerCool, washerYes, washerNo;
     RadioButton[] radioGaga;
     //THE ADD BUTTON
-    Button addPreferenceButton;
+    Button addTemplateButton;
     LinearLayout starters;
     //if washer is selected, make these visible and the others gone
     LinearLayout[] washerVisible;
@@ -59,16 +71,27 @@ public class AddPreferenceFragment extends DialogFragment {
     int dryerTemperature = 0, dryerDelicates = 0,
             washerSoil = 0, washerCycle = 0, washerTemperature = 0, washerSmallLoad = 0;
     boolean washerSelected;
-
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         super.onCreateDialog(savedInstanceState);
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        view = inflater.inflate(R.layout.fragment_add_preference,null);
+        view = inflater.inflate(R.layout.fragment_add_template,null);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         //////////////////////////INITIALIZE EVERY SINGLE THING//////////////////////
         //edit text
         cycleNameEditText = view.findViewById(R.id.cycleNameEditText);
+        cycleNameEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                enableButton();
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) { }
+        });
         //ALL VIEWS
         dryerTemp = view.findViewById(R.id.dryerTemp);delicates = view.findViewById(R.id.delicates);
         soil = view.findViewById(R.id.soil);
@@ -114,13 +137,21 @@ public class AddPreferenceFragment extends DialogFragment {
             });
         }
         //THE ADD BUTTON
-        addPreferenceButton = view.findViewById(R.id.addPreferenceButton);
-        addPreferenceButton.setEnabled(false); //disable the button u cant add nothin yet
-        addPreferenceButton.setOnClickListener(new View.OnClickListener() {
+        addTemplateButton = view.findViewById(R.id.addTemplateButton);
+        addTemplateButton.setEnabled(false); //disable the button u cant add nothin yet
+        addTemplateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getContext(), "Preference " + cycleNameEditText.getText().toString() + " added!",
-                        Toast.LENGTH_SHORT).show();
+                //updates the selected template
+                AddTemplateDoneListener activity = (AddTemplateDoneListener) getActivity();
+                String nameWithSettings = cycleNameEditText.getText().toString().trim();
+                //simply concatenates the settings at the end of the name to be stored in the database
+                if (washerSelected) {
+                    nameWithSettings += "" + washerSoil + washerCycle + washerTemperature + washerSmallLoad;
+                } else {
+                    nameWithSettings += "" + dryerTemperature + dryerDelicates;
+                }
+                activity.onTemplateAdded(nameWithSettings, washerSelected); //lets the parent know that we're done
                 dismiss(); //goodbye~
             }
         });
@@ -215,16 +246,16 @@ public class AddPreferenceFragment extends DialogFragment {
     }
 
     public void enableButton() {
-        if (!(!washerSelected || (washerSoil > 0 && washerCycle > 0 && washerTemperature > 0 && washerSmallLoad > 0)) //washer
-         || !(washerSelected || (dryerTemperature > 0 && dryerDelicates > 0))  //dryer is selected but temp & delicates <= 0
-                || cycleNameEditText.getText().toString().isEmpty()) { //empty name
-            if (addPreferenceButton.isEnabled())
-                addPreferenceButton.setEnabled(false);;
+        if ((washerSelected && (washerSoil == 0 || washerCycle == 0 || washerTemperature == 0 || washerSmallLoad == 0)) //washer
+            || (!washerSelected && (dryerTemperature == 0 || dryerDelicates == 0))  //dryer is selected but temp & delicates <= 0
+            || cycleNameEditText.getText().toString().trim().isEmpty()) { //empty name
+            if (addTemplateButton.isEnabled())
+                addTemplateButton.setEnabled(false);;
             return;
         }
-        if (addPreferenceButton.isEnabled())
+        if (addTemplateButton.isEnabled())
             return;
-        addPreferenceButton.setEnabled(true);
+        addTemplateButton.setEnabled(true);
     }
 
     //method to hide layouts user should not see
@@ -241,27 +272,18 @@ public class AddPreferenceFragment extends DialogFragment {
         }
     }
 
-    public AddPreferenceFragment() {
+    public AddTemplateFragment() {
         // Required empty public constructor
     }
 
 
-    public static AddPreferenceFragment newInstance() {
-        return new AddPreferenceFragment();
+    public static AddTemplateFragment newInstance() {
+        return new AddTemplateFragment();
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+    public interface AddTemplateDoneListener {
+        void onTemplateAdded(String templateName, boolean isWasher);
     }
-     */
+
+
 }

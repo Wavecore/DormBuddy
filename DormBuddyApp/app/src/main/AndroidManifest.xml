@@ -31,7 +31,10 @@
             android:screenOrientation="portrait"
             android:label="Laundry Buddy"
             />
-        <activity android:name=".CycleSettingsActivity" />
+        <activity
+            android:name=".CycleTemplatesActivity"
+            android:screenOrientation="portrait"
+            android:label="Cycle Templates" />
         <activity android:name=".StudyBuddyActivity" />
         <activity android:name=".EventBuddyActivity" />
         <activity android:name=".CreateEventActivity" />

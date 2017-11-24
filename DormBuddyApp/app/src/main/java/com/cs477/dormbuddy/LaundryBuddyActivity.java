@@ -69,7 +69,7 @@ public class LaundryBuddyActivity extends AppCompatActivity {
 
 
 
-    public void cyclePreferencesButtonClicked(View view) {
+    public void cycleTemplatesButtonClicked(View view) {
 
     }
 
@@ -89,7 +89,7 @@ public class LaundryBuddyActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.gear) {
-            startActivity(new Intent(this, CycleSettingsActivity.class));
+            startActivity(new Intent(this, CycleTemplatesActivity.class));
             return true;
         }
 

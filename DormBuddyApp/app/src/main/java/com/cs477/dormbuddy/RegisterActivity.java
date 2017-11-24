@@ -94,7 +94,6 @@ public class RegisterActivity extends AppCompatActivity {
         cv.put(_ID, 123456); //g number
         cv.put(FULL_NAME, "John Doe");
         cv.put(LOGGED_IN, 1);
-
         cv.put(BUILDING_ID, buildingSpinnerView.getSelectedItemPosition());
         cv.put(BUILDING_NAME, buildingSpinnerView.getSelectedItem().toString());
         cv.put(ROOM_NUMBER, roomNumberView.getText().toString());

@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.cs477.dormbuddy.AddPreferenceFragment">
+    tools:context="com.cs477.dormbuddy.AddTemplateFragment">
     <!--only specific settings for the cycle type will show -->
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,7 +12,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Add New Setting"
+            android:text="Add New Template"
             android:textSize="28sp"
             android:textStyle="bold"/>
         <TextView
@@ -28,6 +28,7 @@
             android:textSize="20sp"
             android:maxLength="32"
             android:textAlignment="center"
+            android:inputType="textCapWords"
             android:maxLines="1"/>
         <LinearLayout
             android:id="@+id/laundryType"
@@ -345,10 +346,10 @@
         </LinearLayout>
         <!--               BOUNDARY                -->
         <Button
-            android:id="@+id/addPreferenceButton"
+            android:id="@+id/addTemplateButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:backgroundTint="@color/colorGreen"
-            android:text="Add Setting"/>
+            android:text="Add Template"/>
     </LinearLayout>
 </FrameLayout>
