@@ -1,9 +1,12 @@
 package com.cs477.dormbuddy;
 
+import android.app.AlertDialog;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,7 +15,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,7 +42,7 @@ public class CycleTemplatesActivity extends AppCompatActivity implements AddTemp
     private LocalUserHelper dbHelper = null;
     private Cursor mCursor;
     final static String[] columns = {_ID, LOGGED_IN,
-            SELECTED_WASHER_TEMPLATE, SELECTED_DRYER_TEMPLATE,
+            SELECTED_WASHER_TEMPLATE, SELECTED_DRYER_TEMPLATE, //selected washer/dryer are now ints for more accuracy
             WASHER_TEMPLATE_1, DRYER_TEMPLATE_1,
             WASHER_TEMPLATE_2, DRYER_TEMPLATE_2,
             WASHER_TEMPLATE_3, DRYER_TEMPLATE_3,
@@ -53,7 +56,7 @@ public class CycleTemplatesActivity extends AppCompatActivity implements AddTemp
     public final String[] dryerTemperatures = {"High Heat", "Medium Heat", "Low Heat", "No Heat"};
     public final String[] dryerExtras = {"None", "Delicates"};
     TextView selectedWasherTemplate, selectedDryerTemplate;
-    int storedGNumber;
+    int storedGNumber, selectedWasher, selectedDryer;
     RecyclerView washerTemplateView, dryerTemplateView;
     ArrayList<String> washerTemplateList, dryerTemplateList;
     TemplateAdapter washerTemplateAdapter, dryerTemplateAdapter;
@@ -100,12 +103,16 @@ public class CycleTemplatesActivity extends AppCompatActivity implements AddTemp
         LinearLayoutManager verticalLayout2 = new LinearLayoutManager(this);
         verticalLayout2.setOrientation(LinearLayoutManager.VERTICAL);
         ///////////////////FILL UP ELEMENTS////////////////////////
-        String selectedWasherTemplateString = mCursor.getString(2);
-        String selectedDryerTemplateString = mCursor.getString(3);
-        if (!selectedWasherTemplateString.equals("")) {
+        selectedWasher = mCursor.getInt(2);
+        selectedDryer = mCursor.getInt(3);
+        if (selectedWasher > 0) {
+            String selectedWasherTemplateString = mCursor.getString(selectedWasher);
+            selectedWasherTemplateString = selectedWasherTemplateString.substring(0,selectedWasherTemplateString.length()-4);
             selectedWasherTemplate.setText(selectedWasherTemplateString); //replaces with name of template
         }
-        if (!selectedDryerTemplateString.equals("")) {
+        if (selectedDryer > 0){
+            String selectedDryerTemplateString = mCursor.getString(selectedDryer);
+            selectedDryerTemplateString = selectedDryerTemplateString.substring(0,selectedDryerTemplateString.length()-2);
             selectedDryerTemplate.setText(selectedDryerTemplateString);
         }
         retrieveTemplates(); //retrieve all templates
@@ -142,56 +149,83 @@ public class CycleTemplatesActivity extends AppCompatActivity implements AddTemp
     public void onTemplateAdded(String templateName, boolean isWasher) {
         String actualName;
         if (isWasher) {
-            actualName = insertTemplateToLocalServer(SELECTED_WASHER_TEMPLATE, templateName, isWasher);
+            actualName = insertTemplateToLocalServer(templateName, isWasher);
             Toast.makeText(this, "Washer Template " + actualName + " added!",
                     Toast.LENGTH_SHORT).show();
             selectedWasherTemplate.setText(actualName); //replaces with name of template
         } else {
-            actualName = insertTemplateToLocalServer(SELECTED_DRYER_TEMPLATE, templateName, isWasher);
+            actualName = insertTemplateToLocalServer(templateName, isWasher);
             Toast.makeText(this, "Dryer Template " + actualName + " added!",
                     Toast.LENGTH_SHORT).show();
             selectedDryerTemplate.setText(actualName); //replaces with name of template
         }
     }
 
-    private String insertTemplateToLocalServer(String COLUMN_NAME, String templateName, boolean isWasher) {
+    private String insertTemplateToLocalServer(String templateName, boolean isWasher) {
         /////////////////////////////////Extracts template name//////////
         String actualName = (isWasher) ?
             templateName.substring(0, templateName.length() - 4) : //washers have 4 additional chars
             templateName.substring(0, templateName.length() - 2); //dryers have 2
         /////////////////////////inserts template onto appropriate column////////////////////
-        ContentValues cv = new ContentValues(1);
-        cv.put(COLUMN_NAME, actualName);
+        int columnNumber = insertInDatabase(templateName, isWasher);
         if (isWasher) {
-            insertInDatabase(4, templateName);
-            selectedWasherTemplate.setText(actualName); //replaces with name of template
             Toast.makeText(this, "Washer Template " + actualName + " added!",
                     Toast.LENGTH_SHORT).show();
 
         } else {
-            insertInDatabase(5, templateName);
-            selectedDryerTemplate.setText(actualName); //replaces with name of template
             Toast.makeText(this, "Dryer Template " + actualName + " added!",
                     Toast.LENGTH_SHORT).show();
         }
-        db.update(TABLE_NAME, cv, _ID + "=" + storedGNumber, null); //updates the database
         return actualName;
     }
 
-    private void insertInDatabase(int laundryMachine0, String templateString) {
+    private int insertInDatabase(String templateString, boolean isWasher) {
         String currentMachineName;
         ContentValues cv = new ContentValues(1);
+        int laundryMachine0 = (isWasher) ? 4 : 5;
         for (int i = 0; i < 5; i++) {
             currentMachineName = mCursor.getString(laundryMachine0 + 2*i);
             if (currentMachineName.equals("") || i == 4) { //always replace the last data set, everyone hates the bottom
                 cv.put(columns[laundryMachine0 + 2*i], templateString);
-                selectedDryerTemplate.setText(currentMachineName);
                 db.update(TABLE_NAME, cv, _ID + "=" + storedGNumber, null); //updates the database
-                washerTemplateAdapter.notifyDataSetChanged();
-                dryerTemplateAdapter.notifyDataSetChanged();
-                return;
+                if (isWasher) {
+                    if (washerTemplateList.size() == 5)
+                        washerTemplateList.remove(washerTemplateList.size()-1);
+                    washerTemplateList.add(templateString);
+                    washerTemplateAdapter.notifyDataSetChanged();
+                    selectedWasherTemplate.setText(currentMachineName);
+                } else {
+                    if (dryerTemplateList.size() == 5)
+                        dryerTemplateList.remove(dryerTemplateList.size()-1);
+                    dryerTemplateList.add(templateString);
+                    dryerTemplateAdapter.notifyDataSetChanged();
+                    selectedDryerTemplate.setText(currentMachineName);
+                }
+                return laundryMachine0 + 2*i; //this is the column number
             }
         }
+        return -1;
+    }
+
+    public void updateSelected(int position, boolean isWasher) {
+        String COLUMN_NAME = (isWasher) ? SELECTED_WASHER_TEMPLATE : SELECTED_DRYER_TEMPLATE;
+        TemplateAdapter adapter = (isWasher) ? washerTemplateAdapter : dryerTemplateAdapter;
+        TextView selectedTemplate = (isWasher) ? selectedWasherTemplate : selectedDryerTemplate;
+        int laundryMachine0 = (isWasher) ? 4 : 5;
+        int columnNumber = laundryMachine0 + position*2;
+        if (isWasher) {
+            selectedWasher = columnNumber;
+            washerTemplateAdapter.notifyDataSetChanged();
+        } else {
+            selectedDryer = columnNumber;
+            dryerTemplateAdapter.notifyDataSetChanged();
+        }
+        String actualName = adapter.getName(position);
+        ContentValues cv = new ContentValues(1);
+        cv.put(COLUMN_NAME, columnNumber);
+
+        db.update(TABLE_NAME, cv, _ID + "=" + storedGNumber, null); //updates the database
+        selectedTemplate.setText(actualName);
     }
 
     //holder for template elements
@@ -203,9 +237,11 @@ public class CycleTemplatesActivity extends AppCompatActivity implements AddTemp
         TextView dryerTemp;
         TextView dryerExtra;
         TextView templateName;
+        View v;
 
-        TemplateHolder(View v, boolean isWasher) {
+        TemplateHolder(View v, final boolean isWasher) {
             super(v);
+            this.v = v;
             if (isWasher) {
                 templateName = (TextView) v.findViewById(R.id.washerTemplateName);
                 washerSoil = (TextView) v.findViewById(R.id.washerSoil);
@@ -220,7 +256,20 @@ public class CycleTemplatesActivity extends AppCompatActivity implements AddTemp
             v.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(CycleTemplatesActivity.this, "Template item clicked", Toast.LENGTH_SHORT).show();
+                    updateSelected(getLayoutPosition(), isWasher);
+                    String washerOrDryer = (isWasher) ? "washer" : "dryer";
+                    TemplateAdapter adapter = (isWasher) ? washerTemplateAdapter : dryerTemplateAdapter;
+                    AlertDialog alertDialog = new AlertDialog.Builder(CycleTemplatesActivity.this).create();
+                    alertDialog.setTitle("Current Template");
+                    alertDialog.setMessage("Your current " + washerOrDryer + " template is now " +
+                            adapter.getName(getLayoutPosition()) + ".");
+                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Ok",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                    alertDialog.show();
                 }
             });
             v.setOnLongClickListener(new View.OnLongClickListener() {
@@ -260,6 +309,11 @@ public class CycleTemplatesActivity extends AppCompatActivity implements AddTemp
             String[] nameAndSettings = retrieveActualNameAndSettings(fullName, isWasher);
             String actualName = nameAndSettings[0];
             String settings = nameAndSettings[1];
+            if ((isWasher && position*2+4 == selectedWasher) || (!isWasher && position*2+5 == selectedDryer)) {
+                holder.v.setBackgroundColor(Color.parseColor("#00ff00"));
+            } else {
+                holder.v.setBackgroundColor(Color.parseColor("#ffffff"));
+            }
             if (isWasher) {
                 holder.washerSoil.setText(washerSoils[Character.getNumericValue(settings.charAt(0))-1]);
                 holder.washerCycle.setText(washerCycles[Character.getNumericValue(settings.charAt(1))-1]);
@@ -276,7 +330,7 @@ public class CycleTemplatesActivity extends AppCompatActivity implements AddTemp
             return templates.size();
         }
 
-
+        public String getName(int position) { return retrieveActualNameAndSettings(templates.get(position), isWasher)[0]; }
 
         private String[] retrieveActualNameAndSettings(String templateName, boolean isWasher) {
             String actualName = (isWasher) ?
