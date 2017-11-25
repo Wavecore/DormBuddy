@@ -3,9 +3,13 @@
     xmlns:android="http://schemas.android.com/tools">
     <item
         android1:title="Cycle Templates"
-        android1:id="@+id/gear"
-        android:id="@+id/action_settings"
-        android:icon="@drawable/settings_gear"
-        android:orderInCategory="100"
-        android:showAsAction="always"/>
+        android1:id="@+id/action_settings"
+        android1:icon="@drawable/settings_gear"
+        android1:orderInCategory="100"
+        android:showAsAction="ifRoom|collapseActionView"/>
+    <item
+        android1:title="Legend"
+        android1:id="@+id/action_legend"
+        android1:orderInCategory="200"
+        android:showAsAction="collapseActionView"/>
 </menu>

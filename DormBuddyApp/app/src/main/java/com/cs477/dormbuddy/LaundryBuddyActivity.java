@@ -12,14 +12,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.util.Collections;
+import android.support.v4.app.FragmentManager;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.TimeZone;
 
 public class LaundryBuddyActivity extends AppCompatActivity {
     LaundryAdapter washerAdapter;
@@ -76,9 +76,9 @@ public class LaundryBuddyActivity extends AppCompatActivity {
         washers.add(new LaundryMachine("14", GOOD, RESERVED, 0));
         washers.add(new LaundryMachine("15", CAUTION, RESERVED, 0));
         washers.add(new LaundryMachine("16", BROKEN, RESERVED, 0));
-        washers.add(new LaundryMachine("17", GOOD, CURRENTLY_IN_USE, 0));
-        washers.add(new LaundryMachine("18", CAUTION, CURRENTLY_IN_USE, 0));
-        washers.add(new LaundryMachine("19", BROKEN, CURRENTLY_IN_USE, 0));
+        washers.add(new LaundryMachine("17", GOOD, CURRENTLY_IN_USE, 1));
+        washers.add(new LaundryMachine("18", CAUTION, CURRENTLY_IN_USE, 1));
+        washers.add(new LaundryMachine("19", BROKEN, CURRENTLY_IN_USE, 1));
         dryers.add(new LaundryMachine("01", GOOD, FREE, 0));
         dryers.add(new LaundryMachine("02", CAUTION, FREE, 0));
         dryers.add(new LaundryMachine("03", BROKEN, FREE, 0));
@@ -101,12 +101,6 @@ public class LaundryBuddyActivity extends AppCompatActivity {
         laundryList.addItemDecoration(dividerItemDecoration);
     }
 
-
-
-    public void cycleTemplatesButtonClicked(View view) {
-
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -122,11 +116,15 @@ public class LaundryBuddyActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.gear) {
+        if (id == R.id.action_settings) {
             startActivity(new Intent(this, CycleTemplatesActivity.class));
             return true;
         }
-
+        else if (id == R.id.action_legend) {
+            LegendFragment newFragment = new LegendFragment();
+            newFragment.show(getFragmentManager(), "LegendFragment");
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -229,6 +227,10 @@ public class LaundryBuddyActivity extends AppCompatActivity {
             } else if (b.condition == BROKEN) {
                 return -1;
             }
+            //special case when both machines are in use
+            if (status == CURRENTLY_IN_USE && b.status == CURRENTLY_IN_USE) {
+                return (int)(timeDone - b.timeDone);
+            }
             boolean isLarger = Integer.parseInt(aSettings) < Integer.parseInt(bSettings); //math is wrong
             boolean isSmaller = Integer.parseInt(aSettings) > Integer.parseInt(bSettings);
             return (isLarger) ? -1 : (isSmaller ? 1 : 0);
@@ -237,10 +239,16 @@ public class LaundryBuddyActivity extends AppCompatActivity {
 
     class LaundryHolder extends RecyclerView.ViewHolder {
         TextView machineName;
+        ImageView machinePhoto;
+        ImageView statusIcon;
+        ImageView conditionIcon;
 
         LaundryHolder(View v) {
             super(v);
-            machineName = (TextView) v.findViewById(R.id.machineName);
+            machineName = v.findViewById(R.id.machineName);
+            machinePhoto = v.findViewById(R.id.machinePhoto);
+            statusIcon = v.findViewById(R.id.machineStatus);
+            conditionIcon = v.findViewById(R.id.machineCondition);
             v.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -261,11 +269,8 @@ public class LaundryBuddyActivity extends AppCompatActivity {
         @Override
         public LaundryHolder onCreateViewHolder(ViewGroup parent,int viewType) {
             int layout;
-            if (isWasher) {
-                layout = R.layout.washer_item;
-            } else {
-                layout = R.layout.dryer_item;
-            }
+            //pick image to represent view
+            layout = R.layout.laundry_machine_item;
             // create a new view
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(layout, parent, false);
@@ -273,7 +278,40 @@ public class LaundryBuddyActivity extends AppCompatActivity {
         }
         @Override
         public void onBindViewHolder(final LaundryHolder holder, int position) {
-            holder.machineName.setText(machines.get(position).getMachineName());
+            LaundryMachine machine = machines.get(position);
+            holder.machineName.setText(machine.getMachineName());
+            //change icons according to condition
+            if (!isWasher) {
+                holder.machinePhoto.setImageResource(R.drawable.dryer);
+            }
+            //adjust the icons
+            switch (machine.getCondition()) {
+                case CAUTION:
+                    holder.conditionIcon.setImageResource(R.drawable.caution);
+                    holder.machinePhoto.setAlpha(1f); //obligatory make image fully opague due to android bug
+                    break;
+                case BROKEN:
+                    holder.conditionIcon.setImageResource(R.drawable.broken);
+                    holder.machinePhoto.setAlpha(0.5f); //makes disabled machines half visible
+                    break;
+                default: //GOOD
+                    holder.conditionIcon.setImageResource(R.drawable.working);
+                    holder.machinePhoto.setAlpha(1f);
+
+                    break;
+            }
+            switch (machine.getStatus()) {
+                case CURRENTLY_IN_USE:
+                    holder.statusIcon.setImageResource(R.drawable.currently_in_use);
+                    break;
+                case RESERVED:
+                    holder.statusIcon.setImageResource(R.drawable.reserved);
+                    break;
+                default: //FREE
+                    holder.statusIcon.setImageResource(R.drawable.free);
+                    break;
+
+            }
 
         }
         @Override
