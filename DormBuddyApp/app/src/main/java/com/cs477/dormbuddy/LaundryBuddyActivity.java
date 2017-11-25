@@ -84,6 +84,8 @@ public class LaundryBuddyActivity extends AppCompatActivity {
         dryers.add(new LaundryMachine("03", BROKEN, FREE, 0));
         dryers.add(new LaundryMachine("04", GOOD, RESERVED, 0));
         dryers.add(new LaundryMachine("05", CAUTION, RESERVED, 0));
+        dryers.add(new LaundryMachine("06", GOOD, CURRENTLY_IN_USE, 0));
+        dryers.add(new LaundryMachine("07", CAUTION, CURRENTLY_IN_USE, 0));
         //end fake data
         ///////////////////////////////////
         washerAdapter = new LaundryAdapter(washers, true);
@@ -182,13 +184,12 @@ public class LaundryBuddyActivity extends AppCompatActivity {
 
         //setters
         //must be admin for this one
-        public int changeCondition(int newCondition) {
+        public void changeCondition(int newCondition) {
             //check for admin
             if (condition == BROKEN) {
                 this.status = RESERVED; //marks broken machines as reserve to aid with comparison
             }
             this.condition = newCondition;
-
             //update database
         }
 
@@ -215,15 +216,22 @@ public class LaundryBuddyActivity extends AppCompatActivity {
         /*
            GOOD FREE => CAUTION FREE => GOOD IN_USE => CAUTION IN_USE => GOOD RESERVED => CAUTION RESERVED => BROKEN RESERVED
            00 > 10 > 01 > 11 > 02 > 12 > 22
-           OR
+           OR, if we switch TO status and condition
            00 > 01 > 10 > 11 > 20 > 21 > 22
          */
-        public int compareTo(LaundryMachine a, LaundryMachine b) {
-            String aSettings = "" + a.status + a.condition;
+        public int compareTo(LaundryMachine b) {
+            String aSettings = "" + status + condition;
             String bSettings = "" + b.status + b.condition;
+            if (condition == BROKEN && b.condition == BROKEN) {
+                return 0;
+            } else if (condition == BROKEN) {
+                return 1;
+            } else if (b.condition == BROKEN) {
+                return -1;
+            }
             boolean isLarger = Integer.parseInt(aSettings) < Integer.parseInt(bSettings); //math is wrong
             boolean isSmaller = Integer.parseInt(aSettings) > Integer.parseInt(bSettings);
-            return (isLarger) ? 1 : (isSmaller ? -1 : 0);
+            return (isLarger) ? -1 : (isSmaller ? 1 : 0);
         }
     }
 
@@ -248,6 +256,7 @@ public class LaundryBuddyActivity extends AppCompatActivity {
 
         LaundryAdapter(ArrayList<LaundryMachine> data, boolean isWasher) {
             machines = data;
+            this.isWasher = isWasher;
         }
         @Override
         public LaundryHolder onCreateViewHolder(ViewGroup parent,int viewType) {
