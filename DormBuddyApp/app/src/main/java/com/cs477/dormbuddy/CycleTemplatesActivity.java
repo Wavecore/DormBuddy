@@ -26,22 +26,22 @@ import static com.cs477.dormbuddy.LocalUserHelper.DRYER_TEMPLATE_2;
 import static com.cs477.dormbuddy.LocalUserHelper.DRYER_TEMPLATE_3;
 import static com.cs477.dormbuddy.LocalUserHelper.DRYER_TEMPLATE_4;
 import static com.cs477.dormbuddy.LocalUserHelper.DRYER_TEMPLATE_5;
-import static com.cs477.dormbuddy.LocalUserHelper.LOGGED_IN;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_LOGGED_IN;
 import static com.cs477.dormbuddy.LocalUserHelper.SELECTED_DRYER_TEMPLATE;
 import static com.cs477.dormbuddy.LocalUserHelper.SELECTED_WASHER_TEMPLATE;
-import static com.cs477.dormbuddy.LocalUserHelper.TABLE_NAME;
+import static com.cs477.dormbuddy.LocalUserHelper.TABLE_USER;
 import static com.cs477.dormbuddy.LocalUserHelper.WASHER_TEMPLATE_1;
 import static com.cs477.dormbuddy.LocalUserHelper.WASHER_TEMPLATE_2;
 import static com.cs477.dormbuddy.LocalUserHelper.WASHER_TEMPLATE_3;
 import static com.cs477.dormbuddy.LocalUserHelper.WASHER_TEMPLATE_4;
 import static com.cs477.dormbuddy.LocalUserHelper.WASHER_TEMPLATE_5;
-import static com.cs477.dormbuddy.LocalUserHelper._ID;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_ID;
 
 public class CycleTemplatesActivity extends AppCompatActivity implements AddTemplateFragment.AddTemplateDoneListener, EditTemplateFragment.EditTemplateDoneListener {
     private SQLiteDatabase db = null;
     private LocalUserHelper dbHelper = null;
     private Cursor mCursor;
-    final static String[] columns = {_ID, LOGGED_IN,
+    final static String[] columns = {USER_ID, USER_LOGGED_IN,
             SELECTED_WASHER_TEMPLATE, SELECTED_DRYER_TEMPLATE, //selected washer/dryer are now ints for more accuracy
             WASHER_TEMPLATE_1, DRYER_TEMPLATE_1,
             WASHER_TEMPLATE_2, DRYER_TEMPLATE_2,
@@ -68,7 +68,7 @@ public class CycleTemplatesActivity extends AppCompatActivity implements AddTemp
         //check if user is logged in first, redirect them to log in if not
         dbHelper = new LocalUserHelper(this);
         db = dbHelper.getWritableDatabase();
-        mCursor = db.query(TABLE_NAME, columns, null, new String[] {}, null, null,
+        mCursor = db.query(TABLE_USER, columns, null, new String[] {}, null, null,
                 null);
         /////////
         //try and check if user is logged in, storing g number
@@ -200,7 +200,7 @@ public class CycleTemplatesActivity extends AppCompatActivity implements AddTemp
             currentMachineName = mCursor.getString(laundryMachine0 + 2*i);
             if (currentMachineName.equals("") || i == 4) { //always replace the last data set, everyone hates the bottom
                 cv.put(columns[laundryMachine0 + 2*i], templateString);
-                db.update(TABLE_NAME, cv, _ID + "=" + storedGNumber, null); //updates the database
+                db.update(TABLE_USER, cv, USER_ID + "=" + storedGNumber, null); //updates the database
                 if (isWasher) {
                     if (washerTemplateList.size() == 5)
                         washerTemplateList.remove(washerTemplateList.size()-1);
@@ -221,7 +221,7 @@ public class CycleTemplatesActivity extends AppCompatActivity implements AddTemp
     private void insertInDatabase(String newString, int position) {
         ContentValues cv = new ContentValues(1);
         cv.put(columns[position], newString);
-        db.update(TABLE_NAME, cv, _ID + "=" + storedGNumber, null); //updates the database
+        db.update(TABLE_USER, cv, USER_ID + "=" + storedGNumber, null); //updates the database
         int actual = (position-4)/2; //actual position in the adapter list
         if (position % 2 == 0) {
             washerTemplateList.set(actual, newString);
@@ -249,7 +249,7 @@ public class CycleTemplatesActivity extends AppCompatActivity implements AddTemp
         ContentValues cv = new ContentValues(1);
         cv.put(COLUMN_NAME, columnNumber);
 
-        db.update(TABLE_NAME, cv, _ID + "=" + storedGNumber, null); //updates the database
+        db.update(TABLE_USER, cv, USER_ID + "=" + storedGNumber, null); //updates the database
         selectedTemplate.setText(actualName);
     }
 

@@ -36,10 +36,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.Manifest.permission.READ_CONTACTS;
-import static com.cs477.dormbuddy.LocalUserHelper.FULL_NAME;
-import static com.cs477.dormbuddy.LocalUserHelper.LOGGED_IN;
-import static com.cs477.dormbuddy.LocalUserHelper.TABLE_NAME;
-import static com.cs477.dormbuddy.LocalUserHelper._ID;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_NAME;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_LOGGED_IN;
+import static com.cs477.dormbuddy.LocalUserHelper.TABLE_USER;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_ID;
 
 /**
  * A login screen that offers login via email/password.
@@ -71,7 +71,7 @@ public class CredentialsActivity extends AppCompatActivity implements LoaderCall
     private SQLiteDatabase db = null;
     private LocalUserHelper dbHelper = null;
     private Cursor mCursor;
-    final static String[] columns = { LOGGED_IN };
+    final static String[] columns = { USER_LOGGED_IN };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +79,7 @@ public class CredentialsActivity extends AppCompatActivity implements LoaderCall
         setContentView(R.layout.activity_credentials);
         dbHelper = new LocalUserHelper(this);
         db = dbHelper.getWritableDatabase();
-        mCursor = db.query(TABLE_NAME, columns, null, new String[] {}, null, null,
+        mCursor = db.query(TABLE_USER, columns, null, new String[] {}, null, null,
                 null);
         try { //if the user ever logged in, there will be a row in the database, but check that they didnt log out
             mCursor.moveToPosition(0);

@@ -24,12 +24,12 @@ import java.io.IOException;
 
 import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_ID;
 import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_NAME;
-import static com.cs477.dormbuddy.LocalUserHelper.FULL_NAME;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_NAME;
 import static com.cs477.dormbuddy.LocalUserHelper.USER_ICON;
-import static com.cs477.dormbuddy.LocalUserHelper.LOGGED_IN;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_LOGGED_IN;
 import static com.cs477.dormbuddy.LocalUserHelper.ROOM_NUMBER;
-import static com.cs477.dormbuddy.LocalUserHelper.TABLE_NAME;
-import static com.cs477.dormbuddy.LocalUserHelper._ID;
+import static com.cs477.dormbuddy.LocalUserHelper.TABLE_USER;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_ID;
 
 public class ProfileBuddyActivity extends AppCompatActivity {
     TextView nameView, gNumberView, buildingNameView, roomNumberView;
@@ -38,7 +38,7 @@ public class ProfileBuddyActivity extends AppCompatActivity {
     private LocalUserHelper dbHelper = null;
     private Cursor mCursor;
     private String storedGNumber;
-    final static String[] columns = { _ID, FULL_NAME, LOGGED_IN, BUILDING_ID, BUILDING_NAME, ROOM_NUMBER, USER_ICON };
+    final static String[] columns = { USER_ID, USER_NAME, USER_LOGGED_IN, BUILDING_ID, BUILDING_NAME, ROOM_NUMBER, USER_ICON };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +50,7 @@ public class ProfileBuddyActivity extends AppCompatActivity {
         roomNumberView = findViewById(R.id.roomText);
         dbHelper = new LocalUserHelper(this);
         db = dbHelper.getWritableDatabase();
-        mCursor = db.query(TABLE_NAME, columns, null, new String[] {}, null, null,
+        mCursor = db.query(TABLE_USER, columns, null, new String[] {}, null, null,
                 null);
         try { //since user is logged in, just gobble up his user data
             mCursor.moveToPosition(0);
@@ -82,8 +82,8 @@ public class ProfileBuddyActivity extends AppCompatActivity {
     //user intentionally logging out just updates the logged in column
     public void logoutClicked(View view) {
         ContentValues cv = new ContentValues(1);
-        cv.put(LOGGED_IN, 0); //gives illusion of being logged out but user info is still in table
-        db.update(TABLE_NAME, cv, _ID + "=" + storedGNumber, null);
+        cv.put(USER_LOGGED_IN, 0); //gives illusion of being logged out but user info is still in table
+        db.update(TABLE_USER, cv, USER_ID + "=" + storedGNumber, null);
         db.close();
         mCursor.close();
         startActivity(new Intent(this, CredentialsActivity.class));
@@ -115,7 +115,7 @@ public class ProfileBuddyActivity extends AppCompatActivity {
                 ContentValues cv = new ContentValues(1);
                 byte[] byteArray = stream.toByteArray(); //stream becomes a byte array
                 cv.put(USER_ICON, byteArray); //updates stored byte array for user local table
-                db.update(TABLE_NAME, cv, _ID + "=" + storedGNumber, null); //uploads image
+                db.update(TABLE_USER, cv, USER_ID + "=" + storedGNumber, null); //uploads image
                 displayImage(byteArray); //displays on screen
             } catch (FileNotFoundException e) {
                 e.printStackTrace();

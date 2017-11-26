@@ -25,8 +25,8 @@ import java.sql.RowId;
 import static com.cs477.dormbuddy.LocalUserHelper.ROOM_NUMBER;
 import static com.cs477.dormbuddy.LocalUserHelper.SELECTED_DRYER_TEMPLATE;
 import static com.cs477.dormbuddy.LocalUserHelper.SELECTED_WASHER_TEMPLATE;
-import static com.cs477.dormbuddy.LocalUserHelper.TABLE_NAME;
-import static com.cs477.dormbuddy.LocalUserHelper._ID;
+import static com.cs477.dormbuddy.LocalUserHelper.TABLE_USER;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_ID;
 
 /* using enums didnt work out as implicit int casting is not possible, much more work than needed
 import com.cs477.dormbuddy.CycleTemplatesActivity.WASHER_SOIL;

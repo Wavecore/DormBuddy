@@ -10,14 +10,34 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 //database helper that keeps user logged in and displays their templates
 public class LocalUserHelper extends SQLiteOpenHelper {
-    final static private Integer VERSION = 54;
-    final static String TABLE_NAME = "dormbuddy_user";
-    final static String _ID = "_id";
-    final static String FULL_NAME = "student_name";
-    final static String LOGGED_IN = "logged_in";
+    final static private Integer VERSION = 57;
+    //===============Buildings Table=====================
+    final static String TABLE_BUILDING = "dormbuddy_building";
     final static String BUILDING_ID = "building_id";
     final static String BUILDING_NAME = "building_name";
+    //==============Building Maps Table==================
+    final static String TABLE_BUILDING_MAPS = "dormbuddy_building_maps";
+    final static String BUILDING_MAP_NAME = "building_map_name";
+    final static String BUILDING_MAP = "building_map";
+    //==============Room Table===========================
+    final static String TABLE_ROOM = "dormbuddy_rooms";
+    final static String ROOM_TYPE = "room_type";
+    final static String ROOM_NUMBER = "room_number";
+    final static String ROOM_MAX_OCCUPANCY = "room_max_occupancy";
+    //==============Users Table==========================
+    final static String TABLE_USER = "dormbuddy_user";
+    final static String USER_ID = "user_id";
+    final static String USER_NAME = "user_name";
+    final static String USER_LOGGED_IN = "user_logged_in";
     final static String USER_ICON = "user_photo";
+    //==============Reservation Table====================
+    final static String TABLE_RESERVATION = "dormbuddy_reservations";
+    final static String RESERVATION_TITLE = "reservation_title";
+    final static String RESERVATION_DESCRIPTION = "reservation_description";
+    final static String RESERVATION_START_TIME = "reservation_start_time";
+    final static String RESERVATION_END_TIME = "reservation_end_time";
+    final static String RESERVATION_ICON = "reservation_icon";
+
     final static String SELECTED_WASHER_TEMPLATE = "washer_template_selected";
     final static String SELECTED_DRYER_TEMPLATE = "dryer_template_selected";
     //user can only have a max of 5 templates
@@ -32,16 +52,15 @@ public class LocalUserHelper extends SQLiteOpenHelper {
     final static String WASHER_TEMPLATE_5 = "washer_template_5";
     final static String DRYER_TEMPLATE_5 = "dryer_template_5";
 
-    final static String TABLE_RESERVATION = "dormbuddy_reservations";
-    final static String RESERVATION_TITLE = "reservation_title";
-    final static String RESERVATION_DESCRIPTION = "reservation_description";
-    //final static
 
-    final static String TABLE_ROOM = "dormbuddy_rooms";
-    final static String ROOM_TYPE = "room_type";
-    final static String ROOM_NUMBER = "room_number";
-    final static String ROOM_MAX_OCCUPANCY = "room_max_occupancy";
 
+
+
+
+
+
+
+    final private String[] TABLES = {TABLE_BUILDING,TABLE_BUILDING_MAPS,TABLE_ROOM, TABLE_RESERVATION,TABLE_USER};
 
     final Context context;
     /*
@@ -56,11 +75,11 @@ public class LocalUserHelper extends SQLiteOpenHelper {
      * - selected washer and dryer template
      * - all 5 washer and dryer templates
      */
-    final private static String CREATE_CMD =
-            "CREATE TABLE dormbuddy_user (" +
-                    _ID + " INTEGER PRIMARY KEY, " +
-                    FULL_NAME + " TEXT NOT NULL, " +
-                    LOGGED_IN + " INTEGER DEFAULT 0, " +
+    final private String CREATE_USER =
+            "CREATE TABLE "+TABLE_USER+" (" +
+                    USER_ID + " INTEGER PRIMARY KEY, " +
+                    USER_NAME + " TEXT NOT NULL, " +
+                    USER_LOGGED_IN + " INTEGER DEFAULT 0, " +
                     BUILDING_ID + " INTEGER DEFAULT 0, " +
                     BUILDING_NAME + " TEXT NOT NULL, " +
                     ROOM_NUMBER + " TEXT NOT NULL, " +
@@ -77,25 +96,53 @@ public class LocalUserHelper extends SQLiteOpenHelper {
                     DRYER_TEMPLATE_4 + " TEXT NOT NULL DEFAULT '', " +
                     WASHER_TEMPLATE_5 + " TEXT NOT NULL DEFAULT '', " +
                     DRYER_TEMPLATE_5 + " TEXT NOT NULL DEFAULT '')";
-            ;
+    final private String CREATE_BUILDING =
+            "CREATE TABLE "+TABLE_BUILDING+" ("+
+                    BUILDING_ID +" INTEGER PRIMARY KEY AUTOINCREMENT, "+
+                    BUILDING_NAME + " TEXT NOT NULL);";
+    final private String CREATE_BUILDING_MAPS =
+            "CREATE TABLE "+TABLE_BUILDING_MAPS+" ("+
+                    BUILDING_ID +" INTEGER NOT NULL, "+
+                    BUILDING_MAP_NAME+" INTEGER NOT NULL, "+
+                    BUILDING_MAP + " BLOB NOT NULL, "+
+                    "PRIMARY KEY ("+BUILDING_ID+", "+BUILDING_MAP_NAME+"), "+
+                    "FOREIGN KEY ("+BUILDING_ID+") REFERENCES "+TABLE_BUILDING+" ("+BUILDING_ID+") ON DELETE SET NULL DEFERRABLE);";
+    final private String CREATE_ROOM =
+            "CREATE TABLE "+TABLE_ROOM+" ("+
+                    BUILDING_ID +" INTEGER, "+
+                    ROOM_NUMBER+" INTEGER NOT NULL, "+
+                    ROOM_TYPE+" TEXT CHECK("+ROOM_TYPE+" IN ('LAUNDRY','DORM','STUDY','EVENT')),"+
+                    ROOM_MAX_OCCUPANCY+" INTEGER CHECK("+ROOM_MAX_OCCUPANCY+" >= 0),"+
+                    "PRIMARY KEY ("+BUILDING_ID+", "+ROOM_NUMBER+"), "+
+                    "FOREIGN KEY ("+BUILDING_ID+") REFERENCES "+TABLE_BUILDING+" ("+BUILDING_ID+") ON DELETE SET NULL DEFERRABLE);";
+    final private static String CREATE_RESERVATION ="";
+
+
+    final private String[] CREATE_TABLES = {CREATE_BUILDING,CREATE_BUILDING_MAPS,CREATE_ROOM,CREATE_USER};
 
     public LocalUserHelper(Context context) {
-        super(context, TABLE_NAME, null, VERSION);
+        super(context, TABLE_USER, null, VERSION);
         this.context = context;
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(CREATE_CMD);
+        for(int x = 0; x < CREATE_TABLES.length;x++)
+            db.execSQL(CREATE_TABLES[x]);
+       // db.execSQL(CREATE_USER);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS dormbuddy_user");
+        for(int x = TABLES.length-1; x >= 0; x --)
+            db.execSQL("DROP TABLE IF EXISTS "+TABLES[x]);
+      //  db.execSQL("DROP TABLE IF EXISTS dormbuddy_user");
+      //  db.execSQL("DROP TABLE IF EXISTS "+TABLE_BUILDING);
+      //  db.execSQL("DROP TABLE IF EXISTS "+TABLE_BUILDING_MAPS);
         onCreate(db);
     }
 
     void deleteDatabase ( ) {
-        context.deleteDatabase(TABLE_NAME);
+        context.deleteDatabase(TABLE_USER);
     }
 }
