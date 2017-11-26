@@ -38,6 +38,12 @@
             android:text=" more minutes"
             android:textSize="18sp" />
     </LinearLayout>
+    <Spinner
+        android:id="@+id/reservationDay"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="Select Location"
+        android:textAlignment="center" />
     <ListView
         android:id="@+id/timeList"
         android:layout_width="match_parent"

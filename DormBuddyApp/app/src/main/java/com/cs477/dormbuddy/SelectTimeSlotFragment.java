@@ -13,55 +13,61 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 
 public class SelectTimeSlotFragment extends DialogFragment {
-    final private int MAXRESERVEMINUTES = 120;
+    final private long MAXRESERVETIME = 7200000;
+    private Calendar startTime;
+    private Calendar endTime;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         super.onCreateDialog(savedInstanceState);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View v = inflater.inflate(R.layout.fragment_select_time_slot,null);
-        //DateFormat ft = DateFormat.getDateInstance();
-       // Date d = new Date();
-        //d.setHours(0);
-       // Calendar c;
-        final TextView timeLeft = (TextView)v.findViewById(R.id.timeLeft);
-      //  timeLeft.setText(ft.format(d));
-        final ListView timeSlots = (ListView)v.findViewById(R.id.timeList);
-        final TimeSlotAdapter listAdapter = new TimeSlotAdapter(getActivity(),R.layout.timeslot_item);
-        for(int x = 0; x <=23; x++) {
-            for(int y = 00;y < 60; y +=15){
-                int endM = y + 15;
-                int endH = x;
-                if(endM == 60){
-                    endH++;
-                    endM = 0;
-                }
-                if(endH == 24)
-                    endH = 0;
-                listAdapter.add( new TimeSlot(x,y,endH,endM,0));
-            }
+        final View v = inflater.inflate(R.layout.fragment_select_time_slot,null);
+        Spinner daySpinner = (Spinner)v.findViewById(R.id.reservationDay);
+        ArrayAdapter<CharSequence> dayAdapter = new ArrayAdapter<CharSequence>(v.getContext(),R.layout.spinner_day);
+        Calendar today = Calendar.getInstance();
+        final SimpleDateFormat ft = new SimpleDateFormat("EEE, d MMM yyyy");
+        final ListView timeSlots = (ListView) v.findViewById(R.id.timeList);
+        setListAdapter(Calendar.getInstance(),v,timeSlots);
+        for(int x = 0; x < 7;x++){
+            dayAdapter.add(ft.format(today.getTime()));
+            today.add(Calendar.DAY_OF_MONTH,1);
         }
-        timeSlots.setAdapter(listAdapter);
-        timeSlots.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                System.out.println(i);
-                if(MAXRESERVEMINUTES-(listAdapter.slotsReserved*15) > 0 || listAdapter.getItem(i).owner == 1) {
-                    listAdapter.reserveTimeSlot(i);
-                    listAdapter.notifyDataSetChanged();
-                    timeLeft.setText(""+(MAXRESERVEMINUTES - (listAdapter.slotsReserved * 15)));
-                }
-            }
-        });
+        daySpinner.setAdapter(dayAdapter);
+        daySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                                 @Override
+                                                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                                                     String s = (String) adapterView.getItemAtPosition(i);
+                                                     Date d = null;
+                                                     try{
+                                                         d = ft.parse(s);
+                                                     }
+                                                     catch(ParseException e){
+                                                         Toast.makeText(v.getContext(),e.toString(),Toast.LENGTH_SHORT).show();
+                                                     }
+                                                     if(d != null) {
+                                                         Calendar c = Calendar.getInstance();
+                                                         if(d.after(c.getTime()))
+                                                             c.setTime(d);
+                                                         setListAdapter(c, v, timeSlots);
+                                                     }
+                                                 }
+
+                                                 @Override
+                                                 public void onNothingSelected(AdapterView<?> adapterView) {
+
+                                                 }
+                                             });
         builder.setView(v);
         builder.setNegativeButton("Close", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
@@ -76,62 +82,121 @@ public class SelectTimeSlotFragment extends DialogFragment {
         });
         return builder.create();
     }
+    private void setListAdapter(Calendar c, View view, ListView timeSlots){
+        final View v = view;
+        final TextView timeLeftText = (TextView)v.findViewById(R.id.timeLeft);
+        final TimeSlotAdapter listAdapter = new TimeSlotAdapter(getActivity(),R.layout.timeslot_item,c,this.startTime,this.endTime);
+        timeSlots.setAdapter(listAdapter);
+        timeSlots.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                long timeReserved;
+                if( listAdapter.getItem(i).owner ==2) {
+                    Toast.makeText(v.getContext(),"Time slot has been reserved by someone else",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                else if( listAdapter.getItem(i).owner > 2) {
+                    Toast.makeText(v.getContext(),"Time slot has already passed, can not be reserved",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                else if(listAdapter.endTime != null || listAdapter.startTime != null) {
+                    timeReserved = listAdapter.endTime.getTime().getTime() - listAdapter.startTime.getTime().getTime();
+                    if (MAXRESERVETIME <= timeReserved && listAdapter.getItem(i).owner == 0) {
+                        Toast.makeText(v.getContext(),"You can not reserve any more time slots",Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                }
+                if(!listAdapter.reserveTimeSlot(i)){
+                    Toast.makeText(v.getContext(),"Reserved time slots must be continuous",Toast.LENGTH_SHORT).show();
+                }
+                listAdapter.notifyDataSetChanged();
+                if(listAdapter.endTime != null || listAdapter.startTime != null)
+                    timeReserved = listAdapter.endTime.getTime().getTime() - listAdapter.startTime.getTime().getTime();
+                else
+                    timeReserved = 0;
+                timeLeftText.setText(""+(MAXRESERVETIME - (timeReserved))/60000);
+                startTime = listAdapter.startTime;
+                endTime = listAdapter.endTime;
+            }
+        });
+    }
 
     static SelectTimeSlotFragment newInstance(){
         SelectTimeSlotFragment display = new SelectTimeSlotFragment();
         return display;
     }
     private class TimeSlotAdapter extends ArrayAdapter<TimeSlot> {
-        public int slotsReserved = 0;
-        private int startHour = 0;
-        private int startMinute = 0;
-        private int endHour = 0;
-        private int endMinute = 0;
-        public TimeSlotAdapter(Context context, int textViewResourceId) {
+        private Calendar startTime;
+        private Calendar endTime;
+        public TimeSlotAdapter(Context context, int textViewResourceId,Calendar current, Calendar start, Calendar end) {
             super(context, textViewResourceId);
-        }
-
-        public TimeSlotAdapter(Context context, int resource, List<TimeSlot> items) {
-            super(context, resource, items);
+            this.startTime = start;
+            this.endTime = end;
+            Calendar times = (Calendar)current.clone();
+            times.set(Calendar.HOUR_OF_DAY, 0);
+            times.set(Calendar.MINUTE,0);
+            times.set(Calendar.SECOND,0);
+            times.set(Calendar.MILLISECOND,0);
+            for(int x = 0; x < 96;x++){
+                Calendar endingTime = (Calendar)times.clone();
+                endingTime.add(Calendar.MINUTE,15);
+                TimeSlot t;
+                if(current.after(times)) {
+                    t = new TimeSlot(times, endingTime, 3);
+                    if(this.startTime != null && current.after(this.startTime)){
+                        this.startTime = endingTime;
+                        if(this.endTime != null  && current.after(this.endTime)){
+                            this.startTime = null;
+                            this.endTime = null;
+                        }
+                    }
+                }
+                else if(startTime != null && endTime != null &&                              // Check if there are any reservations yet
+                        (startTime.before(times)||startTime.compareTo(times)==0) &&                // If the timeslot occurred during the user's reserved time
+                        (endTime.after(endingTime) || endTime.compareTo(endingTime)==0)){
+                    t = new TimeSlot(times,endingTime,1);                                 // Set the user to you
+                }
+                else
+                    t = new TimeSlot(times,endingTime);
+                add(t);
+                times = endingTime;
+            }
         }
         public boolean reserveTimeSlot(int position){
             TimeSlot p = getItem(position);
             if(p.owner == 0){
-                if(slotsReserved == 0){
+                if(this.startTime == null || this.endTime == null){
                     p.owner = 1;
-                    slotsReserved++;
-                    startHour = p.startHour;
-                    startMinute = p.startMinute;
-                    endHour = p.endHour;
-                    endMinute = p.endMinute;
+                    this.endTime = p.endTime;
+                    this.startTime = p.startTime;
                     return true;
                 }
-                else if(position != 0 && getItem(position-1).owner == 1){
+                else if(p.startTime.compareTo(this.endTime)==0){
                     p.owner = 1;
-                    slotsReserved++;
-                    endHour = p.endHour;
-                    endMinute = p.endMinute;
+                    this.endTime = p.endTime;
                     return true;
-                }else if(position != getCount()-1 && getItem(position+1).owner == 1){
+                }
+                else if(p.endTime.compareTo(this.startTime)==0){
                     p.owner = 1;
-                    slotsReserved++;
-                    startHour = p.startHour;
-                    startMinute = p.startMinute;
+                    this.startTime = p.startTime;
                     return true;
                 }
             }
             else if(p.owner == 1){
-                if(position == 0 || getItem(position-1).owner != 1){
-                    p.owner =0;
-                    slotsReserved--;
-                    startMinute = p.endHour;
-                    startHour = p.endMinute;
-                    return true;
-                }else if(position == getCount()-1 || getItem(position+1).owner != 1){
+                if(this.startTime.compareTo(p.startTime)==0 && this.endTime.compareTo(p.endTime)==0){
                     p.owner = 0;
-                    slotsReserved--;
-                    endHour = p.startHour;
-                    endMinute = p.startMinute;
+                    this.startTime = null;
+                    this.endTime = null;
+                    return true;
+                }
+                else if(this.endTime.compareTo(p.endTime)==0){
+                    p.owner = 0;
+                    this.endTime = p.startTime;
+                    return true;
+                }
+                else if(this.startTime.compareTo(p.startTime)==0){
+                    p.owner = 0;
+                    this.startTime = p.endTime;
                     return true;
                 }
             }
@@ -167,26 +232,21 @@ public class SelectTimeSlotFragment extends DialogFragment {
 
     }
     private class TimeSlot{
-        public int startHour;
-        public int startMinute;
-        public int endHour;
-        public int endMinute;
         public int owner = 0; //0 no owner, 1 you own, 2 someone else owns
-        public TimeSlot(int startH,int startM, int endH, int endM){
-            startHour = startH;
-            startMinute = startM;
-            endHour = endH;
-            endMinute = endM;
+        public Calendar startTime;
+        public Calendar endTime;
+        public TimeSlot(Calendar start,Calendar end){
+            startTime = start;
+            endTime = end;
         }
-        public TimeSlot(int startH,int startM, int endH, int endM, int o){
-            startHour = startH;
-            startMinute = startM;
-            endHour = endH;
-            endMinute = endM;
+        public TimeSlot(Calendar start,Calendar end, int o){
+            startTime = start;
+            endTime = end;
             owner = o;
         }
         public String toString(){
-            return String.format("%d:%02d to %d:%02d",startHour,startMinute,endHour,endMinute);
+            SimpleDateFormat ft = new SimpleDateFormat("h:mm a");
+            return String.format("%s to %s",ft.format(startTime.getTime()),ft.format(endTime.getTime()));
         }
     }
 }
