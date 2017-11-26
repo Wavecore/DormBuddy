@@ -25,7 +25,7 @@ import java.io.IOException;
 import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_ID;
 import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_NAME;
 import static com.cs477.dormbuddy.LocalUserHelper.FULL_NAME;
-import static com.cs477.dormbuddy.LocalUserHelper.ICON;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_ICON;
 import static com.cs477.dormbuddy.LocalUserHelper.LOGGED_IN;
 import static com.cs477.dormbuddy.LocalUserHelper.ROOM_NUMBER;
 import static com.cs477.dormbuddy.LocalUserHelper.TABLE_NAME;
@@ -38,7 +38,7 @@ public class ProfileBuddyActivity extends AppCompatActivity {
     private LocalUserHelper dbHelper = null;
     private Cursor mCursor;
     private String storedGNumber;
-    final static String[] columns = { _ID, FULL_NAME, LOGGED_IN, BUILDING_ID, BUILDING_NAME, ROOM_NUMBER, ICON };
+    final static String[] columns = { _ID, FULL_NAME, LOGGED_IN, BUILDING_ID, BUILDING_NAME, ROOM_NUMBER, USER_ICON };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,7 +114,7 @@ public class ProfileBuddyActivity extends AppCompatActivity {
                 bmp.compress(Bitmap.CompressFormat.PNG, 10, stream); //bmp gets compressed to the stream
                 ContentValues cv = new ContentValues(1);
                 byte[] byteArray = stream.toByteArray(); //stream becomes a byte array
-                cv.put(ICON, byteArray); //updates stored byte array for user local table
+                cv.put(USER_ICON, byteArray); //updates stored byte array for user local table
                 db.update(TABLE_NAME, cv, _ID + "=" + storedGNumber, null); //uploads image
                 displayImage(byteArray); //displays on screen
             } catch (FileNotFoundException e) {

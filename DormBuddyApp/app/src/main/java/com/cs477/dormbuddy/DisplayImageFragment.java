@@ -20,7 +20,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 public class DisplayImageFragment extends DialogFragment {
-
+    static final String DISPLAY_IMAGE_TAG = "DisplayImageTag";
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         super.onCreateDialog(savedInstanceState);

@@ -24,12 +24,29 @@ import java.util.Date;
 
 
 public class SelectTimeSlotFragment extends DialogFragment {
+    public static interface OnCompleteListener{
+        public abstract void onComplete(Calendar start, Calendar end);
+    }
+    private OnCompleteListener mListener;
+    static final String SELECT_TIME_SLOT_TAG = "SelectTimeSlotTag";
     final private long MAXRESERVETIME = 7200000;
     private Calendar startTime;
     private Calendar endTime;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         super.onCreateDialog(savedInstanceState);
+        long start = getArguments().getLong("start",0);
+        if(start != 0){
+            startTime= Calendar.getInstance();
+            startTime.setTime(new Date(start));
+        }
+        long end = getArguments().getLong("end",0);
+        if(end != 0){
+            endTime= Calendar.getInstance();
+            endTime.setTime(new Date(end));
+        }
+        System.out.println(startTime);
+        System.out.println(endTime);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final View v = inflater.inflate(R.layout.fragment_select_time_slot,null);
@@ -77,11 +94,23 @@ public class SelectTimeSlotFragment extends DialogFragment {
         builder.setPositiveButton("Select Time Slots", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-
+                mListener.onComplete(startTime,endTime);
             }
         });
         return builder.create();
     }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try{
+            this.mListener = (OnCompleteListener)context;
+        }
+        catch (final ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement OnCompleteListener");
+        }
+    }
+
     private void setListAdapter(Calendar c, View view, ListView timeSlots){
         final View v = view;
         final TextView timeLeftText = (TextView)v.findViewById(R.id.timeLeft);
@@ -121,8 +150,16 @@ public class SelectTimeSlotFragment extends DialogFragment {
         });
     }
 
-    static SelectTimeSlotFragment newInstance(){
+    static SelectTimeSlotFragment newInstance(Calendar start, Calendar end){
         SelectTimeSlotFragment display = new SelectTimeSlotFragment();
+        Bundle args = new Bundle();
+        if(start != null && end != null) {
+
+            args.putLong("start", start.getTime().getTime());
+            args.putLong("end", end.getTime().getTime());
+
+        }
+        display.setArguments(args);
         return display;
     }
     private class TimeSlotAdapter extends ArrayAdapter<TimeSlot> {

@@ -1,6 +1,7 @@
 package com.cs477.dormbuddy;
 
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.database.Cursor;
@@ -22,12 +23,18 @@ import android.widget.Toast;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class CreateEventActivity extends AppCompatActivity {
-    static final int PICK_IMAGE = 1;
-    ImageButton imageButton;
+public class CreateEventActivity extends AppCompatActivity implements SelectTimeSlotFragment.OnCompleteListener {
 
+    static final int PICK_IMAGE = 1;
+    static final int SELECT_TIME_SLOT_FRAGMENT = 1;
+    static final String SELECT_TIME_SLOT_TAG = "SelectTimeSlot";
+    private ImageButton imageButton;
+    private Calendar startTime;
+    private Calendar endTime;
+    private EditText editText;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         FragmentManager fm = getFragmentManager();
@@ -43,20 +50,32 @@ public class CreateEventActivity extends AppCompatActivity {
                 return true;
             }
         });
-        final EditText editText = (EditText)findViewById(R.id.eventTime);
+        editText = (EditText)findViewById(R.id.eventTime);
         editText.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                SelectTimeSlotFragment selectTimeSlotFragment = SelectTimeSlotFragment.newInstance();
-                //TODO: SELECT TIME SLOT INSTEAD OF TIME, CREATE DIALOG FRAGMENT
-                Calendar mcurrentTime = Calendar.getInstance();
-                int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
-                int minute = mcurrentTime.get(Calendar.MINUTE);
-                selectTimeSlotFragment.show(getSupportFragmentManager(),"SelectTime");
+                if(getSupportFragmentManager().findFragmentByTag(SelectTimeSlotFragment.SELECT_TIME_SLOT_TAG) == null) {
+                    //TODO: SELECT TIME SLOT INSTEAD OF TIME, CREATE DIALOG FRAGMENT
+                    Calendar mcurrentTime = Calendar.getInstance();
+                    SelectTimeSlotFragment selectTimeSlotFragment = SelectTimeSlotFragment.newInstance(startTime,endTime);
+                    selectTimeSlotFragment.show(getSupportFragmentManager(), SelectTimeSlotFragment.SELECT_TIME_SLOT_TAG);
+
+                }
             }
         });
-    }
 
+    }
+    public void onComplete(Calendar start, Calendar end){
+        startTime = start;
+        endTime = end;
+        if(startTime == null || endTime == null){
+            editText.setText("");
+        }
+        else{
+            SimpleDateFormat ft = new SimpleDateFormat("MMM d hh:mm aaa");
+            editText.setText(ft.format(startTime.getTime())+" to "+ft.format(endTime.getTime()));
+        }
+    }
     public void selectImage(View v){
         Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
         getIntent.setType("image/*");

@@ -21,7 +21,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 public class DisplayEventFragment extends DialogFragment {
-
+    static final String DISPLAY_EVENT_TAG = "DisplayEventTag";
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         super.onCreateDialog(savedInstanceState);
@@ -45,9 +45,11 @@ public class DisplayEventFragment extends DialogFragment {
             eventImage.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View view) {
-                    BitmapDrawable drawable = (BitmapDrawable) eventImage.getDrawable();
-                    DisplayImageFragment newFragment = DisplayImageFragment.newInstance(drawable.getBitmap());
-                    newFragment.show(getActivity().getSupportFragmentManager(),"DisplayImage");
+                    if(getActivity().getSupportFragmentManager().findFragmentByTag(DisplayImageFragment.DISPLAY_IMAGE_TAG) == null) {
+                        BitmapDrawable drawable = (BitmapDrawable) eventImage.getDrawable();
+                        DisplayImageFragment newFragment = DisplayImageFragment.newInstance(drawable.getBitmap());
+                        newFragment.show(getActivity().getSupportFragmentManager(), DisplayImageFragment.DISPLAY_IMAGE_TAG);
+                    }
                     return true;
                 }
             });

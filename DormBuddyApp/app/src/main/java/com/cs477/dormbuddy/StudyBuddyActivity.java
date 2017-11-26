@@ -9,7 +9,9 @@ public class StudyBuddyActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_study_buddy);
-        DisplayEventFragment newFragment = DisplayEventFragment.newInstance("Study",R.drawable.map,"next door","yesterday","procrastination",true);
-        newFragment.show(getSupportFragmentManager(),"here");
+        if(getSupportFragmentManager().findFragmentByTag(DisplayEventFragment.DISPLAY_EVENT_TAG) == null) {
+            DisplayEventFragment newFragment = DisplayEventFragment.newInstance("Study", R.drawable.map, "next door", "yesterday", "procrastination", true);
+            newFragment.show(getSupportFragmentManager(), DisplayEventFragment.DISPLAY_EVENT_TAG);
+        }
     }
 }

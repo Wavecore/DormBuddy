@@ -17,8 +17,7 @@ public class LocalUserHelper extends SQLiteOpenHelper {
     final static String LOGGED_IN = "logged_in";
     final static String BUILDING_ID = "building_id";
     final static String BUILDING_NAME = "building_name";
-    final static String ROOM_NUMBER = "room_number";
-    final static String ICON = "user_photo";
+    final static String USER_ICON = "user_photo";
     final static String SELECTED_WASHER_TEMPLATE = "washer_template_selected";
     final static String SELECTED_DRYER_TEMPLATE = "dryer_template_selected";
     //user can only have a max of 5 templates
@@ -32,6 +31,17 @@ public class LocalUserHelper extends SQLiteOpenHelper {
     final static String DRYER_TEMPLATE_4 = "dryer_template_4";
     final static String WASHER_TEMPLATE_5 = "washer_template_5";
     final static String DRYER_TEMPLATE_5 = "dryer_template_5";
+
+    final static String TABLE_RESERVATION = "dormbuddy_reservations";
+    final static String RESERVATION_TITLE = "reservation_title";
+    final static String RESERVATION_DESCRIPTION = "reservation_description";
+    //final static
+
+    final static String TABLE_ROOM = "dormbuddy_rooms";
+    final static String ROOM_TYPE = "room_type";
+    final static String ROOM_NUMBER = "room_number";
+    final static String ROOM_MAX_OCCUPANCY = "room_max_occupancy";
+
 
     final Context context;
     /*
@@ -54,7 +64,7 @@ public class LocalUserHelper extends SQLiteOpenHelper {
                     BUILDING_ID + " INTEGER DEFAULT 0, " +
                     BUILDING_NAME + " TEXT NOT NULL, " +
                     ROOM_NUMBER + " TEXT NOT NULL, " +
-                    ICON + " BLOB, " +
+                    USER_ICON + " BLOB, " +
                     SELECTED_WASHER_TEMPLATE + " INTEGER DEFAULT 0, " +
                     SELECTED_DRYER_TEMPLATE + " INTEGER DEFAULT 0, " +
                     WASHER_TEMPLATE_1 + " TEXT NOT NULL DEFAULT '', " +
