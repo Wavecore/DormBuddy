@@ -50,7 +50,7 @@ public class ProfileBuddyActivity extends AppCompatActivity {
         roomNumberView = findViewById(R.id.roomText);
         dbHelper = new LocalUserHelper(this);
         db = dbHelper.getWritableDatabase();
-        mCursor = db.query(TABLE_USER, columns, null, new String[] {}, null, null,
+        mCursor = db.query(TABLE_USER, columns, USER_LOGGED_IN+" = 1", new String[] {}, null, null,
                 null);
         try { //since user is logged in, just gobble up his user data
             mCursor.moveToPosition(0);

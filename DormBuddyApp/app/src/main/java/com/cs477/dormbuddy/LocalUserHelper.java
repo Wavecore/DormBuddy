@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 //database helper that keeps user logged in and displays their templates
 public class LocalUserHelper extends SQLiteOpenHelper {
-    final static private Integer VERSION = 65;
+    final static private Integer VERSION = 67;
     //===============Buildings Table=====================
     final static String TABLE_BUILDING = "dormbuddy_building";
     final static String BUILDING_ID = "building_id";
@@ -212,8 +212,8 @@ public class LocalUserHelper extends SQLiteOpenHelper {
         db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 5,'453','LAUNDRY' );");
         db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 5,'333','LAUNDRY' );");
         // Insert Fake User
-      //  db.execSQL("INSERT INTO "+TABLE_USER+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+USER_ID+", "+USER_NAME+", "+BUILDING_NAME+")"+
-      //          " VALUES( 0,'369a',666, 'Anonymous','Fake Building');");
+        db.execSQL("INSERT INTO "+TABLE_USER+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+USER_ID+", "+USER_NAME+", "+BUILDING_NAME+")"+
+                " VALUES( 0,'369a',-1, 'Anonymous','Fake Building');");
         // Insert Reservations
 
     }

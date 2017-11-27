@@ -42,6 +42,8 @@ public class RegisterActivity extends AppCompatActivity {
     final static String[] columns = { USER_ID, USER_NAME, USER_LOGGED_IN, BUILDING_ID, BUILDING_NAME, ROOM_NUMBER, USER_ICON };
     String storedGNumber;
     private int buildingID = 0;
+    private String roomNum;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,21 +64,26 @@ public class RegisterActivity extends AppCompatActivity {
                 mAdapter.add(cCursor.getString(1));
                 cCursor.moveToNext();
             }
-            cCursor.close();
         }
+        cCursor.close();
         // Apply the adapter to the spinner
         buildingSpinnerView.setAdapter(mAdapter);
         buildingSpinnerView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 cAdapter = new ArrayAdapter<CharSequence>(view.getContext(),R.layout.spinner_item,R.id.spinnerItem);
+                int roomPosition = 0;
                 if(i != 0) {
                     cAdapter.add("Select a room");
                     Cursor c = db.query(TABLE_ROOM, new String[]{ROOM_NUMBER}, ROOM_TYPE + " = '" + ROOM_TYPE_DORM + "' AND "+BUILDING_ID+" = "+i, new String[]{}, null, null, null);
+                    int p = 1;
                     if (c.moveToFirst()) {
                         while (!c.isAfterLast()) {
+                            if(roomNum != null && c.getString(0).contentEquals(roomNum))
+                                roomPosition = p;
                             cAdapter.add(c.getString(0));
                             c.moveToNext();
+                            p++;
                         }
                     }
                     c.close();
@@ -85,13 +92,19 @@ public class RegisterActivity extends AppCompatActivity {
                     roomSpinnerView.setFocusable(false);
                 }
                 roomSpinnerView.setAdapter(cAdapter);
+                if(roomPosition != 0) {
+                    System.out.println(cAdapter.getPosition(roomNum));
+                    roomSpinnerView.setSelection(roomPosition);
+                    roomNum = null;
+                }
             }
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
-
             }
         });
-        mCursor = db.query(TABLE_USER, columns, null, new String[] {}, null, null,null); //to check if logged in user exists
+
+        // Check to see if there is a user logged in
+        mCursor = db.query(TABLE_USER, columns, USER_ID+" >= 0", new String[] {}, null, null,null); //to check if logged in user exists
         registerOrUpdateButton = findViewById(R.id.registerOrUpdate);
         //try to get the user
         if (mCursor.moveToFirst()) { //if try is successful, changes register button to update button
@@ -107,6 +120,8 @@ public class RegisterActivity extends AppCompatActivity {
                             onUpdateClicked();
                     }
                 });
+                roomNum = mCursor.getString(5);
+                buildingSpinnerView.setSelection( mCursor.getInt(3));
             } else { //user exists but is not logged in => user becomes logged in
                 loginUser();
             }
@@ -135,7 +150,7 @@ public class RegisterActivity extends AppCompatActivity {
         return true;
     }
 
-    //creates new suer
+    //creates new user
     public void onRegisterClicked() {
 
         ContentValues cv = new ContentValues(7);
@@ -148,7 +163,6 @@ public class RegisterActivity extends AppCompatActivity {
         cv.put(USER_ICON, new byte[]{}); //icon is just an empty byte array to start
         db.insert(TABLE_USER, null, cv);
         db.close();
-        mCursor.close();
         startActivity(new Intent(this, MainActivity.class));
         finish();
     }
@@ -162,7 +176,7 @@ public class RegisterActivity extends AppCompatActivity {
         //updates the 3 fields
         db.update(TABLE_USER, cv, USER_ID + "=" + storedGNumber, null);
         db.close();
-        mCursor.close();
+       // mCursor.close();
         startActivity(new Intent(this, MainActivity.class));
         finish();
     }

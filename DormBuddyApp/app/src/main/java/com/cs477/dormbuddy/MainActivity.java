@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
         //check if user is logged in first, redirect them to log in if not
         dbHelper = new LocalUserHelper(this);
         db = dbHelper.getWritableDatabase();
-        mCursor = db.query(TABLE_USER, columns, null, new String[] {}, null, null,
+        mCursor = db.query(TABLE_USER, columns, USER_LOGGED_IN+" = 1", new String[] {}, null, null,
                 null);
         try { //if the user ever logged in, there will be a row in the database, but check that they didnt log out
             mCursor.moveToPosition(0);
