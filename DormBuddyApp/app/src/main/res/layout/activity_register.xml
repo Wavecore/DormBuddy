@@ -32,13 +32,13 @@
         android:textSize="26sp"
         android:text="Room"
         android:textAlignment="center"/>
-    <EditText
-        android:id="@+id/roomNumber"
+    <Spinner
+        android:id="@+id/registerRoomSpinner"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textSize="24sp"
-        android:layout_marginEnd="80dp"
-        android:layout_marginStart="80dp"/>
+        android:layout_marginEnd="60dp"
+        android:layout_marginStart="60dp"
+        android:textAlignment="center"/>
     <Button
         android:id="@+id/registerOrUpdate"
         android:layout_width="fill_parent"

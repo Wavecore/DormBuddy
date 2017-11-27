@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 //database helper that keeps user logged in and displays their templates
 public class LocalUserHelper extends SQLiteOpenHelper {
-    final static private Integer VERSION = 64;
+    final static private Integer VERSION = 65;
     //===============Buildings Table=====================
     final static String TABLE_BUILDING = "dormbuddy_building";
     final static String BUILDING_ID = "building_id";
@@ -25,6 +25,10 @@ public class LocalUserHelper extends SQLiteOpenHelper {
     final static String ROOM_TYPE = "room_type";
     final static String ROOM_NUMBER = "room_number";
     final static String ROOM_MAX_OCCUPANCY = "room_max_occupancy";
+    final static String ROOM_TYPE_DORM = "DORM";
+    final static String ROOM_TYPE_LAUNDRY = "LAUNDRY";
+    final static String ROOM_TYPE_EVENT = "EVENT";
+    final static String ROOM_TYPE_STUDY = "STUDY";
     //==============Users Table==========================
     final static String TABLE_USER = "dormbuddy_user";
     final static String USER_ID = "user_id";
@@ -113,7 +117,7 @@ public class LocalUserHelper extends SQLiteOpenHelper {
             "CREATE TABLE "+TABLE_ROOM+" ("+
                     BUILDING_ID +" INTEGER, "+
                     ROOM_NUMBER+" INTEGER NOT NULL, "+
-                    ROOM_TYPE+" TEXT CHECK("+ROOM_TYPE+" IN ('LAUNDRY','DORM','STUDY','EVENT')),"+
+                    ROOM_TYPE+" TEXT CHECK("+ROOM_TYPE+" IN ('"+ROOM_TYPE_LAUNDRY+"','"+ROOM_TYPE_DORM+"','"+ROOM_TYPE_STUDY+"','"+ROOM_TYPE_EVENT+"')),"+
                     ROOM_MAX_OCCUPANCY+" INTEGER CHECK("+ROOM_MAX_OCCUPANCY+" >= 0),"+
                     "PRIMARY KEY ("+BUILDING_ID+", "+ROOM_NUMBER+"), "+
                     "FOREIGN KEY ("+BUILDING_ID+") REFERENCES "+TABLE_BUILDING+" ("+BUILDING_ID+") ON DELETE SET NULL DEFERRABLE);";

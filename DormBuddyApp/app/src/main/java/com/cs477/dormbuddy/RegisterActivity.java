@@ -7,14 +7,21 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CursorAdapter;
 import android.widget.EditText;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_ID;
 import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_NAME;
+import static com.cs477.dormbuddy.LocalUserHelper.ROOM_TYPE;
+import static com.cs477.dormbuddy.LocalUserHelper.ROOM_TYPE_DORM;
+import static com.cs477.dormbuddy.LocalUserHelper.TABLE_BUILDING;
+import static com.cs477.dormbuddy.LocalUserHelper.TABLE_ROOM;
 import static com.cs477.dormbuddy.LocalUserHelper.USER_NAME;
 import static com.cs477.dormbuddy.LocalUserHelper.USER_ICON;
 import static com.cs477.dormbuddy.LocalUserHelper.USER_LOGGED_IN;
@@ -23,15 +30,18 @@ import static com.cs477.dormbuddy.LocalUserHelper.TABLE_USER;
 import static com.cs477.dormbuddy.LocalUserHelper.USER_ID;
 
 public class RegisterActivity extends AppCompatActivity {
-    EditText roomNumberView;
     Spinner buildingSpinnerView;
     Button registerOrUpdateButton;
+    Spinner roomSpinnerView;
     private SQLiteDatabase db = null;
     private LocalUserHelper dbHelper = null;
     private Cursor mCursor;
-    ArrayAdapter<CharSequence> mAdapter;
+    private ArrayAdapter<CharSequence> mAdapter;
+    private ArrayAdapter<CharSequence> cAdapter;
+    Cursor cCursor;
     final static String[] columns = { USER_ID, USER_NAME, USER_LOGGED_IN, BUILDING_ID, BUILDING_NAME, ROOM_NUMBER, USER_ICON };
     String storedGNumber;
+    private int buildingID = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,19 +50,51 @@ public class RegisterActivity extends AppCompatActivity {
         //check if user is logged in first, redirect them to log in if not
         dbHelper = new LocalUserHelper(this);
         db = dbHelper.getWritableDatabase();
-        roomNumberView = findViewById(R.id.roomNumber);
         buildingSpinnerView = findViewById(R.id.buildingSpinner);
-        // Create an ArrayAdapter using the string array and a default spinner layout
-        mAdapter = ArrayAdapter.createFromResource(this, R.array.GMU_houses, R.layout.spinner_item);
-        // Specify the layout to use when the list of choices appears
-        mAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        roomSpinnerView = findViewById(R.id.registerRoomSpinner);
+        roomSpinnerView.setFocusable(false);
+        // Create an ArrayAdapter using the a Cursor contain buildings and a default spinner layout
+        cCursor = db.query(TABLE_BUILDING,new String[]{BUILDING_ID,BUILDING_NAME},null, new String[]{},BUILDING_ID, BUILDING_ID+" > 0",BUILDING_ID);
+        mAdapter = new ArrayAdapter<CharSequence>(this,R.layout.spinner_item,R.id.spinnerItem);
+        mAdapter.add("Select a Building");
+        if (cCursor.moveToFirst()) {
+            while ( !cCursor.isAfterLast() ) {
+                mAdapter.add(cCursor.getString(1));
+                cCursor.moveToNext();
+            }
+            cCursor.close();
+        }
         // Apply the adapter to the spinner
         buildingSpinnerView.setAdapter(mAdapter);
-        mCursor = db.query(TABLE_USER, columns, null, new String[] {}, null, null,
-                null); //to check if user exists
+        buildingSpinnerView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                cAdapter = new ArrayAdapter<CharSequence>(view.getContext(),R.layout.spinner_item,R.id.spinnerItem);
+                if(i != 0) {
+                    cAdapter.add("Select a room");
+                    Cursor c = db.query(TABLE_ROOM, new String[]{ROOM_NUMBER}, ROOM_TYPE + " = '" + ROOM_TYPE_DORM + "' AND "+BUILDING_ID+" = "+i, new String[]{}, null, null, null);
+                    if (c.moveToFirst()) {
+                        while (!c.isAfterLast()) {
+                            cAdapter.add(c.getString(0));
+                            c.moveToNext();
+                        }
+                    }
+                    c.close();
+                }
+                else{
+                    roomSpinnerView.setFocusable(false);
+                }
+                roomSpinnerView.setAdapter(cAdapter);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+        mCursor = db.query(TABLE_USER, columns, null, new String[] {}, null, null,null); //to check if logged in user exists
         registerOrUpdateButton = findViewById(R.id.registerOrUpdate);
         //try to get the user
-        try { //if try is successful, changes register button to update button
+        if (mCursor.moveToFirst()) { //if try is successful, changes register button to update button
             mCursor.moveToPosition(0);
             storedGNumber = "" + mCursor.getInt(0); //gets the g number
             int isLoggedIn = mCursor.getInt(2);
@@ -68,7 +110,8 @@ public class RegisterActivity extends AppCompatActivity {
             } else { //user exists but is not logged in => user becomes logged in
                 loginUser();
             }
-        } catch (Exception e) { //user not in the system yet, so proceed without modifying buttons
+        }
+        else{ //user not in the system yet, so proceed without modifying buttons
             registerOrUpdateButton.setText("Register");
             registerOrUpdateButton.setBackgroundColor(getResources().getColor(R.color.colorAmber));
             registerOrUpdateButton.setOnClickListener(new View.OnClickListener() {
@@ -81,8 +124,12 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private Boolean inputIsCorrect(){
-        if (roomNumberView.getText().toString().equals("")) { //checks that room number is not empty
-            Toast.makeText(this, "Enter a room number", Toast.LENGTH_SHORT).show();
+        if(buildingSpinnerView.getSelectedItemPosition() == 0){
+            Toast.makeText(this,"A building must be selected",Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if(roomSpinnerView.getSelectedItemPosition() == 0){
+            Toast.makeText(this, "A room must be selected",Toast.LENGTH_SHORT).show();
             return false;
         }
         return true;
@@ -90,13 +137,14 @@ public class RegisterActivity extends AppCompatActivity {
 
     //creates new suer
     public void onRegisterClicked() {
+
         ContentValues cv = new ContentValues(7);
         cv.put(USER_ID, 123456); //g number
         cv.put(USER_NAME, "John Doe");
         cv.put(USER_LOGGED_IN, 1);
         cv.put(BUILDING_ID, buildingSpinnerView.getSelectedItemPosition());
         cv.put(BUILDING_NAME, buildingSpinnerView.getSelectedItem().toString());
-        cv.put(ROOM_NUMBER, roomNumberView.getText().toString());
+        cv.put(ROOM_NUMBER, roomSpinnerView.getSelectedItem().toString());
         cv.put(USER_ICON, new byte[]{}); //icon is just an empty byte array to start
         db.insert(TABLE_USER, null, cv);
         db.close();
@@ -110,7 +158,7 @@ public class RegisterActivity extends AppCompatActivity {
         ContentValues cv = new ContentValues(3);
         cv.put(BUILDING_ID, buildingSpinnerView.getSelectedItemPosition());
         cv.put(BUILDING_NAME, buildingSpinnerView.getSelectedItem().toString());
-        cv.put(ROOM_NUMBER, roomNumberView.getText().toString());
+        cv.put(ROOM_NUMBER, roomSpinnerView.getSelectedItem().toString());
         //updates the 3 fields
         db.update(TABLE_USER, cv, USER_ID + "=" + storedGNumber, null);
         db.close();
