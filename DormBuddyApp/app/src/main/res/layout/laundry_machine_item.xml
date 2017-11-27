@@ -52,5 +52,19 @@
                 android:src="@drawable/free"
                 android:scaleType="fitCenter"/>
         </LinearLayout>
+        <LinearLayout
+            android:id="@+id/optionalTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/border"
+            android:layout_gravity="bottom|center"
+            android:layout_marginBottom="7dp">
+            <TextView
+                android:id="@+id/timeLeftTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="00:00"
+                android:textStyle="bold"/>
+        </LinearLayout>
     </FrameLayout>
 </LinearLayout>
