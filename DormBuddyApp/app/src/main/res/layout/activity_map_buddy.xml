@@ -35,6 +35,7 @@
                 <!--two/three rectangular maps, at least one dorm map and one campus map, clickable to expand-->
                 <ImageView
                     android:contentDescription="Interactive Campus Map"
+                    android:id="@+id/interactiveCampusMap"
                     android:layout_marginTop="6dp"
                     android:src="@drawable/interactive_campus_map"
                     android:scaleType="fitXY"
@@ -44,6 +45,7 @@
                     android:onClick="mapClicked"/>
                 <ImageView
                     android:contentDescription="Interactive Fairfax Map"
+                    android:id="@+id/interactiveFairfaxMap"
                     android:layout_marginTop="6dp"
                     android:src="@drawable/interactive_fairfax_map"
                     android:scaleType="fitXY"
