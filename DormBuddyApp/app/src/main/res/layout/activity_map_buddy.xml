@@ -68,7 +68,7 @@
                 <!--two/three rectangular maps, at least one dorm map and one campus map, clickable to expand-->
                 <ImageView
                     android:contentDescription="Campus Map"
-                    android:id="@+id/dormMap"
+                    android:id="@+id/campusMap"
                     android:layout_marginTop="6dp"
                     android:src="@drawable/campus_map"
                     android:layout_width="fill_parent"
@@ -78,7 +78,7 @@
                     android:onClick="mapClicked"/>
                 <ImageView
                     android:contentDescription="Dorm Map"
-                    android:id="@+id/campusMap"
+                    android:id="@+id/dormMap"
                     android:layout_marginTop="6dp"
                     android:src="@drawable/dorm_map"
                     android:layout_width="fill_parent"
