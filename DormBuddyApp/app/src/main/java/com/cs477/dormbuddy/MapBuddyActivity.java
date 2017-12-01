@@ -30,12 +30,14 @@ public class MapBuddyActivity extends AppCompatActivity {
             case R.id.interactiveFairfaxMap:
                 intent = new Intent(this, InteractiveMapActivity.class);
                 intent.putExtra(IS_GMU, false);
+                break;
             case R.id.campusMap:
                 DisplayImageFragment displayImageFragment = DisplayImageFragment.newInstanceFromLocal(R.drawable.large_campus_map);
                 displayImageFragment.show(getSupportFragmentManager(),"DisplayCampus");
                 return;
             case R.id.dormMap:
-
+                DisplayImageFragment displayImageFragment2 = DisplayImageFragment.newInstanceFromLocal(R.drawable.dorm_floor);
+                displayImageFragment2.show(getSupportFragmentManager(),"DisplayFloor");
                 return;
             default:
                 Toast.makeText(this, "An Error Occurred", Toast.LENGTH_SHORT).show();
