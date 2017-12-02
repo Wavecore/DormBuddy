@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 //database helper that keeps user logged in and displays their templates
 public class LocalUserHelper extends SQLiteOpenHelper {
-    final static private Integer VERSION = 1027;
+    final static private Integer VERSION = 1029;
     //===============Buildings Table=====================
     final static String TABLE_BUILDING = "dormbuddy_building";
     final static String BUILDING_ID = "building_id";
@@ -51,20 +51,14 @@ public class LocalUserHelper extends SQLiteOpenHelper {
     final static String MARKER_NAME = "marker_name";
     final static String MARKER_IS_CAMPUS = "marker_is_campus";
     final static String MARKER_IS_IMPORTANT = "marker_is_important";
+    //==============Template Table====================
+    final static String TABLE_TEMPLATES = "dormbuddy_templates";
+    final static String TEMPLATE_ID = "template_id";
+    final static String TEMPLATE_NAME = "template_name";
+    final static String TEMPLATE_IS_WASHER = "template_is_washer";
 
     final static String SELECTED_WASHER_TEMPLATE = "washer_template_selected";
     final static String SELECTED_DRYER_TEMPLATE = "dryer_template_selected";
-    //user can only have a max of 5 templates
-    final static String WASHER_TEMPLATE_1 = "washer_template_1";
-    final static String DRYER_TEMPLATE_1 = "dryer_template_1";
-    final static String WASHER_TEMPLATE_2 = "washer_template_2";
-    final static String DRYER_TEMPLATE_2 = "dryer_template_2";
-    final static String WASHER_TEMPLATE_3 = "washer_template_3";
-    final static String DRYER_TEMPLATE_3 = "dryer_template_3";
-    final static String WASHER_TEMPLATE_4 = "washer_template_4";
-    final static String DRYER_TEMPLATE_4 = "dryer_template_4";
-    final static String WASHER_TEMPLATE_5 = "washer_template_5";
-    final static String DRYER_TEMPLATE_5 = "dryer_template_5";
 
 
 
@@ -74,7 +68,7 @@ public class LocalUserHelper extends SQLiteOpenHelper {
 
 
 
-    final private String[] TABLES = {TABLE_BUILDING,TABLE_BUILDING_MAPS,TABLE_ROOM,TABLE_USER,TABLE_RESERVATION,TABLE_MARKERS};
+    final private String[] TABLES = {TABLE_BUILDING,TABLE_BUILDING_MAPS,TABLE_ROOM,TABLE_USER,TABLE_RESERVATION,TABLE_MARKERS, TABLE_TEMPLATES};
 
     final Context context;
     /*
@@ -93,23 +87,13 @@ public class LocalUserHelper extends SQLiteOpenHelper {
             "CREATE TABLE "+TABLE_USER+" (" +
                     USER_ID + " INTEGER PRIMARY KEY, " +
                     USER_NAME + " TEXT NOT NULL, " +
-                    USER_LOGGED_IN + " INTEGER DEFAULT 0, " +
-                    BUILDING_ID + " INTEGER DEFAULT 0, " +
+                    USER_LOGGED_IN + " INTEGER, " +
+                    BUILDING_ID + " INTEGER, " +
                     BUILDING_NAME + " TEXT NOT NULL, " +
                     ROOM_NUMBER + " TEXT NOT NULL, " +
                     USER_ICON + " BLOB, " +
-                    SELECTED_WASHER_TEMPLATE + " INTEGER DEFAULT 0, " +
-                    SELECTED_DRYER_TEMPLATE + " INTEGER DEFAULT 0, " +
-                    WASHER_TEMPLATE_1 + " TEXT NOT NULL DEFAULT '', " +
-                    DRYER_TEMPLATE_1 + " TEXT NOT NULL DEFAULT '', " +
-                    WASHER_TEMPLATE_2 + " TEXT NOT NULL DEFAULT '', " +
-                    DRYER_TEMPLATE_2 + " TEXT NOT NULL DEFAULT '', " +
-                    WASHER_TEMPLATE_3 + " TEXT NOT NULL DEFAULT '', " +
-                    DRYER_TEMPLATE_3 + " TEXT NOT NULL DEFAULT '', " +
-                    WASHER_TEMPLATE_4 + " TEXT NOT NULL DEFAULT '', " +
-                    DRYER_TEMPLATE_4 + " TEXT NOT NULL DEFAULT '', " +
-                    WASHER_TEMPLATE_5 + " TEXT NOT NULL DEFAULT '', " +
-                    DRYER_TEMPLATE_5 + " TEXT NOT NULL DEFAULT '')";
+                    SELECTED_WASHER_TEMPLATE + " INTEGER DEFAULT -1, " +
+                    SELECTED_DRYER_TEMPLATE + " INTEGER DEFAULT -1)";
     final private String CREATE_BUILDING =
             "CREATE TABLE "+TABLE_BUILDING+" ("+
                     BUILDING_ID +" INTEGER PRIMARY KEY AUTOINCREMENT, "+
@@ -152,9 +136,14 @@ public class LocalUserHelper extends SQLiteOpenHelper {
                     MARKER_NAME +" STRING NOT NULL, " +
                     MARKER_IS_CAMPUS +" BOOLEAN, "+
                     MARKER_IS_IMPORTANT +" BOOLEAN);";
+    final static String CREATE_TEMPLATE =
+            "CREATE TABLE "+TABLE_TEMPLATES+" ("+
+                    TEMPLATE_ID +" INTEGER PRIMARY KEY AUTOINCREMENT, "+
+                    TEMPLATE_NAME +" STRING NOT NULL, "+
+                    TEMPLATE_IS_WASHER +" BOOLEAN);";
 
 
-    final private String[] CREATE_TABLES = {CREATE_BUILDING,CREATE_BUILDING_MAPS,CREATE_ROOM,CREATE_USER,CREATE_RESERVATION,CREATE_MAP};
+    final private String[] CREATE_TABLES = {CREATE_BUILDING,CREATE_BUILDING_MAPS,CREATE_ROOM,CREATE_USER,CREATE_RESERVATION,CREATE_MAP,CREATE_TEMPLATE};
 
     public LocalUserHelper(Context context) {
         super(context, TABLE_USER, null, VERSION);

@@ -18,6 +18,9 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
+import static com.cs477.dormbuddy.LocalUserHelper.TEMPLATE_ID;
+import static com.cs477.dormbuddy.LocalUserHelper.TEMPLATE_IS_WASHER;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -61,8 +64,9 @@ public class EditTemplateFragment extends DialogFragment {
         view = inflater.inflate(R.layout.fragment_edit_template,null);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         ///////////////////////////////RETRIEVE PASSED IN ARGUMENTS////////////////
-        position = getArguments().getInt(POSITION);
         templateName = getArguments().getString(TEMPLATE_STRING);
+        position = getArguments().getInt(POSITION);
+        washerSelected = getArguments().getBoolean(TEMPLATE_IS_WASHER);
         //////////////////////////INITIALIZE EVERY SINGLE THING//////////////////////
         //edit text
         cycleNameEditText = view.findViewById(R.id.cycleNameEditText);
@@ -134,7 +138,7 @@ public class EditTemplateFragment extends DialogFragment {
                 } else {
                     nameWithSettings += "" + dryerTemperature + dryerDelicates;
                 }
-                activity.onTemplateReplaced(nameWithSettings, position); //lets the parent know that we're done
+                activity.onTemplateReplaced(nameWithSettings, position, washerSelected); //lets the parent know that we're done
                 dismiss(); //goodbye~
             }
         });
@@ -144,11 +148,9 @@ public class EditTemplateFragment extends DialogFragment {
         //hide layouts till they click washer or dryer
         washerVisible = new LinearLayout[]{soil, cycle, washerTemp, smallLoad};
         dryerVisible = new LinearLayout[]{dryerTemp, delicates};
-        if (position % 2 == 0) {
-            washerSelected = true;
+        if (washerSelected) {
             hideLayouts(dryerVisible);
         } else {
-            washerSelected = false;
             hideLayouts(washerVisible);
         }
         builder.setView(view);
@@ -249,11 +251,12 @@ public class EditTemplateFragment extends DialogFragment {
     }
 
 
-    public static EditTemplateFragment newInstance(String templateString, int position) {
+    public static EditTemplateFragment newInstance(String templateString, int position, boolean isWasher) {
         EditTemplateFragment instance = new EditTemplateFragment();
         Bundle args = new Bundle();
         args.putString(TEMPLATE_STRING, templateString);
         args.putInt(POSITION, position);
+        args.putBoolean(TEMPLATE_IS_WASHER, isWasher);
         instance.setArguments(args);
         return instance;
     }
@@ -389,7 +392,7 @@ public class EditTemplateFragment extends DialogFragment {
     }
 
     public interface EditTemplateDoneListener {
-        void onTemplateReplaced(String newTemplateString, int position);
+        void onTemplateReplaced(String newTemplateString, int position, boolean isWasher);
     }
     
 }

@@ -141,7 +141,7 @@ public class InteractiveMapActivity extends FragmentActivity implements OnMapRea
                 db.execSQL("INSERT INTO "+TABLE_MARKERS+" ("+MARKER_LATITUDE+", "+MARKER_LONGITUDE+", "+MARKER_NAME+", "+MARKER_IS_CAMPUS
                         +", "+MARKER_IS_IMPORTANT+")VALUES( " + latLng.latitude + "," + latLng.longitude + ",'" +
                         markerName.getText().toString() + "', " + isCampus + ", 0 );"); //wegmans should sponsor this app
-
+                mCursor.moveToLast();
                 if (isGmu) {
                     campusLocationNames.add(markerName.getText().toString());
                     campusLocations.add(latLng);
