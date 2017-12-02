@@ -25,7 +25,7 @@
                 android:layout_weight="1"
                 android:scaleType="fitXY"
                 android:onClick="buddyClicked"
-                android:src="@drawable/laundry_machine" />
+                android:src="@drawable/laundry_buddy" />
             <ImageButton
                 android:id="@+id/mapBuddyImageButton"
                 android:layout_height="wrap_content"
@@ -36,7 +36,7 @@
                 android:onClick="buddyClicked"
                 android:layout_weight="1"
                 android:scaleType="fitXY"
-                android:src="@drawable/map" />
+                android:src="@drawable/map_buddy" />
         </LinearLayout>
         <LinearLayout
             android:layout_width="fill_parent"
