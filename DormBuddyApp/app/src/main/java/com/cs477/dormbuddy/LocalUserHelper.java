@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 //database helper that keeps user logged in and displays their templates
 public class LocalUserHelper extends SQLiteOpenHelper {
-    final static private Integer VERSION = 68;
+    final static private Integer VERSION = 1027;
     //===============Buildings Table=====================
     final static String TABLE_BUILDING = "dormbuddy_building";
     final static String BUILDING_ID = "building_id";
@@ -43,6 +43,14 @@ public class LocalUserHelper extends SQLiteOpenHelper {
     final static String RESERVATION_END_TIME = "reservation_end_time";
     final static String RESERVATION_ICON = "reservation_icon";
     final static String RESERVATION_IS_EVENT = "reservation_is_event";
+    //==============Marker Table====================
+    final static String TABLE_MARKERS = "dormbuddy_markers";
+    final static String MARKER_ID = "marker_id";
+    final static String MARKER_LATITUDE = "marker_latitude";
+    final static String MARKER_LONGITUDE = "marker_longitude";
+    final static String MARKER_NAME = "marker_name";
+    final static String MARKER_IS_CAMPUS = "marker_is_campus";
+    final static String MARKER_IS_IMPORTANT = "marker_is_important";
 
     final static String SELECTED_WASHER_TEMPLATE = "washer_template_selected";
     final static String SELECTED_DRYER_TEMPLATE = "dryer_template_selected";
@@ -66,7 +74,7 @@ public class LocalUserHelper extends SQLiteOpenHelper {
 
 
 
-    final private String[] TABLES = {TABLE_BUILDING,TABLE_BUILDING_MAPS,TABLE_ROOM,TABLE_USER,TABLE_RESERVATION};
+    final private String[] TABLES = {TABLE_BUILDING,TABLE_BUILDING_MAPS,TABLE_ROOM,TABLE_USER,TABLE_RESERVATION,TABLE_MARKERS};
 
     final Context context;
     /*
@@ -136,9 +144,17 @@ public class LocalUserHelper extends SQLiteOpenHelper {
                     "FOREIGN KEY ("+BUILDING_ID+") REFERENCES "+TABLE_ROOM+" ("+BUILDING_ID+") ON DELETE SET NULL DEFERRABLE,"+
                     "FOREIGN KEY ("+ROOM_NUMBER+") REFERENCES "+TABLE_ROOM+" ("+ROOM_NUMBER+") ON DELETE SET NULL DEFERRABLE,"+
                     "FOREIGN KEY ("+USER_ID+") REFERENCES "+TABLE_USER+" ("+USER_ID+") ON DELETE SET NULL DEFERRABLE);";
+    final private String CREATE_MAP =
+            "CREATE TABLE "+TABLE_MARKERS+" ("+
+                    MARKER_ID +" INTEGER PRIMARY KEY AUTOINCREMENT, "+
+                    MARKER_LATITUDE +" REAL NOT NULL, "+
+                    MARKER_LONGITUDE +" REAL NOT NULL, "+
+                    MARKER_NAME +" STRING NOT NULL, " +
+                    MARKER_IS_CAMPUS +" BOOLEAN, "+
+                    MARKER_IS_IMPORTANT +" BOOLEAN);";
 
 
-    final private String[] CREATE_TABLES = {CREATE_BUILDING,CREATE_BUILDING_MAPS,CREATE_ROOM,CREATE_USER,CREATE_RESERVATION};
+    final private String[] CREATE_TABLES = {CREATE_BUILDING,CREATE_BUILDING_MAPS,CREATE_ROOM,CREATE_USER,CREATE_RESERVATION,CREATE_MAP};
 
     public LocalUserHelper(Context context) {
         super(context, TABLE_USER, null, VERSION);
@@ -216,6 +232,39 @@ public class LocalUserHelper extends SQLiteOpenHelper {
                 " VALUES( 0,'369a',-1, 'Anonymous','Fake Building');");
         // Insert Reservations
 
+        // Insert Markers
+        db.execSQL("INSERT INTO "+TABLE_MARKERS+" ("+MARKER_LATITUDE+", "+MARKER_LONGITUDE+", "+MARKER_NAME+", "+MARKER_IS_CAMPUS
+                +", "+MARKER_IS_IMPORTANT+")"+"VALUES( 38.82962607382459,-77.30722703039646,'JC', 1, 1 );");
+        db.execSQL("INSERT INTO "+TABLE_MARKERS+" ("+MARKER_LATITUDE+", "+MARKER_LONGITUDE+", "+MARKER_NAME+", "+MARKER_IS_CAMPUS
+                +", "+MARKER_IS_IMPORTANT+")"+"VALUES( 38.826365368729114,-77.30419915169477,'Aquatic Center', 1, 0 );");
+        db.execSQL("INSERT INTO "+TABLE_MARKERS+" ("+MARKER_LATITUDE+", "+MARKER_LONGITUDE+", "+MARKER_NAME+", "+MARKER_IS_CAMPUS
+                +", "+MARKER_IS_IMPORTANT+")"+"VALUES( 38.82763921370384,-77.30505410581827,'Engineering Building', 1, 0 );");
+        db.execSQL("INSERT INTO "+TABLE_MARKERS+" ("+MARKER_LATITUDE+", "+MARKER_LONGITUDE+", "+MARKER_NAME+", "+MARKER_IS_CAMPUS
+                +", "+MARKER_IS_IMPORTANT+")"+"VALUES( 38.826059245522934,-77.3089325800538,'Patriot Center', 1, 0 );");
+        db.execSQL("INSERT INTO "+TABLE_MARKERS+" ("+MARKER_LATITUDE+", "+MARKER_LONGITUDE+", "+MARKER_NAME+", "+MARKER_IS_CAMPUS
+                +", "+MARKER_IS_IMPORTANT+")"+"VALUES( 38.82808506711969,-77.31176063418388,'K Lot', 1, 0 );");
+        db.execSQL("INSERT INTO "+TABLE_MARKERS+" ("+MARKER_LATITUDE+", "+MARKER_LONGITUDE+", "+MARKER_NAME+", "+MARKER_IS_CAMPUS
+                +", "+MARKER_IS_IMPORTANT+")"+"VALUES( 38.832092659869765,-77.30726089328527,'Library', 1, 0 );");
+        db.execSQL("INSERT INTO "+TABLE_MARKERS+" ("+MARKER_LATITUDE+", "+MARKER_LONGITUDE+", "+MARKER_NAME+", "+MARKER_IS_CAMPUS
+                +", "+MARKER_IS_IMPORTANT+")"+"VALUES( 38.82607988014902,-77.31490317732096,'University Mall', 1, 0 );");
+        db.execSQL("INSERT INTO "+TABLE_MARKERS+" ("+MARKER_LATITUDE+", "+MARKER_LONGITUDE+", "+MARKER_NAME+", "+MARKER_IS_CAMPUS
+                +", "+MARKER_IS_IMPORTANT+")"+"VALUES( 38.82881091155222,-77.30236385017633,'Ikes', 1, 0 );");
+        db.execSQL("INSERT INTO "+TABLE_MARKERS+" ("+MARKER_LATITUDE+", "+MARKER_LONGITUDE+", "+MARKER_NAME+", "+MARKER_IS_CAMPUS
+                +", "+MARKER_IS_IMPORTANT+")"+"VALUES( 38.83020799106939,-77.31223538517952,'RAC', 1, 0 );");
+        db.execSQL("INSERT INTO "+TABLE_MARKERS+" ("+MARKER_LATITUDE+", "+MARKER_LONGITUDE+", "+MARKER_NAME+", "+MARKER_IS_CAMPUS
+                +", "+MARKER_IS_IMPORTANT+")"+"VALUES( 38.83029365891558,-77.30847861617804,'Campus', 0, 1 );");
+        db.execSQL("INSERT INTO "+TABLE_MARKERS+" ("+MARKER_LATITUDE+", "+MARKER_LONGITUDE+", "+MARKER_NAME+", "+MARKER_IS_CAMPUS
+                +", "+MARKER_IS_IMPORTANT+")"+"VALUES( 38.84671229617381,-77.30404023081064,'Fairfax City Library', 0, 0 );");
+        db.execSQL("INSERT INTO "+TABLE_MARKERS+" ("+MARKER_LATITUDE+", "+MARKER_LONGITUDE+", "+MARKER_NAME+", "+MARKER_IS_CAMPUS
+                +", "+MARKER_IS_IMPORTANT+")"+"VALUES( 38.834737537041775,-77.3070489987731,'Cue Bus Stop', 0, 0 );");
+        db.execSQL("INSERT INTO "+TABLE_MARKERS+" ("+MARKER_LATITUDE+", "+MARKER_LONGITUDE+", "+MARKER_NAME+", "+MARKER_IS_CAMPUS
+                +", "+MARKER_IS_IMPORTANT+")"+"VALUES( 38.839501828815436,-77.31202114373446,'My Off Campus Friend House', 0, 0 );");
+        db.execSQL("INSERT INTO "+TABLE_MARKERS+" ("+MARKER_LATITUDE+", "+MARKER_LONGITUDE+", "+MARKER_NAME+", "+MARKER_IS_CAMPUS
+                +", "+MARKER_IS_IMPORTANT+")"+"VALUES( 38.844649140953415,-77.2752648219466,'Shopping Center', 0, 0 );");
+        db.execSQL("INSERT INTO "+TABLE_MARKERS+" ("+MARKER_LATITUDE+", "+MARKER_LONGITUDE+", "+MARKER_NAME+", "+MARKER_IS_CAMPUS
+                +", "+MARKER_IS_IMPORTANT+")"+"VALUES( 38.85086584334248,-77.34768010675907,'Groceries', 0, 0 );"); //wegmans should sponsor this app
+        db.execSQL("INSERT INTO "+TABLE_MARKERS+" ("+MARKER_LATITUDE+", "+MARKER_LONGITUDE+", "+MARKER_NAME+", "+MARKER_IS_CAMPUS
+                +", "+MARKER_IS_IMPORTANT+")"+"VALUES( 31.9686,-99.9018,'The Great State of Texas', 0, 0 );"); //so should texas
     }
 /*
 INSERT INTO Location(RoomType,BCode,RoomNum,NumSeats,Area) VALUES('Office','ENG',520,0,224);

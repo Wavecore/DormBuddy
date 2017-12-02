@@ -31,7 +31,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="20sp"
-            android:hint="Name Your Marker"/>
+            android:textAlignment="center"
+            android:hint="Name Your Marker Here"/>
     </LinearLayout>
     <Button
         android:id="@+id/viewSavedMarkersButton"

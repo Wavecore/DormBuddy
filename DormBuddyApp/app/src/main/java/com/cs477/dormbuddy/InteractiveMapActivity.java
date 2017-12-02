@@ -3,6 +3,8 @@ package com.cs477.dormbuddy;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -23,16 +25,31 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 
-public class InteractiveMapActivity extends FragmentActivity implements OnMapReadyCallback {
+import static com.cs477.dormbuddy.LocalUserHelper.MARKER_ID;
+import static com.cs477.dormbuddy.LocalUserHelper.MARKER_IS_CAMPUS;
+import static com.cs477.dormbuddy.LocalUserHelper.MARKER_IS_IMPORTANT;
+import static com.cs477.dormbuddy.LocalUserHelper.MARKER_LATITUDE;
+import static com.cs477.dormbuddy.LocalUserHelper.MARKER_LONGITUDE;
+import static com.cs477.dormbuddy.LocalUserHelper.MARKER_NAME;
+import static com.cs477.dormbuddy.LocalUserHelper.TABLE_MARKERS;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_LOGGED_IN;
+
+public class InteractiveMapActivity extends FragmentActivity implements OnMapReadyCallback, SavedMarkersFragment.SavedMarkersFragmentDone {
 
     private GoogleMap mMap;
     private boolean isGmu;
     //stored user markers
     public static ArrayList<String> cityLocationNames, campusLocationNames;
     public static ArrayList<LatLng> cityLocations, campusLocations;
-    static LinearLayout addMarkerItems; //sorry for the memory leak, but this is a necessity for now
-    static Button viewSavedMarkersButton;
+    public static ArrayList<Integer> cityIds, campusIds;
+    LinearLayout addMarkerItems; //sorry for the memory leak, but this is a necessity for now
+    Button viewSavedMarkersButton;
     EditText markerName;
+    boolean isAddingMarker;
+    final static String[] columns = { MARKER_ID, MARKER_LATITUDE, MARKER_LONGITUDE, MARKER_NAME, MARKER_IS_CAMPUS, MARKER_IS_IMPORTANT };
+    LocalUserHelper dbHelper;
+    SQLiteDatabase db;
+    Cursor mCursor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +57,7 @@ public class InteractiveMapActivity extends FragmentActivity implements OnMapRea
         setContentView(R.layout.activity_interactive_map);
         //get which map to retrieve
         isGmu = getIntent().getBooleanExtra(MapBuddyActivity.IS_GMU, true);
+        isAddingMarker = false;
         //initialize fragment layout elements
         addMarkerItems = findViewById(R.id.addMarkerItems);
         viewSavedMarkersButton = findViewById(R.id.viewSavedMarkersButton);
@@ -49,7 +67,8 @@ public class InteractiveMapActivity extends FragmentActivity implements OnMapRea
         cityLocationNames = new ArrayList<String>();
         campusLocations = new ArrayList<LatLng>();
         cityLocations = new ArrayList<LatLng>();
-        loadMarkers();
+        cityIds = new ArrayList<Integer>();
+        campusIds = new ArrayList<Integer>();
         //////////////////////////////////////////////////////
         addMarkerItems.setVisibility(View.GONE);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -95,6 +114,13 @@ public class InteractiveMapActivity extends FragmentActivity implements OnMapRea
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
+                /*debug to find location of various buildings
+                System.out.println("MAP CLICKED");
+                System.out.println(latLng.latitude);
+                System.out.println(latLng.longitude);*/
+                if (! isAddingMarker) {
+                    return; //map clicks do not do anything unless user is adding marker
+                }
                 if (markerName.getText().toString().isEmpty()) {
                     Toast.makeText(InteractiveMapActivity.this, "Please name your marker", Toast.LENGTH_SHORT).show();
                     return;
@@ -106,16 +132,33 @@ public class InteractiveMapActivity extends FragmentActivity implements OnMapRea
                     campusLocationNames.add(markerName.getText().toString());
                     campusLocations.add(latLng);
                 }
-
+                Toast.makeText(InteractiveMapActivity.this, "Marker " + markerName.getText().toString() + " Added", Toast.LENGTH_SHORT).show();
                 mMap.addMarker(new MarkerOptions()
                         .position(latLng)
                         .title(markerName.getText().toString())
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                int isCampus = isGmu ? 1 : 0;
+                db.execSQL("INSERT INTO "+TABLE_MARKERS+" ("+MARKER_LATITUDE+", "+MARKER_LONGITUDE+", "+MARKER_NAME+", "+MARKER_IS_CAMPUS
+                        +", "+MARKER_IS_IMPORTANT+")VALUES( " + latLng.latitude + "," + latLng.longitude + ",'" +
+                        markerName.getText().toString() + "', " + isCampus + ", 0 );"); //wegmans should sponsor this app
+
+                if (isGmu) {
+                    campusLocationNames.add(markerName.getText().toString());
+                    campusLocations.add(latLng);
+                    campusIds.add(mCursor.getPosition());
+                } else {
+                    cityLocationNames.add(markerName.getText().toString());
+                    cityLocations.add(latLng);
+                    cityIds.add(mCursor.getPosition());
+                }
+                SavedMarkersFragment.mAdapter.notifyDataSetChanged();
                 hideAddMarker();
                 markerName.setText("");
                 displayMarkers();
+                isAddingMarker = false;
             }
         });
+        loadMarkers(); //load markers as map is ready
         /* debug for logcat to tell me lat longs
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
@@ -127,31 +170,86 @@ public class InteractiveMapActivity extends FragmentActivity implements OnMapRea
 
     public void loadMarkers() {
         //retrieve markers from saved local database
+        dbHelper = new LocalUserHelper(this);
+        db = dbHelper.getWritableDatabase();
+        mCursor = db.query(TABLE_MARKERS, columns, null, new String[] {}, null, null,
+                null);
+        mCursor.moveToFirst();
+        while (!mCursor.isAfterLast()) {
+            boolean isCampus = mCursor.getInt(4) == 1;
+            if (isCampus) {
+                campusIds.add(mCursor.getInt(0));
+                campusLocations.add(new LatLng(mCursor.getFloat(1), mCursor.getFloat(2))); //no getReal??!
+                campusLocationNames.add(mCursor.getString(3));
+            } else {
+                cityIds.add(mCursor.getInt(0));
+                cityLocations.add(new LatLng(mCursor.getFloat(1), mCursor.getFloat(2))); //no getReal??!
+                cityLocationNames.add(mCursor.getString(3));
+            }
+            mCursor.moveToNext();
+        }
+        displayMarkers();
     }
 
     public void displayMarkers() {
         ArrayList<String> namesToDisplay = (isGmu) ? campusLocationNames : cityLocationNames;
         ArrayList<LatLng> latLngsToDisplay = (isGmu) ? campusLocations : cityLocations;
         for (int i = 0; i < namesToDisplay.size(); i++) {
-            mMap.addMarker(new MarkerOptions()
-                    .position(latLngsToDisplay.get(i))
-                    .title(namesToDisplay.get(i))
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
+            if (isGmu) {
+                mMap.addMarker(new MarkerOptions()
+                        .position(latLngsToDisplay.get(i))
+                        .title(namesToDisplay.get(i))
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)));
+            } else {
+                mMap.addMarker(new MarkerOptions()
+                        .position(latLngsToDisplay.get(i))
+                        .title(namesToDisplay.get(i))
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
+            }
         }
     }
 
-    public static void displayAddMarker() {
+    public void displayAddMarker() {
         addMarkerItems.setVisibility(View.VISIBLE);
         viewSavedMarkersButton.setVisibility(View.GONE);
+        isAddingMarker = true;
     }
 
-    public static void hideAddMarker() {
+    public void hideAddMarker() {
         addMarkerItems.setVisibility(View.GONE);
         viewSavedMarkersButton.setVisibility(View.VISIBLE);
+        isAddingMarker = false;
     }
 
     public void viewSavedMarkersClicked(View view) {
-        SavedLocationsFragment savedLocationsFragment = SavedLocationsFragment.newInstance(isGmu);
+        SavedMarkersFragment savedLocationsFragment = SavedMarkersFragment.newInstance(isGmu);
         savedLocationsFragment.show(getSupportFragmentManager(),"savedLocations");
+    }
+
+    public void onAddFragmentRequested() {
+            displayAddMarker();
+    }
+
+    public void onClickName(int position) {
+        float zoomLevel = isGmu ? 17.6f : 15.0f;
+        ArrayList<LatLng> listRef = isGmu ? campusLocations : cityLocations;
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(listRef.get(position), zoomLevel));
+    }
+
+    public void onRemoveMarker(int position) {
+        ArrayList<Integer> listRef = isGmu ? campusIds : cityIds;
+        int id = listRef.get(position);
+        db.delete(TABLE_MARKERS, MARKER_ID + "=" + id, null);
+        if (isGmu) {
+            campusIds.remove(position);
+            campusLocations.remove(position);
+            campusLocationNames.remove(position);
+        } else {
+            cityIds.remove(position);
+            cityLocations.remove(position);
+            cityLocationNames.remove(position);
+        }
+        SavedMarkersFragment.mAdapter.notifyDataSetChanged();
+        Toast.makeText(this, "Successfully deleted ", Toast.LENGTH_SHORT).show();
     }
 }
