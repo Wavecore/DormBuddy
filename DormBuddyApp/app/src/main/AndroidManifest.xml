@@ -60,6 +60,7 @@
             android:value="@string/google_maps_key" />
         <activity
             android:name=".InteractiveMapActivity"
+            android:screenOrientation="portrait"
             android:label="@string/title_activity_interactive_map" />
     </application>
 

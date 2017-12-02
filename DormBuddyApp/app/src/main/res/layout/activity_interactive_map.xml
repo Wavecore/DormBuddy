@@ -45,4 +45,15 @@
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="15dp"
         android:onClick="viewSavedMarkersClicked"/>
+    <Button
+        android:id="@+id/cancelButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cancel"
+        android:backgroundTint="@color/darkRed"
+        android:textSize="18sp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="15dp"
+        android:onClick="cancelClicked"/>
 </RelativeLayout>
