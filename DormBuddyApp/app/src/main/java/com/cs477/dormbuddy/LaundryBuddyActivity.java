@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -14,9 +16,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import java.util.Collections;
-import android.support.v4.app.FragmentManager;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -60,15 +61,12 @@ public class LaundryBuddyActivity extends AppCompatActivity {
             }
          */
         //BEGIN fake data
-        washers.add(new LaundryMachine("01", GOOD, FREE, 0));
-        washers.add(new LaundryMachine("02", CAUTION, FREE, 0));
-        washers.add(new LaundryMachine("03", BROKEN, FREE, 0));
-        washers.add(new LaundryMachine("04", GOOD, RESERVED, 0));
-        washers.add(new LaundryMachine("05", CAUTION, RESERVED, 0));
-        washers.add(new LaundryMachine("06", BROKEN, RESERVED, 0));
-        washers.add(new LaundryMachine("07", GOOD, CURRENTLY_IN_USE, 0));
-        washers.add(new LaundryMachine("08", CAUTION, CURRENTLY_IN_USE, 0));
-        washers.add(new LaundryMachine("09", BROKEN, CURRENTLY_IN_USE, 0));
+        washers.add(new LaundryMachine("01", GOOD, FREE, 0, true));
+        washers.add(new LaundryMachine("02", CAUTION, FREE, 0, true));
+        washers.add(new LaundryMachine("03", BROKEN, FREE, 0, true));
+        washers.add(new LaundryMachine("04", GOOD, RESERVED, 0, true));
+        washers.add(new LaundryMachine("05", CAUTION, RESERVED, 0, true));
+        /*
         washers.add(new LaundryMachine("10", GOOD, FREE, 0));
         washers.add(new LaundryMachine("11", GOOD, FREE, 0));
         washers.add(new LaundryMachine("12", CAUTION, FREE, 0));
@@ -79,13 +77,14 @@ public class LaundryBuddyActivity extends AppCompatActivity {
         washers.add(new LaundryMachine("17", GOOD, CURRENTLY_IN_USE, 1));
         washers.add(new LaundryMachine("18", CAUTION, CURRENTLY_IN_USE, 1));
         washers.add(new LaundryMachine("19", BROKEN, CURRENTLY_IN_USE, 1));
-        dryers.add(new LaundryMachine("01", GOOD, FREE, 0));
-        dryers.add(new LaundryMachine("02", CAUTION, FREE, 0));
-        dryers.add(new LaundryMachine("03", BROKEN, FREE, 0));
-        dryers.add(new LaundryMachine("04", GOOD, RESERVED, 0));
-        dryers.add(new LaundryMachine("05", CAUTION, RESERVED, 0));
-        dryers.add(new LaundryMachine("06", GOOD, CURRENTLY_IN_USE, 0));
-        dryers.add(new LaundryMachine("07", CAUTION, CURRENTLY_IN_USE, 0));
+        */
+        dryers.add(new LaundryMachine("01", GOOD, FREE, 0, false));
+        dryers.add(new LaundryMachine("02", CAUTION, FREE, 0, false));
+        dryers.add(new LaundryMachine("03", BROKEN, FREE, 0, false));
+        dryers.add(new LaundryMachine("04", GOOD, RESERVED, 0, false));
+        dryers.add(new LaundryMachine("05", CAUTION, RESERVED, 0, false));
+        dryers.add(new LaundryMachine("06", GOOD, CURRENTLY_IN_USE, 0, false));
+        dryers.add(new LaundryMachine("07", CAUTION, CURRENTLY_IN_USE, 0, false));
         //end fake data
         ///////////////////////////////////
         washerAdapter = new LaundryAdapter(washers, true);
@@ -134,11 +133,12 @@ public class LaundryBuddyActivity extends AppCompatActivity {
         int condition;
         int status;
         long timeDone;
-        public LaundryMachine(String machineName, int condition, int status, long timeDone) {
+        LaundryMachine(String machineName, int condition, int status, long timeDone, boolean isWasher) {
             this.machineName = machineName;
             this.condition = condition;
             this.status = status;
             this.timeDone = timeDone;
+            this.isWasher = isWasher;
         }
 
         public boolean reserve(long reservationLength) {
@@ -242,6 +242,8 @@ public class LaundryBuddyActivity extends AppCompatActivity {
         ImageView machinePhoto;
         ImageView statusIcon;
         ImageView conditionIcon;
+        LaundryMachine machine;
+        View v;
 
         LaundryHolder(View v) {
             super(v);
@@ -249,12 +251,59 @@ public class LaundryBuddyActivity extends AppCompatActivity {
             machinePhoto = v.findViewById(R.id.machinePhoto);
             statusIcon = v.findViewById(R.id.machineStatus);
             conditionIcon = v.findViewById(R.id.machineCondition);
-            v.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Toast.makeText(LaundryBuddyActivity.this, "Laundry item clicked", Toast.LENGTH_SHORT).show();
-                }
-            });
+            this.v = v;
+        }
+
+        void setMachine(final LaundryMachine machine) {
+            this.machine = machine;
+            machineName.setText(machine.getMachineName());
+            //change icons according to condition
+            if (!machine.isWasher) {
+                machinePhoto.setImageResource(R.drawable.dryer);
+            }
+            //adjust the icons
+            switch (machine.getCondition()) {
+                case CAUTION:
+                    conditionIcon.setImageResource(R.drawable.caution);
+                    machinePhoto.setAlpha(1f); //obligatory make image fully opague due to android bug
+                    v.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            MachineSelectedFragment newFrag = MachineSelectedFragment.newInstance(machine.getMachineName(),
+                                    0, machine.getStatus(), machine.getCondition(), machine.getTimeLeftSeconds(), machine.isWasher);
+                            newFrag.show(getFragmentManager(),"MachineSelectedFragment");
+                        }
+                    });
+                    break;
+                case BROKEN:
+                    conditionIcon.setImageResource(R.drawable.broken);
+                    machinePhoto.setAlpha(0.5f); //makes disabled machines half visible
+                    break;
+                default: //GOOD
+                    conditionIcon.setImageResource(R.drawable.working);
+                    machinePhoto.setAlpha(1f);
+                    v.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            MachineSelectedFragment newFrag = MachineSelectedFragment.newInstance(machine.getMachineName(),
+                                    0, machine.getStatus(), machine.getCondition(), machine.getTimeLeftSeconds(), machine.isWasher);
+                            newFrag.show(getFragmentManager(),"MachineSelectedFragment");
+                        }
+                    });
+                    break;
+            }
+            switch (machine.getStatus()) {
+                case CURRENTLY_IN_USE:
+                    statusIcon.setImageResource(R.drawable.currently_in_use);
+                    break;
+                case RESERVED:
+                    statusIcon.setImageResource(R.drawable.reserved);
+                    break;
+                default: //FREE
+                    statusIcon.setImageResource(R.drawable.free);
+                    break;
+
+            }
         }
     }
 
@@ -279,39 +328,7 @@ public class LaundryBuddyActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(final LaundryHolder holder, int position) {
             LaundryMachine machine = machines.get(position);
-            holder.machineName.setText(machine.getMachineName());
-            //change icons according to condition
-            if (!isWasher) {
-                holder.machinePhoto.setImageResource(R.drawable.dryer);
-            }
-            //adjust the icons
-            switch (machine.getCondition()) {
-                case CAUTION:
-                    holder.conditionIcon.setImageResource(R.drawable.caution);
-                    holder.machinePhoto.setAlpha(1f); //obligatory make image fully opague due to android bug
-                    break;
-                case BROKEN:
-                    holder.conditionIcon.setImageResource(R.drawable.broken);
-                    holder.machinePhoto.setAlpha(0.5f); //makes disabled machines half visible
-                    break;
-                default: //GOOD
-                    holder.conditionIcon.setImageResource(R.drawable.working);
-                    holder.machinePhoto.setAlpha(1f);
-
-                    break;
-            }
-            switch (machine.getStatus()) {
-                case CURRENTLY_IN_USE:
-                    holder.statusIcon.setImageResource(R.drawable.currently_in_use);
-                    break;
-                case RESERVED:
-                    holder.statusIcon.setImageResource(R.drawable.reserved);
-                    break;
-                default: //FREE
-                    holder.statusIcon.setImageResource(R.drawable.free);
-                    break;
-
-            }
+            holder.setMachine(machine);
 
         }
         @Override
