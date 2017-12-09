@@ -11,12 +11,7 @@
         android:id="@+id/displayImage"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:contentDescription="Event Image"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:src="@drawable/event" />
+        android:contentDescription="Display Image"
+        android:scaleType="fitCenter" />
 
 </FrameLayout>
