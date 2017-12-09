@@ -79,11 +79,15 @@ public class MachineSelectedFragment extends DialogFragment {
                 dialog.cancel();
             }
         });
-        builder.setPositiveButton("Reserve now", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                dialog.cancel();
-            }
-        });
+        if (status == 0) { //only show reserve if free
+            builder.setPositiveButton("Reserve now", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    dialog.cancel();
+                }
+            });
+        }
+        //cancel reservation button if reserved by current user?
+
         return builder.create();
     }
 
