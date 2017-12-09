@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.Collections;
@@ -278,6 +279,8 @@ public class LaundryBuddyActivity extends AppCompatActivity {
                 case BROKEN:
                     conditionIcon.setImageResource(R.drawable.broken);
                     machinePhoto.setAlpha(0.5f); //makes disabled machines half visible
+                    //gets rid of time left
+                    v.findViewById(R.id.optionalTimer).setVisibility(View.GONE); //HIDES TIMER
                     break;
                 default: //GOOD
                     conditionIcon.setImageResource(R.drawable.working);
@@ -301,6 +304,7 @@ public class LaundryBuddyActivity extends AppCompatActivity {
                     break;
                 default: //FREE
                     statusIcon.setImageResource(R.drawable.free);
+                    v.findViewById(R.id.optionalTimer).setVisibility(View.GONE); //HIDES TIMER
                     break;
 
             }
