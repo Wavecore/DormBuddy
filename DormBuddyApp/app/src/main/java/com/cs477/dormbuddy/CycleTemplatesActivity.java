@@ -33,7 +33,7 @@ public class CycleTemplatesActivity extends AppCompatActivity implements AddTemp
     private SQLiteDatabase db = null;
     private LocalUserHelper dbHelper = null;
     private Cursor mCursorUser, mCursorTemplates;
-    final static String[] columnsUser = {SELECTED_WASHER_TEMPLATE, SELECTED_DRYER_TEMPLATE}; //selected washer/dryer are now ints for more accuracy
+    final static String[] columnsUser = {SELECTED_WASHER_TEMPLATE, SELECTED_DRYER_TEMPLATE};
 
     final static String[] columnsTemplate = {TEMPLATE_ID, TEMPLATE_NAME, TEMPLATE_IS_WASHER};
     public final String[] washerSoils = {"Heavy", "Medium", "Light"};

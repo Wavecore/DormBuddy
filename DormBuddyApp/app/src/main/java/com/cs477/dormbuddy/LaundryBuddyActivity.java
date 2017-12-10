@@ -1,6 +1,8 @@
 package com.cs477.dormbuddy;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
@@ -17,11 +19,16 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.Collections;
 
 import java.util.ArrayList;
 import java.util.Date;
+
+import static com.cs477.dormbuddy.LocalUserHelper.SELECTED_DRYER_TEMPLATE;
+import static com.cs477.dormbuddy.LocalUserHelper.SELECTED_WASHER_TEMPLATE;
+import static com.cs477.dormbuddy.LocalUserHelper.TABLE_USER;
 
 public class LaundryBuddyActivity extends AppCompatActivity {
     LaundryAdapter washerAdapter;
@@ -30,16 +37,37 @@ public class LaundryBuddyActivity extends AppCompatActivity {
     RecyclerView dryerList;
     ArrayList<LaundryMachine> washers = new ArrayList<LaundryMachine>();
     ArrayList<LaundryMachine> dryers = new ArrayList<LaundryMachine>();
-    public final int GOOD = 0;
-    public final int CAUTION = 1;
-    public final int BROKEN = 2;
-    public final int FREE = 0;
-    public final int CURRENTLY_IN_USE = 1;
-    public final int RESERVED = 2;
+    public static final int GOOD = 0;
+    public static final int CAUTION = 1;
+    public static final int BROKEN = 2;
+    public static final int FREE = 0;
+    public static final int CURRENTLY_IN_USE = 1;
+    public static final int RESERVED = 2;
+
+    //cursor queries for if user has set up templates yet
+    private SQLiteDatabase db = null;
+    private LocalUserHelper dbHelper = null;
+    private Cursor mCursorUser;
+    final static String[] columnsUser = {SELECTED_WASHER_TEMPLATE, SELECTED_DRYER_TEMPLATE};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        dbHelper = new LocalUserHelper(this);
+        db = dbHelper.getWritableDatabase();
+        mCursorUser = db.query(TABLE_USER, columnsUser, null, new String[] {}, null, null,
+                null);
+        mCursorUser.moveToFirst();
+        int selectedWasher = mCursorUser.getInt(0);
+        int selectedDryer = mCursorUser.getInt(1);
+        //new users will not see LaundryBuddy unless they have a template selected
+        if (selectedWasher < 0 || selectedDryer < 0) {
+            Toast.makeText(this, "You Must Select A Washer & Dryer Template To Use LaundryBuddy", Toast.LENGTH_LONG).show();
+            startActivity(new Intent(this, CycleTemplatesActivity.class));
+            finish();
+            return;
+        }
+
         setContentView(R.layout.activity_laundry_buddy);
         laundryList = findViewById(R.id.washers);
         dryerList = findViewById(R.id.dryers);
@@ -65,29 +93,20 @@ public class LaundryBuddyActivity extends AppCompatActivity {
         washers.add(new LaundryMachine("01", GOOD, FREE, 0, true));
         washers.add(new LaundryMachine("02", CAUTION, FREE, 0, true));
         washers.add(new LaundryMachine("03", BROKEN, FREE, 0, true));
-        washers.add(new LaundryMachine("04", GOOD, RESERVED, 0, true));
-        washers.add(new LaundryMachine("05", CAUTION, RESERVED, 0, true));
-        /*
-        washers.add(new LaundryMachine("10", GOOD, FREE, 0));
-        washers.add(new LaundryMachine("11", GOOD, FREE, 0));
-        washers.add(new LaundryMachine("12", CAUTION, FREE, 0));
-        washers.add(new LaundryMachine("13", BROKEN, FREE, 0));
-        washers.add(new LaundryMachine("14", GOOD, RESERVED, 0));
-        washers.add(new LaundryMachine("15", CAUTION, RESERVED, 0));
-        washers.add(new LaundryMachine("16", BROKEN, RESERVED, 0));
-        washers.add(new LaundryMachine("17", GOOD, CURRENTLY_IN_USE, 1));
-        washers.add(new LaundryMachine("18", CAUTION, CURRENTLY_IN_USE, 1));
-        washers.add(new LaundryMachine("19", BROKEN, CURRENTLY_IN_USE, 1));
-        */
+        washers.add(new LaundryMachine("04", GOOD, RESERVED, 6, true));
+        washers.add(new LaundryMachine("05", CAUTION, RESERVED, 7, true));
         dryers.add(new LaundryMachine("01", GOOD, FREE, 0, false));
-        dryers.add(new LaundryMachine("02", CAUTION, FREE, 0, false));
+        dryers.add(new LaundryMachine("02", CAUTION, FREE, 1, false));
         dryers.add(new LaundryMachine("03", BROKEN, FREE, 0, false));
-        dryers.add(new LaundryMachine("04", GOOD, RESERVED, 0, false));
-        dryers.add(new LaundryMachine("05", CAUTION, RESERVED, 0, false));
-        dryers.add(new LaundryMachine("06", GOOD, CURRENTLY_IN_USE, 0, false));
-        dryers.add(new LaundryMachine("07", CAUTION, CURRENTLY_IN_USE, 0, false));
+        dryers.add(new LaundryMachine("04", GOOD, RESERVED, 4, false));
+        dryers.add(new LaundryMachine("05", CAUTION, RESERVED, 5, false));
+        dryers.add(new LaundryMachine("06", GOOD, CURRENTLY_IN_USE,151299356731l
+                , false));
+        dryers.add(new LaundryMachine("07", CAUTION, CURRENTLY_IN_USE, 7, false));
         //end fake data
         ///////////////////////////////////
+
+
         washerAdapter = new LaundryAdapter(washers, true);
         dryerAdapter = new LaundryAdapter(dryers, false);
         washerAdapter.sortData();
@@ -165,18 +184,19 @@ public class LaundryBuddyActivity extends AppCompatActivity {
             //update database
         }
 
-        public int getTimeLeftSeconds() {
+        public int getTimeLeft() {
             if (timeDone == 0) {
                 return 0;
             } else { //if time expired OR there is time left
                 long currentTime = new Date().getTime();
+                //time of it being done has passed
                 if (timeDone <= currentTime) {
                     //makes sure the status is updated across the server as it should have been
-                    changeStatus(FREE);
+                    //changeStatus(FREE); //this machine is supposed to actually be free
                     timeDone = 0;
                     return 0;
                 } else {
-                    return (int)(timeDone/1000 - currentTime/1000);
+                    return (int)(timeDone/(60*1000) - currentTime/(1000*60));
                 }
             }
         }
@@ -271,7 +291,7 @@ public class LaundryBuddyActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View v) {
                             MachineSelectedFragment newFrag = MachineSelectedFragment.newInstance(machine.getMachineName(),
-                                    0, machine.getStatus(), machine.getCondition(), machine.getTimeLeftSeconds(), machine.isWasher);
+                                    0, machine.getStatus(), machine.getCondition(), machine.getTimeLeft(), machine.isWasher);
                             newFrag.show(getFragmentManager(),"MachineSelectedFragment");
                         }
                     });
@@ -289,18 +309,26 @@ public class LaundryBuddyActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View v) {
                             MachineSelectedFragment newFrag = MachineSelectedFragment.newInstance(machine.getMachineName(),
-                                    0, machine.getStatus(), machine.getCondition(), machine.getTimeLeftSeconds(), machine.isWasher);
+                                    0, machine.getStatus(), machine.getCondition(), machine.getTimeLeft(), machine.isWasher);
                             newFrag.show(getFragmentManager(),"MachineSelectedFragment");
                         }
                     });
                     break;
             }
+            //sets up a 00:00 padded string for time left
+            int hoursLeft = (machine.getTimeLeft()/60);
+            String hoursLeftString = (hoursLeft < 10) ? "0" + hoursLeft: "" + hoursLeft;
+            int minutesLeft = (machine.getTimeLeft()%60);
+            String minutesLeftString = (minutesLeft < 10) ? "0" + minutesLeft: "" + minutesLeft;
+            String timeLeftString = "" + hoursLeftString + ":" + minutesLeftString;
             switch (machine.getStatus()) {
                 case CURRENTLY_IN_USE:
                     statusIcon.setImageResource(R.drawable.currently_in_use);
+                    ((TextView)v.findViewById(R.id.timeLeftTextView)).setText(timeLeftString);
                     break;
                 case RESERVED:
                     statusIcon.setImageResource(R.drawable.reserved);
+                    ((TextView)v.findViewById(R.id.timeLeftTextView)).setText(timeLeftString);
                     break;
                 default: //FREE
                     statusIcon.setImageResource(R.drawable.free);

@@ -67,22 +67,23 @@
                 android:textSize="24sp"/>
         </LinearLayout>
         <LinearLayout
+            android:id="@+id/optionalTimerLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_gravity="center_horizontal">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:text="Time Left: "/>
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone">
             <TextView
                 android:id="@+id/machineTimeLeftText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="00:00"
-                android:textSize="24sp"/>
+                android:text="0"
+                android:textSize="28sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="28sp"
+                android:text=" Minutes Left"/>
         </LinearLayout>
     </LinearLayout>
 </FrameLayout>

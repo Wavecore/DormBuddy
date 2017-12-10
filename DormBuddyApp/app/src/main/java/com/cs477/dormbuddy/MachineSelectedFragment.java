@@ -11,7 +11,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 /**
@@ -62,6 +64,12 @@ public class MachineSelectedFragment extends DialogFragment {
             ((ImageView)v.findViewById(R.id.machineSelectedImage)).setImageResource(R.drawable.dryer);
         }
 
+        if (timeLeft > 0) {
+            String timeLeftText = "" + timeLeft;
+            v.findViewById(R.id.optionalTimerLayout).setVisibility(View.VISIBLE);
+            ((TextView)v.findViewById(R.id.machineTimeLeftText)).setText(timeLeftText);
+        }
+
         String statText = (status == 0 ) ? "Free" : (status == 1 ) ? "Busy" : "Reserved";
         String condText = (condition == 0 ) ? "Good" : (condition == 1 ) ? "Caution" : "Broken";
 
@@ -82,6 +90,11 @@ public class MachineSelectedFragment extends DialogFragment {
         if (status == 0) { //only show reserve if free
             builder.setPositiveButton("Reserve now", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
+                    /*
+                     * Server code to reserve the machine by its ID
+                     * final check if the reservation was successful
+                     */
+                    Toast.makeText(getActivity(), "Reservation Made Successfully!", Toast.LENGTH_SHORT).show();
                     dialog.cancel();
                 }
             });
