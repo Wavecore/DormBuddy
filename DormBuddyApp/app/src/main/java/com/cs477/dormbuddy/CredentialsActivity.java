@@ -31,9 +31,17 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import org.json.*; //responses are in JSON
+
+import javax.net.ssl.HttpsURLConnection;
 
 import static android.Manifest.permission.READ_CONTACTS;
 import static com.cs477.dormbuddy.LocalUserHelper.USER_NAME;
@@ -72,6 +80,8 @@ public class CredentialsActivity extends AppCompatActivity implements LoaderCall
     private LocalUserHelper dbHelper = null;
     private Cursor mCursor;
     final static String[] columns = { USER_LOGGED_IN };
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -212,6 +222,7 @@ public class CredentialsActivity extends AppCompatActivity implements LoaderCall
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
+            //attempt logging in
             mAuthTask = new UserLoginTask(email, password, this);
             mAuthTask.execute((Void) null);
         }
@@ -323,20 +334,63 @@ public class CredentialsActivity extends AppCompatActivity implements LoaderCall
      */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final String mEmail;
-        private final String mPassword;
+        private final String requestURL;
         private Context context;
 
         UserLoginTask(String email, String password, Context context) {
-            mEmail = email;
-            mPassword = password;
+            requestURL = String.format("https://hidden-caverns-60306.herokuapp.com/login?netID=%s&password=%s", email, password);
             this.context = context;
         }
 
+        //sends the request in background
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
+            try {
+                URL url = new URL(requestURL);
 
+                //uses HttpsURLConnection to make the request(HttpClient is outdated and deprecated)
+                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setDoOutput(false);
+                connection.setConnectTimeout(5000);
+                connection.setReadTimeout(5000);
+                connection.connect();
+
+                //get the response
+                BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String content = "", line;
+
+                while ((line = rd.readLine()) != null) {
+                    content += line + "\n";
+                }
+
+                //parse the response JSON
+                JSONObject response = new JSONObject(content);
+                //use .getJSONObject("object") to get inner JSONs
+                String Name = response.getString("Name");
+                String BuildingID = response.getString("Name");
+                String GNumber = response.getString("GNumber");
+                int RoomNum = response.getInt("RoomNum");
+                Boolean isAdmin = response.getBoolean("isAdmin");
+
+                System.out.printf("%s, %s, %s, %s, %s\n", Name, BuildingID, GNumber, RoomNum, isAdmin);
+
+                /* array code snippet
+                JSONArray arr = obj.getJSONArray("posts");
+                for (int i = 0; i < arr.length(); i++)
+                {
+                    String post_id = arr.getJSONObject(i).getString("post_id");
+                }
+                */
+
+                //password is correct if content is returned lol*/
+                return Name.length() > 1;
+            } catch (Exception e) {
+                System.out.println(e.toString());
+                return false;
+            }
+
+            /*
             try {
                 // Simulate network access.
                 Thread.sleep(2000);
@@ -353,7 +407,7 @@ public class CredentialsActivity extends AppCompatActivity implements LoaderCall
             }
 
             // TODO: register the new account here.
-            return true; //every password is correct
+            return true; //every password is correct*/
         }
 
         @Override
