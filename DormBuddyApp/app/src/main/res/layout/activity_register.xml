@@ -27,6 +27,7 @@
         android:layout_marginStart="60dp"
         android:textAlignment="center"/>
     <TextView
+        android:id="@+id/roomNumberTextView"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:textSize="26sp"

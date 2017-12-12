@@ -14,7 +14,10 @@ import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_ID;
 import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_NAME;
@@ -38,6 +41,7 @@ public class RegisterActivity extends AppCompatActivity {
     private Cursor mCursor;
     private ArrayAdapter<CharSequence> mAdapter;
     private ArrayAdapter<CharSequence> cAdapter;
+    private TextView roomNumberTextView;
     Cursor cCursor;
     final static String[] columns = { USER_ID, USER_NAME, USER_LOGGED_IN, BUILDING_ID, BUILDING_NAME, ROOM_NUMBER, USER_ICON };
     String storedGNumber;
@@ -52,9 +56,14 @@ public class RegisterActivity extends AppCompatActivity {
         //check if user is logged in first, redirect them to log in if not
         dbHelper = new LocalUserHelper(this);
         db = dbHelper.getWritableDatabase();
+        registerOrUpdateButton = findViewById(R.id.registerOrUpdate);
         buildingSpinnerView = findViewById(R.id.buildingSpinner);
         roomSpinnerView = findViewById(R.id.registerRoomSpinner);
+        roomNumberTextView = findViewById(R.id.roomNumberTextView);
         roomSpinnerView.setFocusable(false);
+        roomSpinnerView.setVisibility(View.GONE);
+        roomNumberTextView.setVisibility(View.GONE);
+        registerOrUpdateButton.setVisibility(View.GONE);
         // Create an ArrayAdapter using the a Cursor contain buildings and a default spinner layout
         cCursor = db.query(TABLE_BUILDING,new String[]{BUILDING_ID,BUILDING_NAME},null, new String[]{},BUILDING_ID, BUILDING_ID+" > 0",BUILDING_ID);
         mAdapter = new ArrayAdapter<CharSequence>(this,R.layout.spinner_item,R.id.spinnerItem);
@@ -86,6 +95,8 @@ public class RegisterActivity extends AppCompatActivity {
                             p++;
                         }
                     }
+                    roomSpinnerView.setVisibility(View.VISIBLE);
+                    registerOrUpdateButton.setVisibility(View.VISIBLE);
                     c.close();
                 }
                 else{
@@ -105,7 +116,6 @@ public class RegisterActivity extends AppCompatActivity {
 
         // Check to see if there is a user logged in
         mCursor = db.query(TABLE_USER, columns, USER_ID+" >= 0", new String[] {}, null, null,null); //to check if logged in user exists
-        registerOrUpdateButton = findViewById(R.id.registerOrUpdate);
         //try to get the user
         if (mCursor.moveToFirst()) { //if try is successful, changes register button to update button
             mCursor.moveToPosition(0);
