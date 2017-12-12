@@ -5,6 +5,7 @@ import android.app.FragmentTransaction;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -15,8 +16,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -26,20 +30,70 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_ID;
+import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_NAME;
+import static com.cs477.dormbuddy.LocalUserHelper.ROOM_NUMBER;
+import static com.cs477.dormbuddy.LocalUserHelper.ROOM_TYPE;
+import static com.cs477.dormbuddy.LocalUserHelper.ROOM_TYPE_DORM;
+import static com.cs477.dormbuddy.LocalUserHelper.ROOM_TYPE_STUDY;
+import static com.cs477.dormbuddy.LocalUserHelper.TABLE_BUILDING;
+import static com.cs477.dormbuddy.LocalUserHelper.TABLE_ROOM;
+import static com.cs477.dormbuddy.LocalUserHelper.TABLE_USER;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_ID;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_LOGGED_IN;
+
 public class CreateEventActivity extends AppCompatActivity implements SelectTimeSlotFragment.OnCompleteListener {
 
     static final int PICK_IMAGE = 1;
-    static final int SELECT_TIME_SLOT_FRAGMENT = 1;
-    static final String SELECT_TIME_SLOT_TAG = "SelectTimeSlot";
+    private SQLiteDatabase db = null;
+    private LocalUserHelper dbHelper = null;
     private ImageButton imageButton;
     private Calendar startTime;
     private Calendar endTime;
     private EditText editText;
+    private int user_id;
+    private int building_id;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        FragmentManager fm = getFragmentManager();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_event);
+        FragmentManager fm = getFragmentManager();
+        dbHelper = new LocalUserHelper(this);
+        db = dbHelper.getWritableDatabase();
+        editText = (EditText)findViewById(R.id.eventTime);
+        editText.setFocusable(false);
+        Cursor cCursor = db.query(TABLE_USER,new String[]{USER_ID,BUILDING_ID},USER_LOGGED_IN+" = 1", new String[]{},null, null,null);
+        if(cCursor.moveToFirst()){
+            building_id = cCursor.getInt(1);
+            user_id = cCursor.getInt(0);
+        }
+        cCursor.close();
+        cCursor = db.query(TABLE_ROOM,new String[]{ROOM_NUMBER},BUILDING_ID+" = "+building_id+" AND "+ROOM_TYPE+" = '"+ROOM_TYPE_STUDY+"'", new String[]{},null, null,null);
+        ArrayAdapter<CharSequence> mAdapter = new ArrayAdapter<CharSequence>(this,R.layout.spinner_item,R.id.spinnerItem);
+        mAdapter.add("Select a Room");
+        if (cCursor.moveToFirst()) {
+            while ( !cCursor.isAfterLast() ) {
+                mAdapter.add(cCursor.getString(0));
+                cCursor.moveToNext();
+            }
+        }
+        cCursor.close();
+        Spinner eventLocation = (Spinner)findViewById(R.id.eventLocation);
+        eventLocation.setAdapter(mAdapter);
+        eventLocation.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                if(i != 0)
+                    editText.setFocusable(true);
+                else
+                    editText.setFocusable(false);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
         imageButton =  (ImageButton)findViewById(R.id.createEventImageButton);
         imageButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -50,7 +104,6 @@ public class CreateEventActivity extends AppCompatActivity implements SelectTime
                 return true;
             }
         });
-        editText = (EditText)findViewById(R.id.eventTime);
         editText.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
@@ -63,7 +116,6 @@ public class CreateEventActivity extends AppCompatActivity implements SelectTime
                 }
             }
         });
-
     }
     public void onComplete(Calendar start, Calendar end){
         startTime = start;
