@@ -162,16 +162,6 @@ public class RegisterActivity extends AppCompatActivity {
 
     //creates new user
     public void onRegisterClicked() {
-
-        ContentValues cv = new ContentValues(7);
-        cv.put(USER_ID, 123456); //g number
-        cv.put(USER_NAME, "John Doe");
-        cv.put(USER_LOGGED_IN, 1);
-        cv.put(BUILDING_ID, buildingSpinnerView.getSelectedItemPosition());
-        cv.put(BUILDING_NAME, buildingSpinnerView.getSelectedItem().toString());
-        cv.put(ROOM_NUMBER, roomSpinnerView.getSelectedItem().toString());
-        cv.put(USER_ICON, new byte[]{}); //icon is just an empty byte array to start
-        db.insert(TABLE_USER, null, cv);
         db.close();
         startActivity(new Intent(this, MainActivity.class));
         finish();

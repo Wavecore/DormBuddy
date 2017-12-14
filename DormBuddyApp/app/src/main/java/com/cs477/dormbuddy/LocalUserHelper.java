@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 //database helper that keeps user logged in and displays their templates
 public class LocalUserHelper extends SQLiteOpenHelper {
-    final static private Integer VERSION = 1030;
+    final static private Integer VERSION = 1033;
     //===============Buildings Table=====================
     final static String TABLE_BUILDING = "dormbuddy_building";
     final static String BUILDING_ID = "building_id";
@@ -32,8 +32,10 @@ public class LocalUserHelper extends SQLiteOpenHelper {
     //==============Users Table==========================
     final static String TABLE_USER = "dormbuddy_user";
     final static String USER_ID = "user_id";
+    final static String USER_NET_ID = "user_net_id";
     final static String USER_NAME = "user_name";
     final static String USER_LOGGED_IN = "user_logged_in";
+    final static String USER_IS_ADMIN = "user_is_admin";
     final static String USER_ICON = "user_photo";
     //==============Reservation Table====================
     final static String TABLE_RESERVATION = "dormbuddy_reservations";
@@ -85,12 +87,14 @@ public class LocalUserHelper extends SQLiteOpenHelper {
      */
     final private String CREATE_USER =
             "CREATE TABLE "+TABLE_USER+" (" +
-                    USER_ID + " INTEGER PRIMARY KEY, " +
+                    USER_ID + " TEXT PRIMARY KEY NOT NULL, " +
+                    USER_NET_ID + " TEXT NOT NULL, " +
                     USER_NAME + " TEXT NOT NULL, " +
                     USER_LOGGED_IN + " INTEGER, " +
                     BUILDING_ID + " INTEGER, " +
                     BUILDING_NAME + " TEXT NOT NULL, " +
                     ROOM_NUMBER + " TEXT NOT NULL, " +
+                    USER_IS_ADMIN + " BOOLEAN DEFAULT FALSE, " +
                     USER_ICON + " BLOB, " +
                     SELECTED_WASHER_TEMPLATE + " INTEGER DEFAULT -1, " +
                     SELECTED_DRYER_TEMPLATE + " INTEGER DEFAULT -1)";
@@ -216,9 +220,6 @@ public class LocalUserHelper extends SQLiteOpenHelper {
         db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 5,'666','LAUNDRY' );");
         db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 5,'453','LAUNDRY' );");
         db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 5,'333','LAUNDRY' );");
-        // Insert Fake User
-        db.execSQL("INSERT INTO "+TABLE_USER+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+USER_ID+", "+USER_NAME+", "+BUILDING_NAME+")"+
-                " VALUES( 0,'369a',-1, 'Anonymous','Fake Building');");
         // Insert Reservations
 
         // Insert Markers

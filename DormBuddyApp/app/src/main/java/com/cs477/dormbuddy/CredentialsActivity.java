@@ -3,6 +3,7 @@ package com.cs477.dormbuddy;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -44,10 +45,16 @@ import org.json.*; //responses are in JSON
 import javax.net.ssl.HttpsURLConnection;
 
 import static android.Manifest.permission.READ_CONTACTS;
+import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_ID;
+import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_NAME;
+import static com.cs477.dormbuddy.LocalUserHelper.ROOM_NUMBER;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_ICON;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_IS_ADMIN;
 import static com.cs477.dormbuddy.LocalUserHelper.USER_NAME;
 import static com.cs477.dormbuddy.LocalUserHelper.USER_LOGGED_IN;
 import static com.cs477.dormbuddy.LocalUserHelper.TABLE_USER;
 import static com.cs477.dormbuddy.LocalUserHelper.USER_ID;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_NET_ID;
 
 /**
  * A login screen that offers login via email/password.
@@ -336,8 +343,10 @@ public class CredentialsActivity extends AppCompatActivity implements LoaderCall
 
         private final String requestURL;
         private Context context;
+        private String netId;
 
         UserLoginTask(String email, String password, Context context) {
+            netId = email;
             requestURL = String.format("https://hidden-caverns-60306.herokuapp.com/login?netID=%s&password=%s", email, password);
             this.context = context;
         }
@@ -368,12 +377,41 @@ public class CredentialsActivity extends AppCompatActivity implements LoaderCall
                 JSONObject response = new JSONObject(content);
                 //use .getJSONObject("object") to get inner JSONs
                 String Name = response.getString("Name");
-                String BuildingID = response.getString("Name");
-                String GNumber = response.getString("GNumber");
-                int RoomNum = response.getInt("RoomNum");
-                Boolean isAdmin = response.getBoolean("isAdmin");
 
-                System.out.printf("%s, %s, %s, %s, %s\n", Name, BuildingID, GNumber, RoomNum, isAdmin);
+                if (Name.length() > 1) { //user successfully logged in if a name was returned
+                    String BuildingID = response.getString("BuildingID");
+                    String GNumber = response.getString("GNumber");
+                    int RoomNum = response.getInt("RoomNum");
+                    Boolean isAdmin = response.getBoolean("isAdmin");
+                    try {
+                        //CHECKS if user has ever logged in on this phone
+                        mCursor = db.query(TABLE_USER, columns, USER_NET_ID+"='"+netId+"'", new String[] {}, null, null,
+                                null);
+                        mCursor.moveToFirst();
+                        System.out.println("User logged in: " + mCursor.getInt(0));
+                        ContentValues cv = new ContentValues(1);
+                        cv.put(USER_LOGGED_IN, 1); //makes the logged out user logged in
+                        db.update(TABLE_USER, cv, USER_NET_ID+"='"+netId+"'", null);
+                    } catch (Exception e) {
+                        //ELSE insert user information in local database
+                        ContentValues cv = new ContentValues(8);
+                        cv.put(USER_ID, GNumber); //g number
+                        cv.put(USER_NET_ID, netId);
+                        cv.put(USER_NAME, Name);
+                        cv.put(USER_LOGGED_IN, 1);
+                        cv.put(BUILDING_NAME, BuildingID);
+                        cv.put(BUILDING_ID, BuildingID);
+                        cv.put(ROOM_NUMBER, RoomNum);
+                        cv.put(USER_IS_ADMIN, isAdmin);
+                        cv.put(USER_ICON, new byte[]{}); //icon is just an empty byte array to start
+                        db.insert(TABLE_USER, null, cv);
+                    }
+                    mCursor.close();
+
+
+
+                    System.out.printf("%s, %s, %s, %s, %s\n", Name, BuildingID, GNumber, RoomNum, isAdmin);
+                }
 
                 /* array code snippet
                 JSONArray arr = obj.getJSONArray("posts");
@@ -417,7 +455,7 @@ public class CredentialsActivity extends AppCompatActivity implements LoaderCall
 
             if (success) { //correct password
                 //go to house picking
-                startActivity(new Intent(context, RegisterActivity.class));
+                startActivity(new Intent(context, MainActivity.class));
                 finish(); //finish ends this activity for good
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
