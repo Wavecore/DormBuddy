@@ -395,12 +395,16 @@ public class LaundryBuddyActivity extends AppCompatActivity {
     public class LoadLaundryMachinesTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String requestURL;
+        private final String requestUsingLaundryURL;
         private Context context;
         private String buildingId;
+        private JSONObject occupiedMachines;
 
         LoadLaundryMachinesTask(String buildingID, Context context) {
             this.buildingId = buildingID;
             requestURL = String.format("https://hidden-caverns-60306.herokuapp.com/laundryMachines/%s", buildingId);
+            long now = new Date().getTime();
+            requestUsingLaundryURL = String.format("https://hidden-caverns-60306.herokuapp.com/usingLaundryMachines/%s/%s", buildingId, now);
             this.context = context;
         }
 
@@ -408,59 +412,79 @@ public class LaundryBuddyActivity extends AppCompatActivity {
         @Override
         protected Boolean doInBackground(Void... params) {
             try {
-                URL url = new URL(requestURL);
+                URL requestMachinesURL = new URL(requestURL);
+                URL requestUsingLaundryMachinesURL = new URL(requestUsingLaundryURL);
 
-                //uses HttpsURLConnection to make the request(HttpClient is outdated and deprecated)
-                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+                //GETS the machines
+                HttpsURLConnection connection = (HttpsURLConnection) requestMachinesURL.openConnection();
                 connection.setRequestMethod("GET");
                 connection.setDoOutput(false);
                 connection.setConnectTimeout(5000);
                 connection.setReadTimeout(5000);
                 connection.connect();
 
-                //get the response
-                BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String content = "", line;
+                //GETS BUSY/RESERVED machines
+                HttpsURLConnection connection2 = (HttpsURLConnection) requestUsingLaundryMachinesURL.openConnection();
+                connection2.setRequestMethod("GET");
+                connection2.setDoOutput(false);
+                connection2.setConnectTimeout(5000);
+                connection2.setReadTimeout(5000);
+                connection2.connect();
 
-                while ((line = rd.readLine()) != null) {
-                    content += line + "\n";
+                //get the responses
+                BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream())),
+                        rd2 = new BufferedReader(new InputStreamReader(connection2.getInputStream()));
+                String getMachinesContent = "", getMachinesLine, getUsingMachinesContent = "", getUsingMachinesLine;
+
+                while ((getMachinesLine = rd.readLine()) != null) {
+                    getMachinesContent += getMachinesLine + "\n";
                 }
 
+                while ((getUsingMachinesLine = rd2.readLine()) != null) {
+                    getUsingMachinesContent += getUsingMachinesLine + "\n";
+                }
+
+                washers.clear();
+                dryers.clear();
+
                 //parse the response JSON
-                JSONObject response = new JSONObject(content);
-                System.out.println(response);
-                Iterator<?> keys = response.keys();
+                JSONObject getMachinesResponse = new JSONObject(getMachinesContent);
+                System.out.println(getMachinesResponse);
+                Iterator<?> keys = getMachinesResponse.keys();
+
+                JSONObject getUsingMachinesResponse = new JSONObject(getUsingMachinesContent);
+                System.out.println(getUsingMachinesResponse);
 
                 //iterate over each key, adding the laundry machine in
                 while (keys.hasNext()) {
                     String keyString = (String) keys.next();
-                    if (response.get(keyString) instanceof JSONObject) {
-                        JSONObject machineJSON = (JSONObject) response.get(keyString);
+                    if (getMachinesResponse.get(keyString) instanceof JSONObject) {
+                        JSONObject machineJSON = (JSONObject) getMachinesResponse.get(keyString);
                         boolean isWasher = machineJSON.getBoolean("IsWasher");
-                        if (isWasher) {
-                            washers.add(new LaundryMachine(
-                                    machineJSON.getString("Name"), machineJSON.getInt("Condition"), FREE, 0, true));
-                        } else {
-                            dryers.add(new LaundryMachine(
-                                    machineJSON.getString("Name"), machineJSON.getInt("Condition"), FREE, 0, false));
+                        //tries to see if laundry machine is being used currently before adding the machine as free
+                        ArrayList<LaundryMachine> machinesList = (isWasher) ? washers : dryers;
+                        if (getUsingMachinesResponse.has(keyString)) {
+                            JSONObject reservationObject = getUsingMachinesResponse.getJSONObject(keyString);
+                            System.out.println("Status of reserved machine is " + reservationObject.getInt("Status"));
+                            //adds the machine with the correct status and time left
+                            machinesList.add(new LaundryMachine(
+                                    machineJSON.getString("Name"), machineJSON.getInt("Condition"),
+                                    reservationObject.getInt("Status"), reservationObject.getLong("TimeDone"), isWasher));
+                        } else { //didn't find a reservation
+                            //adds the machine with a FREE status and 0 time done
+                            machinesList.add(new LaundryMachine(
+                                    machineJSON.getString("Name"), machineJSON.getInt("Condition"), FREE, 0, isWasher));
                         }
                     }
                 }
-
-
-                /* array code snippet
-                JSONArray arr = obj.getJSONArray("posts");
-                for (int i = 0; i < arr.length(); i++)
-                {
-                    String post_id = arr.getJSONObject(i).getString("post_id");
-                }
-                */
                 return true;
             } catch (Exception e) {
                 System.out.println(e.toString());
                 return false;
             }
         }
+
+
 
         @Override
         protected void onPostExecute(Boolean aBoolean) {
