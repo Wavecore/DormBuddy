@@ -115,8 +115,8 @@ public class LaundryBuddyActivity extends AppCompatActivity implements MachineSe
         retrieveLaundryTask.execute((Void) null);
     }
 
-    public void onReservationMade(String machineId, int time) {
-        reserveLaundryMachineTask = new ReserveLaundryMachineTask(buildingId, machineId, 23122131233l, this);
+    public void onReservationMade(String machineId, long time) {
+        reserveLaundryMachineTask = new ReserveLaundryMachineTask(buildingId, machineId, time, this);
         reserveLaundryMachineTask.execute((Void) null);
     }
 
@@ -163,26 +163,14 @@ public class LaundryBuddyActivity extends AppCompatActivity implements MachineSe
             this.isWasher = isWasher;
         }
 
-        public boolean reserve(long reservationLength) {
-            if (status == RESERVED || condition == BROKEN || status == CURRENTLY_IN_USE) {
-                return false; //can't reserve broken or reserved machines
-            }
-            //UTC based time of reservation, with a 20 minute extra minutes
-            this.timeDone = new Date().getTime() + reservationLength + 20*60*1000;
-            this.status = RESERVED;
-            return true;
-        }
-
-        public void cancel() {
-            this.timeDone = 0;
-            //update database
-        }
-
         public int getTimeLeft() {
             if (timeDone == 0) {
                 return 0;
             } else { //if time expired OR there is time left
                 long currentTime = new Date().getTime();
+                System.out.println("CURRENT TIME TIME DONE");
+                System.out.println(currentTime);
+                System.out.println(timeDone);
                 //time of it being done has passed
                 if (timeDone <= currentTime) {
                     //makes sure the status is updated across the server as it should have been
@@ -193,23 +181,6 @@ public class LaundryBuddyActivity extends AppCompatActivity implements MachineSe
                     return (int)(timeDone/(60*1000) - currentTime/(1000*60));
                 }
             }
-        }
-
-        //setters
-        //must be admin for this one
-        public void changeCondition(int newCondition) {
-            //check for admin
-            if (condition == BROKEN) {
-                this.status = RESERVED; //marks broken machines as reserve to aid with comparison
-            }
-            this.condition = newCondition;
-            //update database
-        }
-
-        //any user can reserve a machine
-        public void changeStatus(int newStatus) {
-            this.status = newStatus;
-            //updateDatabase
         }
 
         //getters
@@ -487,7 +458,7 @@ public class LaundryBuddyActivity extends AppCompatActivity implements MachineSe
             requestURL = String.format("https://hidden-caverns-60306.herokuapp.com/makeLaundryReservation/%s/%s", buildingId, machineKey);
             System.out.println(requestURL);
             long now = new Date().getTime();
-            this.timeDone = now + timeToEnd/60*1000; //adds timeToEnd as minutes
+            this.timeDone = now + timeToEnd; //adds timeToEnd as minutes
             this.machineKey = machineKey;
             this.context = context;
         }

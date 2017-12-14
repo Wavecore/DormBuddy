@@ -15,6 +15,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Date;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -39,7 +41,7 @@ public class MachineSelectedFragment extends DialogFragment {
         args.putString(MACHINE_ID, id);
         args.putInt(MACHINE_STATUS, status);
         args.putInt(MACHINE_CONDITION, condition);
-        args.putInt(MACHINE_TIME_LEFT, timeLeft);
+        args.putLong(MACHINE_TIME_LEFT, timeLeft);
         args.putBoolean(MACHINE_IS_WASHER, isWasher);
         MachineSelectedFragment fragment = new MachineSelectedFragment();
         fragment.setArguments(args);
@@ -57,7 +59,7 @@ public class MachineSelectedFragment extends DialogFragment {
         id = getArguments().getString(MACHINE_ID);
         int status = getArguments().getInt(MACHINE_STATUS);
         int condition = getArguments().getInt(MACHINE_CONDITION);
-        int timeLeft = getArguments().getInt(MACHINE_TIME_LEFT);
+        long timeLeft = getArguments().getLong(MACHINE_TIME_LEFT);
         boolean isWasher = getArguments().getBoolean(MACHINE_IS_WASHER);
 
         if (! isWasher) {
@@ -96,7 +98,7 @@ public class MachineSelectedFragment extends DialogFragment {
                      */
                     //updates the selected template
                     ReservationDoneListener activity = (ReservationDoneListener) getActivity();
-                    activity.onReservationMade(id, 45); //every machine gets reserved for 45 minutes for now
+                    activity.onReservationMade(id, 45*60*1000); //every machine gets reserved for 45 minutes for now
                     dialog.cancel();
                 }
             });
@@ -107,7 +109,7 @@ public class MachineSelectedFragment extends DialogFragment {
     }
 
     public interface ReservationDoneListener {
-        void onReservationMade(String id, int time);
+        void onReservationMade(String id, long time);
     }
 
 }
