@@ -117,6 +117,8 @@ public class CreateEventActivity extends AppCompatActivity implements SelectTime
             }
         });
     }
+
+
     public void onComplete(Calendar start, Calendar end){
         startTime = start;
         endTime = end;
