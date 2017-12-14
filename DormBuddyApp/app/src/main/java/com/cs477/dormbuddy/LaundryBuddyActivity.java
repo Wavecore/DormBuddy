@@ -1,8 +1,11 @@
 package com.cs477.dormbuddy;
 
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
@@ -21,11 +24,21 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.Collections;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 
+import javax.net.ssl.HttpsURLConnection;
+
+import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_ID;
 import static com.cs477.dormbuddy.LocalUserHelper.SELECTED_DRYER_TEMPLATE;
 import static com.cs477.dormbuddy.LocalUserHelper.SELECTED_WASHER_TEMPLATE;
 import static com.cs477.dormbuddy.LocalUserHelper.TABLE_USER;
@@ -48,7 +61,8 @@ public class LaundryBuddyActivity extends AppCompatActivity {
     private SQLiteDatabase db = null;
     private LocalUserHelper dbHelper = null;
     private Cursor mCursorUser;
-    final static String[] columnsUser = {SELECTED_WASHER_TEMPLATE, SELECTED_DRYER_TEMPLATE};
+    private LoadLaundryMachinesTask retrieveLaundryTask = null;
+    final static String[] columnsUser = {SELECTED_WASHER_TEMPLATE, SELECTED_DRYER_TEMPLATE, BUILDING_ID};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +74,7 @@ public class LaundryBuddyActivity extends AppCompatActivity {
         mCursorUser.moveToFirst();
         int selectedWasher = mCursorUser.getInt(0);
         int selectedDryer = mCursorUser.getInt(1);
+        String buildingId = mCursorUser.getString(2);
         //new users will not see LaundryBuddy unless they have a template selected
         if (selectedWasher < 0 || selectedDryer < 0) {
             Toast.makeText(this, "You Must Select A Washer & Dryer Template To Use LaundryBuddy", Toast.LENGTH_LONG).show();
@@ -67,7 +82,6 @@ public class LaundryBuddyActivity extends AppCompatActivity {
             finish();
             return;
         }
-
         setContentView(R.layout.activity_laundry_buddy);
         laundryList = findViewById(R.id.washers);
         dryerList = findViewById(R.id.dryers);
@@ -89,7 +103,7 @@ public class LaundryBuddyActivity extends AppCompatActivity {
                 }
             }
          */
-        //BEGIN fake data
+        /*BEGIN fake data
         washers.add(new LaundryMachine("01", GOOD, FREE, 0, true));
         washers.add(new LaundryMachine("02", CAUTION, FREE, 0, true));
         washers.add(new LaundryMachine("03", BROKEN, FREE, 0, true));
@@ -104,13 +118,11 @@ public class LaundryBuddyActivity extends AppCompatActivity {
                 , false));
         dryers.add(new LaundryMachine("07", CAUTION, CURRENTLY_IN_USE, 7, false));
         //end fake data
-        ///////////////////////////////////
-
+        /////////////////////////////////*/
+        loadLaundryMachines(buildingId);
 
         washerAdapter = new LaundryAdapter(washers, true);
         dryerAdapter = new LaundryAdapter(dryers, false);
-        washerAdapter.sortData();
-        dryerAdapter.sortData();
         laundryList.setAdapter(washerAdapter);
         dryerList.setAdapter(dryerAdapter);
         laundryList.setLayoutManager(horizontalLayout);
@@ -118,6 +130,11 @@ public class LaundryBuddyActivity extends AppCompatActivity {
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(laundryList.getContext(),
                 horizontalLayout.getOrientation());
         laundryList.addItemDecoration(dividerItemDecoration);
+    }
+
+    public void loadLaundryMachines(String buildingID) {
+        retrieveLaundryTask = new LoadLaundryMachinesTask(buildingID, this);
+        retrieveLaundryTask.execute((Void) null);
     }
 
     @Override
@@ -252,9 +269,10 @@ public class LaundryBuddyActivity extends AppCompatActivity {
             if (status == CURRENTLY_IN_USE && b.status == CURRENTLY_IN_USE) {
                 return (int)(timeDone - b.timeDone);
             }
-            boolean isLarger = Integer.parseInt(aSettings) < Integer.parseInt(bSettings); //math is wrong
+            boolean isLarger = Integer.parseInt(aSettings) < Integer.parseInt(bSettings);
             boolean isSmaller = Integer.parseInt(aSettings) > Integer.parseInt(bSettings);
-            return (isLarger) ? -1 : (isSmaller ? 1 : 0);
+            //sorts them by status and condition, otherwise asciiabetically
+            return (isLarger) ? -1 : (isSmaller ? 1 : machineName.compareTo(b.machineName));
         }
     }
 
@@ -371,6 +389,110 @@ public class LaundryBuddyActivity extends AppCompatActivity {
         public void sortData() {
             Collections.sort(machines); //sort all machines
             notifyDataSetChanged(); //updates the data
+        }
+    }
+
+    public class LoadLaundryMachinesTask extends AsyncTask<Void, Void, Boolean> {
+
+        private final String requestURL;
+        private final String requestUsingLaundryURL;
+        private Context context;
+        private String buildingId;
+        private JSONObject occupiedMachines;
+
+        LoadLaundryMachinesTask(String buildingID, Context context) {
+            this.buildingId = buildingID;
+            requestURL = String.format("https://hidden-caverns-60306.herokuapp.com/laundryMachines/%s", buildingId);
+            long now = new Date().getTime();
+            requestUsingLaundryURL = String.format("https://hidden-caverns-60306.herokuapp.com/usingLaundryMachines/%s/%s", buildingId, now);
+            this.context = context;
+        }
+
+        //sends the request in background
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                URL requestMachinesURL = new URL(requestURL);
+                URL requestUsingLaundryMachinesURL = new URL(requestUsingLaundryURL);
+
+                //GETS the machines
+                HttpsURLConnection connection = (HttpsURLConnection) requestMachinesURL.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setDoOutput(false);
+                connection.setConnectTimeout(5000);
+                connection.setReadTimeout(5000);
+                connection.connect();
+
+                //GETS BUSY/RESERVED machines
+                HttpsURLConnection connection2 = (HttpsURLConnection) requestUsingLaundryMachinesURL.openConnection();
+                connection2.setRequestMethod("GET");
+                connection2.setDoOutput(false);
+                connection2.setConnectTimeout(5000);
+                connection2.setReadTimeout(5000);
+                connection2.connect();
+
+                //get the responses
+                BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream())),
+                        rd2 = new BufferedReader(new InputStreamReader(connection2.getInputStream()));
+                String getMachinesContent = "", getMachinesLine, getUsingMachinesContent = "", getUsingMachinesLine;
+
+                while ((getMachinesLine = rd.readLine()) != null) {
+                    getMachinesContent += getMachinesLine + "\n";
+                }
+
+                while ((getUsingMachinesLine = rd2.readLine()) != null) {
+                    getUsingMachinesContent += getUsingMachinesLine + "\n";
+                }
+
+                washers.clear();
+                dryers.clear();
+
+                //parse the response JSON
+                JSONObject getMachinesResponse = new JSONObject(getMachinesContent);
+                System.out.println(getMachinesResponse);
+                Iterator<?> keys = getMachinesResponse.keys();
+
+                JSONObject getUsingMachinesResponse = new JSONObject(getUsingMachinesContent);
+                System.out.println(getUsingMachinesResponse);
+
+                //iterate over each key, adding the laundry machine in
+                while (keys.hasNext()) {
+                    String keyString = (String) keys.next();
+                    if (getMachinesResponse.get(keyString) instanceof JSONObject) {
+                        JSONObject machineJSON = (JSONObject) getMachinesResponse.get(keyString);
+                        boolean isWasher = machineJSON.getBoolean("IsWasher");
+                        //tries to see if laundry machine is being used currently before adding the machine as free
+                        ArrayList<LaundryMachine> machinesList = (isWasher) ? washers : dryers;
+                        if (getUsingMachinesResponse.has(keyString)) {
+                            JSONObject reservationObject = getUsingMachinesResponse.getJSONObject(keyString);
+                            System.out.println("Status of reserved machine is " + reservationObject.getInt("Status"));
+                            //adds the machine with the correct status and time left
+                            machinesList.add(new LaundryMachine(
+                                    machineJSON.getString("Name"), machineJSON.getInt("Condition"),
+                                    reservationObject.getInt("Status"), reservationObject.getLong("TimeDone"), isWasher));
+                        } else { //didn't find a reservation
+                            //adds the machine with a FREE status and 0 time done
+                            machinesList.add(new LaundryMachine(
+                                    machineJSON.getString("Name"), machineJSON.getInt("Condition"), FREE, 0, isWasher));
+                        }
+                    }
+                }
+                return true;
+            } catch (Exception e) {
+                System.out.println(e.toString());
+                return false;
+            }
+        }
+
+
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            washerAdapter.sortData();
+            dryerAdapter.sortData();
+            washerAdapter.notifyDataSetChanged();
+            dryerAdapter.notifyDataSetChanged();
+            super.onPostExecute(aBoolean);
         }
     }
 }
