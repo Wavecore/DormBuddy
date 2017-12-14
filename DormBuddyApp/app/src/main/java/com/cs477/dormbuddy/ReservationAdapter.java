@@ -1,6 +1,8 @@
 package com.cs477.dormbuddy;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -10,14 +12,26 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_ID;
+import static com.cs477.dormbuddy.LocalUserHelper.RESERVATION_END_TIME;
+import static com.cs477.dormbuddy.LocalUserHelper.RESERVATION_IS_EVENT;
+import static com.cs477.dormbuddy.LocalUserHelper.TABLE_BUILDING;
+import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_NAME;
+
 /**
  * Created by white on 12/12/2017.
  */
 public class ReservationAdapter extends ArrayAdapter<Reservation> {
     private Reservation[] reservations;
+    private Context context;
     public ReservationAdapter(Context context, int resourceID, Reservation[] r){
         super(context,resourceID);
         reservations = r;
+        this.context = context;
+        if(r != null){
+            for(int x = 0; x < r.length;x++)
+                add(r[x]);
+        }
     }
 
     @NonNull
@@ -30,12 +44,22 @@ public class ReservationAdapter extends ArrayAdapter<Reservation> {
         }
         Reservation r = getItem(position);
         if(r != null){
+            System.out.println("hereas==============================================================================");
             TextView title = (TextView)v.findViewById(R.id.reservation_Title);
             TextView time = (TextView)v.findViewById(R.id.reservation_Time);
             TextView loca = (TextView)v.findViewById(R.id.reservation_Location);
             ImageView icon = (ImageView)v.findViewById(R.id.reservation_Icon);
 
-
+            title.setText("Title: "+r.title);
+            LocalUserHelper dbHelper = new LocalUserHelper(this.context);
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            Cursor cCursor = db.query(TABLE_BUILDING,new String[]{BUILDING_NAME},BUILDING_ID+"="+r.buildingID,
+                    new String[]{},null, null,null);                            //Get the name of the building from the
+            if(cCursor.moveToFirst())
+                loca.setText("Location: "+cCursor.getString(0)+" "+r.roomNum);
+            time.setText("Time: "+Reservation.simpleResFormatter.format(r.startTime.getTime())+" to "+Reservation.simpleResFormatter.format(r.endTime.getTime()));
+            if(r.image != null)
+                icon.setImageBitmap(r.image);
         }
         return v;
     }

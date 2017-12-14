@@ -20,11 +20,14 @@ public class StudyBuddyActivity extends AppCompatActivity {
         }
         ListView studyList = (ListView)findViewById(R.id.reservationList);
         Reservation[] reservations = Reservation.getStudy(this, Calendar.getInstance());
-        if(reservations.length != 0)
+        if(reservations !=null && reservations.length != 0) {
             studyList.setBackground(null);
-        else
-            studyList.setBackground(ContextCompat.getDrawable(this,R.drawable.empty));
-
+            ReservationAdapter mAdapter = new ReservationAdapter(this, R.layout.reservation_item, reservations);
+            studyList.setAdapter(mAdapter);
+        }
+        else {
+            studyList.setBackground(ContextCompat.getDrawable(this, R.drawable.empty));
+        }
 
 
     }

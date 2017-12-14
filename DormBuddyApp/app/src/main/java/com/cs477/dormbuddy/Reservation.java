@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -37,11 +38,13 @@ public class Reservation {
     public static Bitmap image;
     public static Boolean isEvent;
     public static int buildingID;
-    public static int roomNum;
+    public static String roomNum;
     public static String[] columns = {BUILDING_ID,ROOM_NUMBER,USER_ID,RESERVATION_TITLE,RESERVATION_DESCRIPTION,
         RESERVATION_ICON,RESERVATION_IS_EVENT,RESERVATION_START_TIME,RESERVATION_END_TIME};
+    public static final SimpleDateFormat resFormatter = new SimpleDateFormat("h:mm a, EEE d MMM yyyy");
+    public static final SimpleDateFormat simpleResFormatter = new SimpleDateFormat("h:mm a, d MMM");
 
-    private Reservation(boolean event,Calendar start, Calendar end, String t, String d, Bitmap i,int buildingID, int roomNum){
+    private Reservation(boolean event,Calendar start, Calendar end, String t, String d, Bitmap i,int buildingID, String roomNum){
         this.isEvent = event;
         this.startTime = start;
         this.endTime = end;
@@ -56,14 +59,14 @@ public class Reservation {
         long t = time.getTime().getTime();
         LocalUserHelper dbHelper = new LocalUserHelper(c);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        Cursor cCursor = db.query(TABLE_RESERVATION,columns,RESERVATION_IS_EVENT+"="+false+" AND "+RESERVATION_END_TIME+">"+t,
+        Cursor cCursor = db.query(TABLE_RESERVATION,columns,RESERVATION_IS_EVENT+"=0 AND "+RESERVATION_END_TIME+">"+t,
                 new String[]{},null, null,null);                            //Query for all reservations that aren't events and haven't passed
         if(cCursor.moveToFirst()){
             Reservation[] output = new Reservation[cCursor.getCount()];
             int count = 0;
             while ( !cCursor.isAfterLast() ) {
                 int buildingID = cCursor.getInt(0);                     //BuildingID
-                int roomNum = cCursor.getInt(1);                        //Room Number
+                String roomNum = cCursor.getString(1);                        //Room Number
                 // Don't need to get userID because we already have it
                 String reservationTitle = cCursor.getString(3);         //Reservation Title
                 String reservationDescription = cCursor.getString(4);   //Reservation Description
@@ -89,14 +92,14 @@ public class Reservation {
         long t = time.getTime().getTime();
         LocalUserHelper dbHelper = new LocalUserHelper(c);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        Cursor cCursor = db.query(TABLE_RESERVATION,columns,RESERVATION_IS_EVENT+"="+true+" AND "+RESERVATION_END_TIME+">"+t,
+        Cursor cCursor = db.query(TABLE_RESERVATION,columns,RESERVATION_IS_EVENT+"=1 AND "+RESERVATION_END_TIME+">"+t,
                 new String[]{},null, null,null);                            //Query for all reservations that are events and haven't passed
         if(cCursor.moveToFirst()){
             Reservation[] output = new Reservation[cCursor.getCount()];
             int count = 0;
             while ( !cCursor.isAfterLast() ) {
                 int buildingID = cCursor.getInt(0);                     //BuildingID
-                int roomNum = cCursor.getInt(1);                        //Room Number
+                String roomNum = cCursor.getString(1);                        //Room Number
                 // Don't need to get userID because we already have it
                 String reservationTitle = cCursor.getString(3);         //Reservation Title
                 String reservationDescription = cCursor.getString(4);   //Reservation Description
@@ -116,7 +119,7 @@ public class Reservation {
         db.close();
         return null;
     }
-    public static Reservation createReservation(boolean isEvent,long start, long end, String title, String description, byte[] image,int bID,int rNum){
+    public static Reservation createReservation(boolean isEvent,long start, long end, String title, String description, byte[] image,int bID,String rNum){
         Calendar startTime = Calendar.getInstance();
         startTime.setTime(new Date(start));
         Calendar endTime = Calendar.getInstance();
@@ -127,7 +130,7 @@ public class Reservation {
     }
     @Nullable
     public static Bitmap displayImage(byte[] imageBytes) {
-        if (imageBytes.length > 0) {
+        if (imageBytes != null && imageBytes.length > 0) {
             Bitmap bmp = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
             return bmp;
         }

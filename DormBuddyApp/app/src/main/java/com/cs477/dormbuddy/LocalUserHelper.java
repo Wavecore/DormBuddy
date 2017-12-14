@@ -5,13 +5,15 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.Calendar;
+
 /**
  * Created by ndarwich on 11/17/17.
  */
 
 //database helper that keeps user logged in and displays their templates
 public class LocalUserHelper extends SQLiteOpenHelper {
-    final static private Integer VERSION = 1034;
+    final static private Integer VERSION = 1036;
     //===============Buildings Table=====================
     final static String TABLE_BUILDING = "dormbuddy_building";
     final static String BUILDING_ID = "building_id";
@@ -223,7 +225,24 @@ public class LocalUserHelper extends SQLiteOpenHelper {
         db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 5,'453','LAUNDRY' );");
         db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 5,'333','LAUNDRY' );");
         // Insert Reservations
-
+        /*
+         BUILDING_ID +" INTEGER, "+
+                    ROOM_NUMBER+" TEXT NOT NULL, "+
+                    USER_ID+ " INTEGER, "+
+                    RESERVATION_TITLE+ " TEXT, "+
+                    RESERVATION_DESCRIPTION+" TEXT, "+
+                    RESERVATION_ICON+ " BLOB, "+
+                    RESERVATION_IS_EVENT+" BOOLEAN, "+
+                    RESERVATION_START_TIME+ " INTEGER NOT NULL, "+
+                    RESERVATION_END_TIME+ " INTEGER NOT NULL, "+
+                    "PRIMARY KEY ("+BUILDING_ID+", "+ROOM_NUMBER+","+RESERVATION_START_TIME+","+RESERVATION_END_TIME+"), "+
+                    "FOREIGN KEY ("+BUILDING_ID+") REFERENCES "+TABLE_ROOM+" ("+BUILDING_ID+") ON DELETE SET NULL DEFERRABLE,"+
+                    "FOREIGN KEY ("+ROOM_NUMBER+") REFERENCES "+TABLE_ROOM+" ("+ROOM_NUMBER+") ON DELETE SET NULL DEFERRABLE,"+
+                    "FOREIGN KEY ("+USER_ID+") REFERENCES "+TABLE_USER+" ("+USER_ID+") ON DELETE SET NULL DEFERRABLE);";
+         */
+        db.execSQL("INSERT INTO "+TABLE_RESERVATION+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+USER_ID+", "+RESERVATION_TITLE+", "+RESERVATION_DESCRIPTION+
+                ", "+RESERVATION_ICON+", "+RESERVATION_IS_EVENT+", "+RESERVATION_START_TIME+", "+RESERVATION_END_TIME+") VALUES( 3,'333',1123,'Test123123','descriptiosnsdfsdf',null,0,"+
+                (Calendar.getInstance().getTime().getTime()+100000000)+","+(Calendar.getInstance().getTime().getTime()+500000000)+" );");
         // Insert Markers
         db.execSQL("INSERT INTO "+TABLE_MARKERS+" ("+MARKER_LATITUDE+", "+MARKER_LONGITUDE+", "+MARKER_NAME+", "+MARKER_IS_CAMPUS
                 +", "+MARKER_IS_IMPORTANT+")"+"VALUES( 38.82962607382459,-77.30722703039646,'JC', 1, 1 );");
@@ -257,7 +276,9 @@ public class LocalUserHelper extends SQLiteOpenHelper {
                 +", "+MARKER_IS_IMPORTANT+")"+"VALUES( 38.85086584334248,-77.34768010675907,'Groceries', 0, 0 );"); //wegmans should sponsor this app
         db.execSQL("INSERT INTO "+TABLE_MARKERS+" ("+MARKER_LATITUDE+", "+MARKER_LONGITUDE+", "+MARKER_NAME+", "+MARKER_IS_CAMPUS
                 +", "+MARKER_IS_IMPORTANT+")"+"VALUES( 31.9686,-99.9018,'The Great State of Texas', 0, 0 );"); //so should texas
+        //
     }
+
 /*
 INSERT INTO Location(RoomType,BCode,RoomNum,NumSeats,Area) VALUES('Office','ENG',520,0,224);
  USER_ID + " INTEGER PRIMARY KEY, " +
