@@ -443,8 +443,6 @@ public class CredentialsActivity extends AppCompatActivity implements LoaderCall
                     return pieces[1].equals(mPassword);
                 }
             }
-
-            // TODO: register the new account here.
             return true; //every password is correct*/
         }
 

@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 //database helper that keeps user logged in and displays their templates
 public class LocalUserHelper extends SQLiteOpenHelper {
-    final static private Integer VERSION = 1033;
+    final static private Integer VERSION = 1034;
     //===============Buildings Table=====================
     final static String TABLE_BUILDING = "dormbuddy_building";
     final static String BUILDING_ID = "building_id";
@@ -91,7 +91,7 @@ public class LocalUserHelper extends SQLiteOpenHelper {
                     USER_NET_ID + " TEXT NOT NULL, " +
                     USER_NAME + " TEXT NOT NULL, " +
                     USER_LOGGED_IN + " INTEGER, " +
-                    BUILDING_ID + " INTEGER, " +
+                    BUILDING_ID + " TEXT NOT NULL, " +
                     BUILDING_NAME + " TEXT NOT NULL, " +
                     ROOM_NUMBER + " TEXT NOT NULL, " +
                     USER_IS_ADMIN + " BOOLEAN DEFAULT FALSE, " +
