@@ -40,7 +40,7 @@ import static com.cs477.dormbuddy.InteractiveMapActivity.cityLocations;
  */
 public class SavedMarkersFragment extends DialogFragment {
     public static final String IS_GMU = "isGmu";
-    public static ArrayAdapter<String> mAdapter;
+    public ArrayAdapter<String> mAdapter;
     ListView locations;
     boolean isGmu = false;
     @Override

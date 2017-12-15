@@ -29,6 +29,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.Collections;
 
@@ -42,8 +43,10 @@ import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_ID;
 import static com.cs477.dormbuddy.LocalUserHelper.SELECTED_DRYER_TEMPLATE;
 import static com.cs477.dormbuddy.LocalUserHelper.SELECTED_WASHER_TEMPLATE;
 import static com.cs477.dormbuddy.LocalUserHelper.TABLE_USER;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_LOGGED_IN;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_NET_ID;
 
-public class LaundryBuddyActivity extends AppCompatActivity {
+public class LaundryBuddyActivity extends AppCompatActivity implements MachineSelectedFragment.ReservationDoneListener {
     LaundryAdapter washerAdapter;
     LaundryAdapter dryerAdapter;
     RecyclerView laundryList;
@@ -61,20 +64,24 @@ public class LaundryBuddyActivity extends AppCompatActivity {
     private SQLiteDatabase db = null;
     private LocalUserHelper dbHelper = null;
     private Cursor mCursorUser;
+    private String buildingId;
+    private String userNetId;
     private LoadLaundryMachinesTask retrieveLaundryTask = null;
-    final static String[] columnsUser = {SELECTED_WASHER_TEMPLATE, SELECTED_DRYER_TEMPLATE, BUILDING_ID};
+    private ReserveLaundryMachineTask reserveLaundryMachineTask = null;
+    final static String[] columnsUser = {SELECTED_WASHER_TEMPLATE, SELECTED_DRYER_TEMPLATE, BUILDING_ID, USER_NET_ID};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         dbHelper = new LocalUserHelper(this);
         db = dbHelper.getWritableDatabase();
-        mCursorUser = db.query(TABLE_USER, columnsUser, null, new String[] {}, null, null,
+        mCursorUser = db.query(TABLE_USER, columnsUser, USER_LOGGED_IN+ " = 1", new String[] {}, null, null,
                 null);
         mCursorUser.moveToFirst();
         int selectedWasher = mCursorUser.getInt(0);
         int selectedDryer = mCursorUser.getInt(1);
-        String buildingId = mCursorUser.getString(2);
+        buildingId = mCursorUser.getString(2);
+        userNetId = mCursorUser.getString(3);
         //new users will not see LaundryBuddy unless they have a template selected
         if (selectedWasher < 0 || selectedDryer < 0) {
             Toast.makeText(this, "You Must Select A Washer & Dryer Template To Use LaundryBuddy", Toast.LENGTH_LONG).show();
@@ -91,35 +98,7 @@ public class LaundryBuddyActivity extends AppCompatActivity {
         horizontalLayout.setOrientation(LinearLayoutManager.HORIZONTAL);
         LinearLayoutManager horizontalLayout2 = new LinearLayoutManager(this);
         horizontalLayout2.setOrientation(LinearLayoutManager.HORIZONTAL);
-        /////////fill arraylists here///////
-        /*
-        Query server for laundry machines
-            String[] names = server.get(machine array);
-            for (int i = 0; i < names.length(); i++) {
-                if (machine.type == washer) {
-                    washers.add(machine);
-                } else {
-                    dryers.add(machine);
-                }
-            }
-         */
-        /*BEGIN fake data
-        washers.add(new LaundryMachine("01", GOOD, FREE, 0, true));
-        washers.add(new LaundryMachine("02", CAUTION, FREE, 0, true));
-        washers.add(new LaundryMachine("03", BROKEN, FREE, 0, true));
-        washers.add(new LaundryMachine("04", GOOD, RESERVED, 6, true));
-        washers.add(new LaundryMachine("05", CAUTION, RESERVED, 7, true));
-        dryers.add(new LaundryMachine("01", GOOD, FREE, 0, false));
-        dryers.add(new LaundryMachine("02", CAUTION, FREE, 1, false));
-        dryers.add(new LaundryMachine("03", BROKEN, FREE, 0, false));
-        dryers.add(new LaundryMachine("04", GOOD, RESERVED, 4, false));
-        dryers.add(new LaundryMachine("05", CAUTION, RESERVED, 5, false));
-        dryers.add(new LaundryMachine("06", GOOD, CURRENTLY_IN_USE,151299356731l
-                , false));
-        dryers.add(new LaundryMachine("07", CAUTION, CURRENTLY_IN_USE, 7, false));
-        //end fake data
-        /////////////////////////////////*/
-        loadLaundryMachines(buildingId);
+        loadLaundryMachines();
 
         washerAdapter = new LaundryAdapter(washers, true);
         dryerAdapter = new LaundryAdapter(dryers, false);
@@ -132,9 +111,25 @@ public class LaundryBuddyActivity extends AppCompatActivity {
         laundryList.addItemDecoration(dividerItemDecoration);
     }
 
-    public void loadLaundryMachines(String buildingID) {
-        retrieveLaundryTask = new LoadLaundryMachinesTask(buildingID, this);
+    public void loadLaundryMachines() {
+        retrieveLaundryTask = new LoadLaundryMachinesTask(buildingId, this);
         retrieveLaundryTask.execute((Void) null);
+    }
+
+    public void onReservationMade(String machineId, int reservationType) {
+        long reservationTime = 0;
+        switch (reservationType) {
+            case 1: //if busy
+                reservationTime = 1000*60*55;
+                break;
+            case 2: //if reserved
+                reservationTime = 1000*60*10;
+                break;
+            default:
+                break;
+        }
+        reserveLaundryMachineTask = new ReserveLaundryMachineTask(buildingId, machineId, reservationTime, reservationType, this);
+        reserveLaundryMachineTask.execute((Void) null);
     }
 
     @Override
@@ -165,40 +160,23 @@ public class LaundryBuddyActivity extends AppCompatActivity {
     }
 
     class LaundryMachine implements Comparable<LaundryMachine>{
+        String machineId;
         String machineName;
         boolean isWasher;
         int condition;
         int status;
         long timeDone;
-        LaundryMachine(String machineName, int condition, int status, long timeDone, boolean isWasher) {
+        String user;
+        boolean isMine;
+        LaundryMachine(String machineId, String machineName, int condition, int status, long timeDone, boolean isWasher, String user) {
+            this.machineId = machineId;
             this.machineName = machineName;
             this.condition = condition;
             this.status = status;
             this.timeDone = timeDone;
             this.isWasher = isWasher;
-        }
-
-        public boolean reserve(long reservationLength) {
-            if (status == RESERVED || condition == BROKEN || status == CURRENTLY_IN_USE) {
-                return false; //can't reserve broken or reserved machines
-            }
-            //UTC based time of reservation, with a 20 minute extra minutes
-            this.timeDone = new Date().getTime() + reservationLength + 20*60*1000;
-            this.status = RESERVED;
-            //update database
-            /*
-            try {
-                update a value
-            } catch IllegalModification {
-
-            }
-             */
-            return true;
-        }
-
-        public void cancel() {
-            this.timeDone = 0;
-            //update database
+            this.user = user;
+            this.isMine = user.equals(userNetId);
         }
 
         public int getTimeLeft() {
@@ -206,6 +184,9 @@ public class LaundryBuddyActivity extends AppCompatActivity {
                 return 0;
             } else { //if time expired OR there is time left
                 long currentTime = new Date().getTime();
+                System.out.println("CURRENT TIME TIME DONE");
+                System.out.println(currentTime);
+                System.out.println(timeDone);
                 //time of it being done has passed
                 if (timeDone <= currentTime) {
                     //makes sure the status is updated across the server as it should have been
@@ -216,23 +197,6 @@ public class LaundryBuddyActivity extends AppCompatActivity {
                     return (int)(timeDone/(60*1000) - currentTime/(1000*60));
                 }
             }
-        }
-
-        //setters
-        //must be admin for this one
-        public void changeCondition(int newCondition) {
-            //check for admin
-            if (condition == BROKEN) {
-                this.status = RESERVED; //marks broken machines as reserve to aid with comparison
-            }
-            this.condition = newCondition;
-            //update database
-        }
-
-        //any user can reserve a machine
-        public void changeStatus(int newStatus) {
-            this.status = newStatus;
-            //updateDatabase
         }
 
         //getters
@@ -246,6 +210,14 @@ public class LaundryBuddyActivity extends AppCompatActivity {
 
         public String getMachineName() {
             return machineName;
+        }
+
+        public String getMachineId() {
+            return machineId;
+        }
+
+        public String getUser() {
+            return user;
         }
 
         //ORDER IS
@@ -265,8 +237,18 @@ public class LaundryBuddyActivity extends AppCompatActivity {
             } else if (b.condition == BROKEN) {
                 return -1;
             }
+            System.out.println("Comparing " + user + " and " + b.user +" to " + userNetId);
+            if (isMine && !b.isMine) { //our machines are always first
+                return -1;
+            } else if (b.isMine && !isMine) {
+                return 1;
+            }
             //special case when both machines are in use
             if (status == CURRENTLY_IN_USE && b.status == CURRENTLY_IN_USE) {
+                return (int)(timeDone - b.timeDone);
+            }
+            //special case when both machines are reserved
+            if (status == RESERVED && b.status == RESERVED) {
                 return (int)(timeDone - b.timeDone);
             }
             boolean isLarger = Integer.parseInt(aSettings) < Integer.parseInt(bSettings);
@@ -309,7 +291,7 @@ public class LaundryBuddyActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View v) {
                             MachineSelectedFragment newFrag = MachineSelectedFragment.newInstance(machine.getMachineName(),
-                                    0, machine.getStatus(), machine.getCondition(), machine.getTimeLeft(), machine.isWasher);
+                                    machine.getMachineId(), machine.getStatus(), machine.getCondition(), machine.getTimeLeft(), machine.isWasher, machine.isMine);
                             newFrag.show(getFragmentManager(),"MachineSelectedFragment");
                         }
                     });
@@ -327,7 +309,7 @@ public class LaundryBuddyActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View v) {
                             MachineSelectedFragment newFrag = MachineSelectedFragment.newInstance(machine.getMachineName(),
-                                    0, machine.getStatus(), machine.getCondition(), machine.getTimeLeft(), machine.isWasher);
+                                    machine.getMachineId(), machine.getStatus(), machine.getCondition(), machine.getTimeLeft(), machine.isWasher, machine.isMine);
                             newFrag.show(getFragmentManager(),"MachineSelectedFragment");
                         }
                     });
@@ -393,15 +375,11 @@ public class LaundryBuddyActivity extends AppCompatActivity {
     }
 
     public class LoadLaundryMachinesTask extends AsyncTask<Void, Void, Boolean> {
-
         private final String requestURL;
         private final String requestUsingLaundryURL;
         private Context context;
-        private String buildingId;
-        private JSONObject occupiedMachines;
 
-        LoadLaundryMachinesTask(String buildingID, Context context) {
-            this.buildingId = buildingID;
+        LoadLaundryMachinesTask(String buildingId, Context context) {
             requestURL = String.format("https://hidden-caverns-60306.herokuapp.com/laundryMachines/%s", buildingId);
             long now = new Date().getTime();
             requestUsingLaundryURL = String.format("https://hidden-caverns-60306.herokuapp.com/usingLaundryMachines/%s/%s", buildingId, now);
@@ -427,8 +405,8 @@ public class LaundryBuddyActivity extends AppCompatActivity {
                 HttpsURLConnection connection2 = (HttpsURLConnection) requestUsingLaundryMachinesURL.openConnection();
                 connection2.setRequestMethod("GET");
                 connection2.setDoOutput(false);
-                connection2.setConnectTimeout(5000);
-                connection2.setReadTimeout(5000);
+                connection2.setConnectTimeout(10000);
+                connection2.setReadTimeout(10000);
                 connection2.connect();
 
                 //get the responses
@@ -452,8 +430,10 @@ public class LaundryBuddyActivity extends AppCompatActivity {
                 System.out.println(getMachinesResponse);
                 Iterator<?> keys = getMachinesResponse.keys();
 
-                JSONObject getUsingMachinesResponse = new JSONObject(getUsingMachinesContent);
-                System.out.println(getUsingMachinesResponse);
+                JSONObject getUsingMachinesResponse = new JSONObject();
+                if (!getUsingMachinesContent.equals("")) {
+                    getUsingMachinesResponse = new JSONObject(getUsingMachinesContent);
+                }
 
                 //iterate over each key, adding the laundry machine in
                 while (keys.hasNext()) {
@@ -463,17 +443,21 @@ public class LaundryBuddyActivity extends AppCompatActivity {
                         boolean isWasher = machineJSON.getBoolean("IsWasher");
                         //tries to see if laundry machine is being used currently before adding the machine as free
                         ArrayList<LaundryMachine> machinesList = (isWasher) ? washers : dryers;
-                        if (getUsingMachinesResponse.has(keyString)) {
+                        if (getUsingMachinesResponse.has(keyString) && getUsingMachinesResponse.getJSONObject(keyString).getInt("Status") > 0) {
                             JSONObject reservationObject = getUsingMachinesResponse.getJSONObject(keyString);
                             System.out.println("Status of reserved machine is " + reservationObject.getInt("Status"));
                             //adds the machine with the correct status and time left
                             machinesList.add(new LaundryMachine(
-                                    machineJSON.getString("Name"), machineJSON.getInt("Condition"),
-                                    reservationObject.getInt("Status"), reservationObject.getLong("TimeDone"), isWasher));
-                        } else { //didn't find a reservation
+                                    keyString, machineJSON.getString("Name"),
+                                    machineJSON.getInt("Condition"),
+                                    reservationObject.getInt("Status"), reservationObject.getLong("TimeDone"), isWasher,
+                                    reservationObject.getString("User")));
+                        } else { //didn't find a reservation/laundry machine is free
                             //adds the machine with a FREE status and 0 time done
                             machinesList.add(new LaundryMachine(
-                                    machineJSON.getString("Name"), machineJSON.getInt("Condition"), FREE, 0, isWasher));
+                                    keyString, machineJSON.getString("Name"),
+                                    machineJSON.getInt("Condition"), FREE, 0, isWasher,
+                                    "")); //user is empty string
                         }
                     }
                 }
@@ -493,6 +477,72 @@ public class LaundryBuddyActivity extends AppCompatActivity {
             washerAdapter.notifyDataSetChanged();
             dryerAdapter.notifyDataSetChanged();
             super.onPostExecute(aBoolean);
+        }
+    }
+
+    public class ReserveLaundryMachineTask extends AsyncTask<Void, Void, Integer> {
+        private final String requestURL;
+        String machineKey;
+        long timeDone;
+        int reservationType;
+        private Context context;
+
+        ReserveLaundryMachineTask(String buildingId, String machineKey, long timeToEnd, int reservationType, Context context) {
+            requestURL = String.format("https://hidden-caverns-60306.herokuapp.com/makeLaundryReservation/%s/%s", buildingId, machineKey);
+            System.out.println(requestURL);
+            long now = new Date().getTime();
+            this.timeDone = now + timeToEnd; //adds timeToEnd as minutes
+            this.machineKey = machineKey;
+            this.reservationType = reservationType;
+            this.context = context;
+        }
+
+        @Override
+        protected Integer doInBackground(Void... params) {
+            try {
+                URL requestReserveMachineURL = new URL(requestURL);
+
+                HttpsURLConnection connection = (HttpsURLConnection) requestReserveMachineURL.openConnection();
+                connection.setRequestMethod("PUT");
+                connection.setDoOutput(true);
+                connection.setRequestProperty("Content-Type", "application/json");
+                connection.setRequestProperty("Accept", "application/json");
+
+                //prepares the request body, using reservation type to determine new status of machine
+                String writeData = String.format("{\"Status\":%d,\"TimeDone\":%d, \"User\": \"%s\"}", reservationType, timeDone, userNetId);
+                System.out.println("User Net Id is " + userNetId);
+                OutputStreamWriter osw = new OutputStreamWriter(connection.getOutputStream());
+                osw.write(writeData);
+                osw.flush();
+                osw.close();
+
+                String responseMessage = connection.getResponseMessage();
+                if (responseMessage.equals("OK")) {
+                    return reservationType;
+                } else if (responseMessage.equals("Precondition Failed")) {
+                    return -1;
+                } else {
+                    return -1;
+                }
+            } catch (Exception e) {
+                System.out.println(e.toString());
+                return -1;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Integer type) {
+            super.onPostExecute(type);
+            if (type == 0) { //cancellation
+                Toast.makeText(context, "Cancellation successful.", Toast.LENGTH_SHORT).show();
+            } else if (type == 1) { //start
+                Toast.makeText(context, "Your laundry started with the selected cycle.", Toast.LENGTH_SHORT).show();
+            } else if (type == 2) { //reservation
+                Toast.makeText(context, "Reservation Successful. You have 10 minutes to load your laundry and confirm.", Toast.LENGTH_SHORT).show();
+            } else { //-1 was returned
+                Toast.makeText(context, "Could Not Reserve Machine", Toast.LENGTH_SHORT).show();
+            }
+            loadLaundryMachines(); //refreshes the view
         }
     }
 }

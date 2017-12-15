@@ -15,6 +15,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Date;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -25,22 +27,24 @@ public class MachineSelectedFragment extends DialogFragment {
     private static final String MACHINE_CONDITION = "condition";
     private static final String MACHINE_TIME_LEFT = "time-left";
     private static final String MACHINE_IS_WASHER = "is-washer";
+    private static final String MY_MACHINE = "my-machine";
     private static final String MACHINE_ID = "_machine-id";
     String name;
-    int id;
+    String id;
 
     public MachineSelectedFragment() {
         // Required empty public constructor
     }
 
-    public static MachineSelectedFragment newInstance(String name, int id, int status, int condition, int timeLeft, boolean isWasher) {
+    public static MachineSelectedFragment newInstance(String name, String id, int status, int condition, int timeLeft, boolean isWasher, boolean myMachine) {
         Bundle args = new Bundle();
         args.putString(MACHINE_NAME, name);
-        args.putInt(MACHINE_ID, id);
+        args.putString(MACHINE_ID, id);
         args.putInt(MACHINE_STATUS, status);
         args.putInt(MACHINE_CONDITION, condition);
-        args.putInt(MACHINE_TIME_LEFT, timeLeft);
+        args.putLong(MACHINE_TIME_LEFT, timeLeft);
         args.putBoolean(MACHINE_IS_WASHER, isWasher);
+        args.putBoolean(MY_MACHINE, myMachine);
         MachineSelectedFragment fragment = new MachineSelectedFragment();
         fragment.setArguments(args);
         return fragment;
@@ -54,11 +58,12 @@ public class MachineSelectedFragment extends DialogFragment {
         View v = inflater.inflate(R.layout.fragment_machine_selected,null);
 
         name = getArguments().getString(MACHINE_NAME);
-        id = getArguments().getInt(MACHINE_ID);
+        id = getArguments().getString(MACHINE_ID);
         int status = getArguments().getInt(MACHINE_STATUS);
         int condition = getArguments().getInt(MACHINE_CONDITION);
-        int timeLeft = getArguments().getInt(MACHINE_TIME_LEFT);
+        long timeLeft = getArguments().getLong(MACHINE_TIME_LEFT);
         boolean isWasher = getArguments().getBoolean(MACHINE_IS_WASHER);
+        boolean myMachine = getArguments().getBoolean(MY_MACHINE);
 
         if (! isWasher) {
             ((ImageView)v.findViewById(R.id.machineSelectedImage)).setImageResource(R.drawable.dryer);
@@ -68,6 +73,10 @@ public class MachineSelectedFragment extends DialogFragment {
             String timeLeftText = "" + timeLeft;
             v.findViewById(R.id.optionalTimerLayout).setVisibility(View.VISIBLE);
             ((TextView)v.findViewById(R.id.machineTimeLeftText)).setText(timeLeftText);
+        }
+
+        if (myMachine) {
+            v.findViewById(R.id.myMachine).setVisibility(View.VISIBLE);
         }
 
         String statText = (status == 0 ) ? "Free" : (status == 1 ) ? "Busy" : "Reserved";
@@ -89,19 +98,46 @@ public class MachineSelectedFragment extends DialogFragment {
         });
         if (status == 0) { //only show reserve if free
             builder.setPositiveButton("Reserve now", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
+                public void onClick(DialogInterface dialog, int id2) {
                     /*
                      * Server code to reserve the machine by its ID
                      * final check if the reservation was successful
                      */
-                    Toast.makeText(getActivity(), "Reservation Made Successfully!", Toast.LENGTH_SHORT).show();
+                    //updates the selected template
+                    ReservationDoneListener activity = (ReservationDoneListener) getActivity();
+                    //every machine gets reserved for 10 minutes so the student can come
+                    activity.onReservationMade(id, 2);
+                    dialog.cancel();
+                }
+            });
+        } else if (status == 2 && myMachine) { //cancel reservation/start laundry button if reserved by current user
+            builder.setNeutralButton("Cancel Reservation", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id2) {
+                    ReservationDoneListener activity = (ReservationDoneListener) getActivity();
+                    activity.onReservationMade(id, 0);
+                    dialog.cancel();
+                }
+            });
+            builder.setPositiveButton("Start Laundry", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id2) {
+                    /*
+                     * Server code to reserve the machine by its ID
+                     * final check if the reservation was successful
+                     */
+                    //updates the selected template
+                    ReservationDoneListener activity = (ReservationDoneListener) getActivity();
+                    activity.onReservationMade(id, 1);
                     dialog.cancel();
                 }
             });
         }
-        //cancel reservation button if reserved by current user?
+
 
         return builder.create();
+    }
+
+    public interface ReservationDoneListener {
+        void onReservationMade(String id, int reservationType);
     }
 
 }
