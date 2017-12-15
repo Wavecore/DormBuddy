@@ -37,14 +37,14 @@ public class Reservation {
     public static String description;
     public static Bitmap image;
     public static Boolean isEvent;
-    public static int buildingID;
+    public static String buildingID;
     public static String roomNum;
     public static String[] columns = {BUILDING_ID,ROOM_NUMBER,USER_ID,RESERVATION_TITLE,RESERVATION_DESCRIPTION,
         RESERVATION_ICON,RESERVATION_IS_EVENT,RESERVATION_START_TIME,RESERVATION_END_TIME};
     public static final SimpleDateFormat resFormatter = new SimpleDateFormat("h:mm a, EEE d MMM yyyy");
     public static final SimpleDateFormat simpleResFormatter = new SimpleDateFormat("h:mm a, d MMM");
 
-    private Reservation(boolean event,Calendar start, Calendar end, String t, String d, Bitmap i,int buildingID, String roomNum){
+    private Reservation(boolean event,Calendar start, Calendar end, String t, String d, Bitmap i,String buildingID, String roomNum){
         this.isEvent = event;
         this.startTime = start;
         this.endTime = end;
@@ -65,7 +65,7 @@ public class Reservation {
             Reservation[] output = new Reservation[cCursor.getCount()];
             int count = 0;
             while ( !cCursor.isAfterLast() ) {
-                int buildingID = cCursor.getInt(0);                     //BuildingID
+                String buildingID = cCursor.getString(0);                     //BuildingID
                 String roomNum = cCursor.getString(1);                        //Room Number
                 // Don't need to get userID because we already have it
                 String reservationTitle = cCursor.getString(3);         //Reservation Title
@@ -98,7 +98,7 @@ public class Reservation {
             Reservation[] output = new Reservation[cCursor.getCount()];
             int count = 0;
             while ( !cCursor.isAfterLast() ) {
-                int buildingID = cCursor.getInt(0);                     //BuildingID
+                String buildingID = cCursor.getString(0);                     //BuildingID
                 String roomNum = cCursor.getString(1);                        //Room Number
                 // Don't need to get userID because we already have it
                 String reservationTitle = cCursor.getString(3);         //Reservation Title
@@ -119,7 +119,7 @@ public class Reservation {
         db.close();
         return null;
     }
-    public static Reservation createReservation(boolean isEvent,long start, long end, String title, String description, byte[] image,int bID,String rNum){
+    public static Reservation createReservation(boolean isEvent,long start, long end, String title, String description, byte[] image,String bID,String rNum){
         Calendar startTime = Calendar.getInstance();
         startTime.setTime(new Date(start));
         Calendar endTime = Calendar.getInstance();

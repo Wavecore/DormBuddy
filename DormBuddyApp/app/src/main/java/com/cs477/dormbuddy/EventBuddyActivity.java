@@ -14,10 +14,10 @@ public class EventBuddyActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_buddy);
-        if(getSupportFragmentManager().findFragmentByTag(DisplayEventFragment.DISPLAY_EVENT_TAG) == null) {
-            DisplayEventFragment newFragment = DisplayEventFragment.newInstance("Test", R.drawable.laundry_machine, "here", "now", "Roses are read\nViolets are violet\n You had one job\n Don't fck it up\n", false);
-            newFragment.show(getSupportFragmentManager(), DisplayEventFragment.DISPLAY_EVENT_TAG);
-        }
+       // if(getSupportFragmentManager().findFragmentByTag(DisplayEventFragment.DISPLAY_EVENT_TAG) == null) {
+        //    DisplayEventFragment newFragment = DisplayEventFragment.newInstance("Test", R.drawable.laundry_machine, "here", "now", "Roses are read\nViolets are violet\n You had one job\n Don't fck it up\n", false);
+         //   newFragment.show(getSupportFragmentManager(), DisplayEventFragment.DISPLAY_EVENT_TAG);
+       // }
     }
 
     public void createEventClicked(View view) {

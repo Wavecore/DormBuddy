@@ -36,16 +36,14 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="Where: "
                 android:textSize="26sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/eventLocation"
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="Location Placeholder"
                 android:textSize="22sp" />
 
@@ -61,16 +59,14 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="When:"
                 android:textSize="26sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/eventTime"
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="Date Placeholder"
                 android:textSize="22sp" />
         </LinearLayout>

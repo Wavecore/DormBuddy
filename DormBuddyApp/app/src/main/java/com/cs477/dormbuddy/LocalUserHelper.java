@@ -13,7 +13,7 @@ import java.util.Calendar;
 
 //database helper that keeps user logged in and displays their templates
 public class LocalUserHelper extends SQLiteOpenHelper {
-    final static private Integer VERSION = 1036;
+    final static private Integer VERSION = 1037;
     //===============Buildings Table=====================
     final static String TABLE_BUILDING = "dormbuddy_building";
     final static String BUILDING_ID = "building_id";
@@ -102,18 +102,18 @@ public class LocalUserHelper extends SQLiteOpenHelper {
                     SELECTED_DRYER_TEMPLATE + " INTEGER DEFAULT -1)";
     final private String CREATE_BUILDING =
             "CREATE TABLE "+TABLE_BUILDING+" ("+
-                    BUILDING_ID +" INTEGER PRIMARY KEY AUTOINCREMENT, "+
+                    BUILDING_ID +" TEXT PRIMARY KEY , "+
                     BUILDING_NAME + " TEXT NOT NULL);";
     final private String CREATE_BUILDING_MAPS =
             "CREATE TABLE "+TABLE_BUILDING_MAPS+" ("+
-                    BUILDING_ID +" INTEGER NOT NULL, "+
+                    BUILDING_ID +" TEXT NOT NULL, "+
                     BUILDING_MAP_NAME+" INTEGER NOT NULL, "+
                     BUILDING_MAP + " BLOB NOT NULL, "+
                     "PRIMARY KEY ("+BUILDING_ID+", "+BUILDING_MAP_NAME+"), "+
                     "FOREIGN KEY ("+BUILDING_ID+") REFERENCES "+TABLE_BUILDING+" ("+BUILDING_ID+") ON DELETE SET NULL DEFERRABLE);";
     final private String CREATE_ROOM =
             "CREATE TABLE "+TABLE_ROOM+" ("+
-                    BUILDING_ID +" INTEGER, "+
+                    BUILDING_ID +" TEXT NOT NULL, "+
                     ROOM_NUMBER+" INTEGER NOT NULL, "+
                     ROOM_TYPE+" TEXT CHECK("+ROOM_TYPE+" IN ('"+ROOM_TYPE_LAUNDRY+"','"+ROOM_TYPE_DORM+"','"+ROOM_TYPE_STUDY+"','"+ROOM_TYPE_EVENT+"')),"+
                     ROOM_MAX_OCCUPANCY+" INTEGER CHECK("+ROOM_MAX_OCCUPANCY+" >= 0),"+
@@ -121,7 +121,7 @@ public class LocalUserHelper extends SQLiteOpenHelper {
                     "FOREIGN KEY ("+BUILDING_ID+") REFERENCES "+TABLE_BUILDING+" ("+BUILDING_ID+") ON DELETE SET NULL DEFERRABLE);";
     final private  String CREATE_RESERVATION =
             "CREATE TABLE "+TABLE_RESERVATION+" ("+
-                    BUILDING_ID +" INTEGER, "+
+                    BUILDING_ID +" TEXT NOT NULL, "+
                     ROOM_NUMBER+" TEXT NOT NULL, "+
                     USER_ID+ " INTEGER, "+
                     RESERVATION_TITLE+ " TEXT, "+
@@ -171,12 +171,12 @@ public class LocalUserHelper extends SQLiteOpenHelper {
     }
     private void addInitialEntries(SQLiteDatabase db){
         // Insert Buildings
-        db.execSQL("INSERT INTO "+TABLE_BUILDING+" ("+BUILDING_ID+", "+BUILDING_NAME+") VALUES( 0, 'Fake Building');");    //ID 0
-        db.execSQL("INSERT INTO "+TABLE_BUILDING+" ("+BUILDING_NAME+") VALUES('Beacon Hall');");    //ID 1
-        db.execSQL("INSERT INTO "+TABLE_BUILDING+" ("+BUILDING_NAME+") VALUES('Blue Ridge');");     //ID 2
-        db.execSQL("INSERT INTO "+TABLE_BUILDING+" ("+BUILDING_NAME+") VALUES('The Commons');");    //ID 3
-        db.execSQL("INSERT INTO "+TABLE_BUILDING+" ("+BUILDING_NAME+") VALUES('Commonwealth');");   //ID 4
-        db.execSQL("INSERT INTO "+TABLE_BUILDING+" ("+BUILDING_NAME+") VALUES('Dominion');");       //ID 5
+        db.execSQL("INSERT INTO "+TABLE_BUILDING+" ("+BUILDING_ID+", "+BUILDING_NAME+") VALUES( 'FAKE', 'Fake Building');");    //ID 0
+        db.execSQL("INSERT INTO "+TABLE_BUILDING+" ("+BUILDING_ID+", "+BUILDING_NAME+") VALUES('BEAC','Beacon Hall');");    //ID 1
+        db.execSQL("INSERT INTO "+TABLE_BUILDING+" ("+BUILDING_ID+", "+BUILDING_NAME+") VALUES('BLUE','Blue Ridge');");     //ID 2
+        db.execSQL("INSERT INTO "+TABLE_BUILDING+" ("+BUILDING_ID+", "+BUILDING_NAME+") VALUES('COMM','The Commons');");    //ID 3
+        db.execSQL("INSERT INTO "+TABLE_BUILDING+" ("+BUILDING_ID+", "+BUILDING_NAME+") VALUES('COMW','Commonwealth');");   //ID 4
+        db.execSQL("INSERT INTO "+TABLE_BUILDING+" ("+BUILDING_ID+", "+BUILDING_NAME+") VALUES('DOMI','Dominion');");       //ID 5
         Cursor c = db.rawQuery("SELECT "+BUILDING_ID+" FROM "+TABLE_BUILDING, null);
         if (c.moveToFirst()) {
             while ( !c.isAfterLast() ) {
@@ -185,45 +185,47 @@ public class LocalUserHelper extends SQLiteOpenHelper {
             }
         }
         // Insert Rooms
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 0,'369a','DORM' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 1,'222','DORM' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 1,'223','DORM' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 1,'108','LAUNDRY' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 1,'123','STUDY' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 1,'333','EVENT' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'FAKE','369a','DORM' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'BEAC','222','DORM' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'BEAC','223','DORM' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'BEAC','108','LAUNDRY' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'BEAC','123','STUDY' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'BEAC','333','EVENT' );");
 
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 2,'222','DORM' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 2,'333','DORM' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 2,'444','DORM' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 2,'555','DORM' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 2,'111','LAUNDRY' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 2,'666','STUDY' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 2,'777','EVENT' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'BLUE','222','DORM' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'BLUE','333','DORM' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'BLUE','444','DORM' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'BLUE','555','DORM' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'BLUE','111','LAUNDRY' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'BLUE','666','STUDY' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'BLUE','777','EVENT' );");
 
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 3,'444','DORM' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 3,'69','DORM' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 3,'108','LAUNDRY' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 3,'213','STUDY' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 3,'777','STUDY' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 3,'666','STUDY' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 3,'453','STUDY' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 3,'333','EVENT' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 4,'444a','DORM' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 4,'444b','DORM' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 4,'108','LAUNDRY' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 4,'213','STUDY' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 4,'777','EVENT' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 4,'666','EVENT' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 4,'453','EVENT' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 4,'333','EVENT' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 5,'444a','DORM' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 5,'444b','DORM' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 5,'108','LAUNDRY' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 5,'213','LAUNDRY' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 5,'777','LAUNDRY' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 5,'666','LAUNDRY' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 5,'453','LAUNDRY' );");
-        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 5,'333','LAUNDRY' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'COMM','444','DORM' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'COMM','69','DORM' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'COMM','108','LAUNDRY' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'COMM','213','STUDY' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'COMM','777','STUDY' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'COMM','666','STUDY' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'COMM','453','STUDY' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'COMM','333','EVENT' );");
+
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'COMW','444a','DORM' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'COMW','444b','DORM' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'COMW','108','LAUNDRY' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'COMW','213','STUDY' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'COMW','777','EVENT' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'COMW','666','EVENT' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'COMW','453','EVENT' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'COMW','333','EVENT' );");
+
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'DOMI','444a','DORM' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'DOMI','444b','DORM' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'DOMI','108','LAUNDRY' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'DOMI','213','LAUNDRY' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'DOMI','777','LAUNDRY' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'DOMI','666','LAUNDRY' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'DOMI','453','LAUNDRY' );");
+        db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'DOMI','333','LAUNDRY' );");
         // Insert Reservations
         /*
          BUILDING_ID +" INTEGER, "+
@@ -241,7 +243,7 @@ public class LocalUserHelper extends SQLiteOpenHelper {
                     "FOREIGN KEY ("+USER_ID+") REFERENCES "+TABLE_USER+" ("+USER_ID+") ON DELETE SET NULL DEFERRABLE);";
          */
         db.execSQL("INSERT INTO "+TABLE_RESERVATION+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+USER_ID+", "+RESERVATION_TITLE+", "+RESERVATION_DESCRIPTION+
-                ", "+RESERVATION_ICON+", "+RESERVATION_IS_EVENT+", "+RESERVATION_START_TIME+", "+RESERVATION_END_TIME+") VALUES( 3,'333',1123,'Test123123','descriptiosnsdfsdf',null,0,"+
+                ", "+RESERVATION_ICON+", "+RESERVATION_IS_EVENT+", "+RESERVATION_START_TIME+", "+RESERVATION_END_TIME+") VALUES( 'COMM','333',1123,'Test123123','descriptiosnsdfsdf',null,0,"+
                 (Calendar.getInstance().getTime().getTime()+100000000)+","+(Calendar.getInstance().getTime().getTime()+500000000)+" );");
         // Insert Markers
         db.execSQL("INSERT INTO "+TABLE_MARKERS+" ("+MARKER_LATITUDE+", "+MARKER_LONGITUDE+", "+MARKER_NAME+", "+MARKER_IS_CAMPUS

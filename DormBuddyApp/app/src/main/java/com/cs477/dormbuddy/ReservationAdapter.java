@@ -44,19 +44,15 @@ public class ReservationAdapter extends ArrayAdapter<Reservation> {
         }
         Reservation r = getItem(position);
         if(r != null){
-            System.out.println("hereas==============================================================================");
             TextView title = (TextView)v.findViewById(R.id.reservation_Title);
             TextView time = (TextView)v.findViewById(R.id.reservation_Time);
             TextView loca = (TextView)v.findViewById(R.id.reservation_Location);
             ImageView icon = (ImageView)v.findViewById(R.id.reservation_Icon);
 
             title.setText("Title: "+r.title);
-            LocalUserHelper dbHelper = new LocalUserHelper(this.context);
-            SQLiteDatabase db = dbHelper.getWritableDatabase();
-            Cursor cCursor = db.query(TABLE_BUILDING,new String[]{BUILDING_NAME},BUILDING_ID+"="+r.buildingID,
-                    new String[]{},null, null,null);                            //Get the name of the building from the
-            if(cCursor.moveToFirst())
-                loca.setText("Location: "+cCursor.getString(0)+" "+r.roomNum);
+
+                loca.setText("Location: " + r.buildingID + " " + r.roomNum);
+
             time.setText("Time: "+Reservation.simpleResFormatter.format(r.startTime.getTime())+" to "+Reservation.simpleResFormatter.format(r.endTime.getTime()));
             if(r.image != null)
                 icon.setImageBitmap(r.image);
