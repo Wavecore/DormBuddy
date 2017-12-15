@@ -85,5 +85,14 @@
                 android:textSize="28sp"
                 android:text=" Minutes Left"/>
         </LinearLayout>
+        <TextView
+            android:id="@+id/myMachine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textSize="26sp"
+            android:textColor="@color/colorAmber"
+            android:visibility="gone"
+            android:text="Reserved By You"/>
     </LinearLayout>
 </FrameLayout>
