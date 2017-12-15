@@ -196,7 +196,6 @@ public class InteractiveMapActivity extends FragmentActivity implements OnMapRea
             cityLocations.add(latLng);
             cityIds.add(mCursor.getPosition());
         }
-        SavedMarkersFragment.mAdapter.notifyDataSetChanged();
         hideAddMarker();
         markerName.setText("");
         displayMarkers();
@@ -263,7 +262,6 @@ public class InteractiveMapActivity extends FragmentActivity implements OnMapRea
             cityLocations.remove(position);
             cityLocationNames.remove(position);
         }
-        SavedMarkersFragment.mAdapter.notifyDataSetChanged();
         Toast.makeText(this, "Successfully deleted ", Toast.LENGTH_SHORT).show();
     }
 
