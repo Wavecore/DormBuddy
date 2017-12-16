@@ -77,7 +77,6 @@ public class StudyBuddyActivity extends AppCompatActivity implements DisplayEven
                 }
             }
         });
-
         LoadStudyReservationTask retrieveStudyReservationTask = new LoadStudyReservationTask(userNetID, this);
         retrieveStudyReservationTask.execute((Void) null);
     }

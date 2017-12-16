@@ -46,7 +46,6 @@ public class EventBuddyActivity extends AppCompatActivity implements DisplayEven
     final static String[] columnsUser = {BUILDING_ID, USER_NET_ID, USER_IS_ADMIN};
     private ListView eventList;
     private String buildingID = "";
-    private Reservation[] reservations;
     private boolean isAdmin;
     private  Button createResButton;
     @Override
@@ -79,7 +78,7 @@ public class EventBuddyActivity extends AppCompatActivity implements DisplayEven
         mCursorUser.close();
 
         eventList = (ListView)findViewById(R.id.eventList);
-        reservations = Reservation.getUpcommingEvent(this, Calendar.getInstance());
+        Reservation[] reservations = Reservation.getUpcommingEvent(this, Calendar.getInstance());
         mAdapter = new ReservationAdapter(this, R.layout.reservation_item, reservations, true);
         eventList.setAdapter(mAdapter);
         eventList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -92,7 +91,6 @@ public class EventBuddyActivity extends AppCompatActivity implements DisplayEven
                 }
             }
         });
-        System.out.println("Initial Load");
         LoadEventReservationTask loadEventReservationTask = new LoadEventReservationTask(buildingID, this);
         loadEventReservationTask.execute((Void) null);
     }

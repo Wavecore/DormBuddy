@@ -20,8 +20,7 @@
         android:id="@+id/eventList"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
-        android:layout_above="@+id/eventCreationButton"
-        android:background="@drawable/empty">
+        android:layout_above="@+id/eventCreationButton">
     </ListView>
     <!--This button will only be visible to administrators-->
     <Button
