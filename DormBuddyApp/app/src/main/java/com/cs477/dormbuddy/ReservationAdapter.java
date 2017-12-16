@@ -25,7 +25,7 @@ import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_NAME;
  * Created by white on 12/12/2017.
  */
 public class ReservationAdapter extends ArrayAdapter<Reservation> {
-    private Reservation[] reservations;
+    public Reservation[] reservations;
     private Context context;
     public ReservationAdapter(Context context, int resourceID, Reservation[] r){
         super(context,resourceID);

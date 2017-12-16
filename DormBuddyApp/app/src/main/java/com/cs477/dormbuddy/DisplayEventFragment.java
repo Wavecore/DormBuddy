@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
@@ -42,10 +43,11 @@ import static com.cs477.dormbuddy.LocalUserHelper.RESERVATION_TITLE;
 import static com.cs477.dormbuddy.LocalUserHelper.ROOM_NUMBER;
 import static com.cs477.dormbuddy.LocalUserHelper.TABLE_BUILDING;
 import static com.cs477.dormbuddy.LocalUserHelper.TABLE_RESERVATION;
-import static com.cs477.dormbuddy.Reservation.image;
-import static com.cs477.dormbuddy.Reservation.roomNum;
-
 public class DisplayEventFragment extends DialogFragment {
+    public static interface OnCompleteListener{
+        public abstract void onDisplayEventComplete();
+    }
+    private OnCompleteListener mListener;
     static final String DISPLAY_EVENT_TAG = "DisplayEventTag";
     private String buildingID;
     private String room;
@@ -122,18 +124,21 @@ public class DisplayEventFragment extends DialogFragment {
              builder.setPositiveButton("Cancel Reservation", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int id) {
-                            //TODO: Implement delete event functionality
+
                             DeleteReservation deleteReservation = new DeleteReservation(context);
                             deleteReservation.execute((Void) null);
 
                             db.delete(TABLE_RESERVATION,BUILDING_ID+"='"+buildingID+"' AND "+ROOM_NUMBER+"='"+room+"' AND "+RESERVATION_START_TIME+"="+start, new String[]{});
+                            mListener.onDisplayEventComplete();
                         }
                     });
          builder.setNegativeButton("Close", new DialogInterface.OnClickListener() {
                            public void onClick(DialogInterface dialog, int id) {
+                               mListener.onDisplayEventComplete();
                         dialog.cancel();
                     }
                 });
+
         return builder.create();
     }
 
@@ -152,6 +157,16 @@ public class DisplayEventFragment extends DialogFragment {
         return display;
     }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try{
+            this.mListener = (OnCompleteListener)context;
+        }
+        catch (final ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement OnCompleteListener");
+        }
+    }
     static DisplayEventFragment newInstance(Reservation r, boolean authorization){
         DisplayEventFragment display = new DisplayEventFragment();
         Bundle args = new Bundle();

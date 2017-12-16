@@ -40,7 +40,7 @@ import static com.cs477.dormbuddy.LocalUserHelper.USER_IS_ADMIN;
 import static com.cs477.dormbuddy.LocalUserHelper.USER_LOGGED_IN;
 import static com.cs477.dormbuddy.LocalUserHelper.USER_NET_ID;
 
-public class EventBuddyActivity extends AppCompatActivity {
+public class EventBuddyActivity extends AppCompatActivity implements DisplayEventFragment.OnCompleteListener {
     private ReservationAdapter mAdapter;
     private SQLiteDatabase db;
     final static String[] columnsUser = {BUILDING_ID, USER_NET_ID, USER_IS_ADMIN};
@@ -92,25 +92,22 @@ public class EventBuddyActivity extends AppCompatActivity {
                 }
             }
         });
-        /*
+        System.out.println("Initial Load");
         LoadEventReservationTask loadEventReservationTask = new LoadEventReservationTask(buildingID, this);
         loadEventReservationTask.execute((Void) null);
-        if(reservations !=null && reservations.length != 0)
-            eventList.setBackground(null);
-        else
-            eventList.setBackground(ContextCompat.getDrawable(this, R.drawable.empty));
-*/
     }
 
     @Override
     protected void onPostResume() {
         super.onPostResume();
+        System.out.println("Post Resume Load");
         LoadEventReservationTask loadEventReservationTask = new LoadEventReservationTask(buildingID, this);
         loadEventReservationTask.execute((Void) null);
-        if(reservations !=null && reservations.length != 0)
-            eventList.setBackground(null);
-        else
-            eventList.setBackground(ContextCompat.getDrawable(this, R.drawable.empty));
+    }
+    public void onDisplayEventComplete(){
+        System.out.println("Display Complete Load");
+        LoadEventReservationTask retrieveStudyReservationTask = new LoadEventReservationTask(buildingID, this);
+        retrieveStudyReservationTask.execute((Void) null);
     }
 
     public void createEventClicked(View view) {
@@ -186,12 +183,12 @@ public class EventBuddyActivity extends AppCompatActivity {
                         cv.put(RESERVATION_START_TIME,reservationStartTime);
                         cv.put(RESERVATION_END_TIME,reservationEndTime);
                         db.insert(TABLE_RESERVATION,null,cv);
-                        System.out.println("Added new event "+buildingID+roomNum);
+                        System.out.println("Added new event "+reservationTitle+buildingID+roomNum);
                     }
                     resCursor.close();
-                    System.out.println("Finished loading study room");
-                    eventList.setBackground(null);
+                    //eventList.setBackground(null);
                 }
+                System.out.println("Finished loading event room");
                 return true;
             } catch (Exception e) {
                 System.out.println(e.toString());
@@ -204,8 +201,10 @@ public class EventBuddyActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Boolean aBoolean) {
             mAdapter.updateEventAdapter(context);
-            //washerAdapter.notifyDataSetChanged();
-            //dryerAdapter.notifyDataSetChanged();
+            if(mAdapter.getCount() != 0)
+                eventList.setBackground(null);
+            else
+                eventList.setBackground(ContextCompat.getDrawable(context, R.drawable.empty));
             super.onPostExecute(aBoolean);
         }
     }

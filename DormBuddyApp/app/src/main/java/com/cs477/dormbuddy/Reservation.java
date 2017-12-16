@@ -32,14 +32,14 @@ import static com.cs477.dormbuddy.LocalUserHelper.USER_NET_ID;
  */
 
 public class Reservation {
-    public static Calendar startTime;
-    public static Calendar endTime;
-    public static String title;
-    public static String description;
-    public static Bitmap image;
-    public static Boolean isEvent;
-    public static String buildingID;
-    public static String roomNum;
+    public Calendar startTime;
+    public Calendar endTime;
+    public String title;
+    public String description;
+    public Bitmap image;
+    public Boolean isEvent;
+    public String buildingID;
+    public String roomNum;
     public static String[] columns = {BUILDING_ID,ROOM_NUMBER,USER_NET_ID,RESERVATION_TITLE,RESERVATION_DESCRIPTION,
         RESERVATION_ICON,RESERVATION_IS_EVENT,RESERVATION_START_TIME,RESERVATION_END_TIME};
     public static final SimpleDateFormat resFormatter = new SimpleDateFormat("h:mm a, EEE d MMM yyyy");
@@ -75,9 +75,11 @@ public class Reservation {
                 boolean reservationIsEvent = 1==cCursor.getInt(6);
                 long reservationStartTime = cCursor.getLong(7);
                 long reservationEndTime = cCursor.getLong(8);
+                System.out.println(reservationTitle);
                 output[count] = createReservation(reservationIsEvent,reservationStartTime,reservationEndTime,
                         reservationTitle,reservationDescription, reservationIcon,buildingID,roomNum);
                 cCursor.moveToNext();
+                count++;
             }
             cCursor.close();
             db.close();
@@ -111,6 +113,7 @@ public class Reservation {
                 output[count] = createReservation(reservationIsEvent,reservationStartTime,reservationEndTime,
                         reservationTitle,reservationDescription, reservationIcon,buildingID,roomNum);
                 cCursor.moveToNext();
+                count++;
             }
             cCursor.close();
             db.close();

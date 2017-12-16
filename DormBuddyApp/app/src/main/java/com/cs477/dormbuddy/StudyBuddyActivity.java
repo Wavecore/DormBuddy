@@ -40,12 +40,12 @@ import static com.cs477.dormbuddy.LocalUserHelper.TABLE_USER;
 import static com.cs477.dormbuddy.LocalUserHelper.USER_LOGGED_IN;
 import static com.cs477.dormbuddy.LocalUserHelper.USER_NET_ID;
 
-public class StudyBuddyActivity extends AppCompatActivity {
+public class StudyBuddyActivity extends AppCompatActivity implements DisplayEventFragment.OnCompleteListener {
     private ReservationAdapter mAdapter;
     private SQLiteDatabase db;
     private ListView studyList;
     private final static String[] columnsUser = {BUILDING_ID, USER_NET_ID};
-    private Reservation[] reservations;
+    //private Reservation[] reservations;
     private String userNetID = "";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +64,7 @@ public class StudyBuddyActivity extends AppCompatActivity {
         mCursorUser.close();
 
         studyList = (ListView)findViewById(R.id.reservationList);
-        reservations = Reservation.getStudy(this, Calendar.getInstance());
+        Reservation[] reservations = Reservation.getStudy(this, Calendar.getInstance());
         mAdapter = new ReservationAdapter(this, R.layout.reservation_item, reservations);
         studyList.setAdapter(mAdapter);
         studyList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -78,16 +78,8 @@ public class StudyBuddyActivity extends AppCompatActivity {
             }
         });
 
-        /*
         LoadStudyReservationTask retrieveStudyReservationTask = new LoadStudyReservationTask(userNetID, this);
         retrieveStudyReservationTask.execute((Void) null);
-
-        if(reservations !=null && reservations.length != 0)
-            studyList.setBackground(null);
-        else
-            studyList.setBackground(ContextCompat.getDrawable(this, R.drawable.empty));
-*/
-
     }
 
     public void createEventClicked(View view) {
@@ -95,22 +87,20 @@ public class StudyBuddyActivity extends AppCompatActivity {
         intent.putExtra("isEvent",false);
         startActivity(intent);
     }
+    public void onDisplayEventComplete(){
+        LoadStudyReservationTask retrieveStudyReservationTask = new LoadStudyReservationTask(userNetID, this);
+        retrieveStudyReservationTask.execute((Void) null);
+    }
 
     @Override
     protected void onPostResume() {
         super.onPostResume();
         LoadStudyReservationTask retrieveStudyReservationTask = new LoadStudyReservationTask(userNetID, this);
         retrieveStudyReservationTask.execute((Void) null);
-
-        if(reservations !=null && reservations.length != 0)
-            studyList.setBackground(null);
-        else
-            studyList.setBackground(ContextCompat.getDrawable(this, R.drawable.empty));
     }
 
     public class LoadStudyReservationTask extends AsyncTask<Void, Void, Boolean> {
         private final String requestURL;
-        //private final String requestUsingLaundryURL;
         private Context context;
 
         LoadStudyReservationTask(String userNetID, Context context) {
@@ -147,6 +137,7 @@ public class StudyBuddyActivity extends AppCompatActivity {
                 Iterator<?> keys = getStudyResponse.keys();
                 while(keys.hasNext()){
                     String keyString = (String) keys.next();
+                    System.out.println(keyString);
                     JSONObject resJSON = (JSONObject) getStudyResponse.get(keyString);
                     String buildingID = resJSON.getString("BuildingID");
                     String roomNum = resJSON.getString("RoomNum");
@@ -174,12 +165,12 @@ public class StudyBuddyActivity extends AppCompatActivity {
                         cv.put(RESERVATION_START_TIME,reservationStartTime);
                         cv.put(RESERVATION_END_TIME,reservationEndTime);
                         db.insert(TABLE_RESERVATION,null,cv);
-                        System.out.println("Added new reservation "+buildingID+roomNum);
+                        System.out.println("Added new reservation "+reservationTitle+buildingID+roomNum);
                     }
                     resCursor.close();
-                    System.out.println("Finished loading study room");
                     studyList.setBackground(null);
                 }
+                System.out.println("Finished loading study room");
                 return true;
             } catch (Exception e) {
                 System.out.println(e.toString());
@@ -192,8 +183,10 @@ public class StudyBuddyActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Boolean aBoolean) {
             mAdapter.updateStudyAdapter(context);
-            //washerAdapter.notifyDataSetChanged();
-            //dryerAdapter.notifyDataSetChanged();
+            if(mAdapter.getCount() != 0)
+                studyList.setBackground(null);
+            else
+                studyList.setBackground(ContextCompat.getDrawable(context, R.drawable.empty));
             super.onPostExecute(aBoolean);
         }
     }
