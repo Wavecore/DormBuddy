@@ -82,6 +82,8 @@ public class LaundryBuddyActivity extends AppCompatActivity implements MachineSe
         int selectedDryer = mCursorUser.getInt(1);
         buildingId = mCursorUser.getString(2);
         userNetId = mCursorUser.getString(3);
+        mCursorUser.close();
+        db.close();//done with local database
         //new users will not see LaundryBuddy unless they have a template selected
         if (selectedWasher < 0 || selectedDryer < 0) {
             Toast.makeText(this, "You Must Select A Washer & Dryer Template To Use LaundryBuddy", Toast.LENGTH_LONG).show();

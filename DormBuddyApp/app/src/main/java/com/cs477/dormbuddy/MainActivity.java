@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
         try { //if the user ever logged in, there will be a row in the database, but check that they didnt log out
             mCursor.moveToPosition(0);
             int isLoggedIn = mCursor.getInt(2);
+            db.close();
             if (isLoggedIn == 1) {
                 Toast.makeText(this, "Greetings, buddy " + mCursor.getString(1), Toast.LENGTH_SHORT).show(); //welcome message
                 //user is logged in, therefore show activity_main
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(this, CredentialsActivity.class));
             }
         } catch (Exception e) { //otherwise direct to login
+            db.close();
             startActivity(new Intent(this, CredentialsActivity.class));
         }
     }
@@ -60,11 +62,22 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.profileBuddyImageButton:
                 intent = new Intent(this, ProfileBuddyActivity.class);
-                break;
+                //profile buddy is the only buddy that can kill this activity
+                startActivityForResult(intent, 200);
+                return;
             default:
                 Toast.makeText(this, "Error Retrieving Page", Toast.LENGTH_SHORT).show();
                 return;
         }
         startActivity(intent); //main activity never ends
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == 500) {
+            super.onActivityResult(requestCode, resultCode, data);
+            finish(); //finish this activity as log out was clicked
+            startActivity(new Intent(this, CredentialsActivity.class));
+        }
     }
 }

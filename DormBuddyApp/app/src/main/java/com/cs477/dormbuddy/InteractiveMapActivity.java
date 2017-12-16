@@ -268,4 +268,12 @@ public class InteractiveMapActivity extends FragmentActivity implements OnMapRea
     public void cancelClicked(View view) {
         hideAddMarker();
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        System.out.println("Map destroyed");
+        mCursor.close();
+        db.close();
+    }
 }

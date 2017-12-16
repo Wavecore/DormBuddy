@@ -368,4 +368,13 @@ public class CycleTemplatesActivity extends AppCompatActivity implements AddTemp
             return new String[]{actualName, templateSettings};
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        System.out.println("Cycle Templates Destroyed");
+        mCursorUser.close();
+        mCursorTemplates.close();
+        db.close();
+    }
 }

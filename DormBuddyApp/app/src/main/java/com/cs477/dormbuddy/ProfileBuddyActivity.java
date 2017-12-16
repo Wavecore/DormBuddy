@@ -84,9 +84,9 @@ public class ProfileBuddyActivity extends AppCompatActivity {
         cv.put(USER_LOGGED_IN, 0); //gives illusion of being logged out but user info is still in table
         db.update(TABLE_USER, cv, USER_LOGGED_IN + "=" + 1, null);
         db.delete(TABLE_RESERVATION,"", new String[]{});
-        db.close();
         mCursor.close();
-        startActivity(new Intent(this, CredentialsActivity.class));
+        db.close();
+        setResult(500);
         finish();
     }
 
