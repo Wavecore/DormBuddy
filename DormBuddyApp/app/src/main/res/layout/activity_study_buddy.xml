@@ -31,11 +31,13 @@
         android:layout_below="@+id/MyReservationTextView"
         android:layout_above="@+id/roomReservationButton"
         />
+
     <Button
         android:id="@+id/roomReservationButton"
-        android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:backgroundTint="@color/colorAmber"
-        android:text="Reserve a Room"/>
+        android:onClick="createEventClicked"
+        android:text="Reserve a Room" />
 </RelativeLayout>

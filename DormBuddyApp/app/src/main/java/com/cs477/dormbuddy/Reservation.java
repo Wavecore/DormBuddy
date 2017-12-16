@@ -25,6 +25,7 @@ import static com.cs477.dormbuddy.LocalUserHelper.TABLE_RESERVATION;
 import static com.cs477.dormbuddy.LocalUserHelper.TABLE_USER;
 import static com.cs477.dormbuddy.LocalUserHelper.USER_ID;
 import static com.cs477.dormbuddy.LocalUserHelper.USER_LOGGED_IN;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_NET_ID;
 
 /**
  * Created by Wave on 12/2/2017.
@@ -39,7 +40,7 @@ public class Reservation {
     public static Boolean isEvent;
     public static String buildingID;
     public static String roomNum;
-    public static String[] columns = {BUILDING_ID,ROOM_NUMBER,USER_ID,RESERVATION_TITLE,RESERVATION_DESCRIPTION,
+    public static String[] columns = {BUILDING_ID,ROOM_NUMBER,USER_NET_ID,RESERVATION_TITLE,RESERVATION_DESCRIPTION,
         RESERVATION_ICON,RESERVATION_IS_EVENT,RESERVATION_START_TIME,RESERVATION_END_TIME};
     public static final SimpleDateFormat resFormatter = new SimpleDateFormat("h:mm a, EEE d MMM yyyy");
     public static final SimpleDateFormat simpleResFormatter = new SimpleDateFormat("h:mm a, d MMM");

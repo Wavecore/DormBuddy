@@ -12,6 +12,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -23,27 +24,44 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
+import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_ID;
 import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_NAME;
+import static com.cs477.dormbuddy.LocalUserHelper.RESERVATION_DESCRIPTION;
+import static com.cs477.dormbuddy.LocalUserHelper.RESERVATION_START_TIME;
+import static com.cs477.dormbuddy.LocalUserHelper.RESERVATION_TITLE;
+import static com.cs477.dormbuddy.LocalUserHelper.ROOM_NUMBER;
 import static com.cs477.dormbuddy.LocalUserHelper.TABLE_BUILDING;
+import static com.cs477.dormbuddy.LocalUserHelper.TABLE_RESERVATION;
 import static com.cs477.dormbuddy.Reservation.image;
+import static com.cs477.dormbuddy.Reservation.roomNum;
 
 public class DisplayEventFragment extends DialogFragment {
     static final String DISPLAY_EVENT_TAG = "DisplayEventTag";
+    private String buildingID;
+    private String room;
+    private long start;
+    private SQLiteDatabase db;
+    private Context context;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         super.onCreateDialog(savedInstanceState);
         // Get values from bundle
+        context = getContext();
         String title = getArguments().getString("title");
         byte[] i = getArguments().getByteArray("image");
-        String buildingID = getArguments().getString("buildingID");
-        String room = getArguments().getString("roomNum");
-        long start = getArguments().getLong("start");
+         buildingID = getArguments().getString("buildingID");
+         room = getArguments().getString("roomNum");
+        start = getArguments().getLong("start");
         long end = getArguments().getLong("end");
         String description = getArguments().getString("description");
         boolean auth = getArguments().getBoolean("authorization");
@@ -84,7 +102,7 @@ public class DisplayEventFragment extends DialogFragment {
         });
 
         LocalUserHelper dbHelper = new LocalUserHelper(this.getContext());
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db = dbHelper.getWritableDatabase();
         Cursor cCursor = db.query(TABLE_BUILDING,new String[]{BUILDING_NAME},BUILDING_ID+"='"+buildingID+"'",
                 new String[]{},null, null,null);                            //Get the name of the building from the
         // System.out.println(r.buildingID);
@@ -101,10 +119,14 @@ public class DisplayEventFragment extends DialogFragment {
 
         builder.setView(v);
         if(auth)
-             builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+             builder.setPositiveButton("Cancel Reservation", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int id) {
                             //TODO: Implement delete event functionality
+                            DeleteReservation deleteReservation = new DeleteReservation(context);
+                            deleteReservation.execute((Void) null);
+
+                            db.delete(TABLE_RESERVATION,BUILDING_ID+"='"+buildingID+"' AND "+ROOM_NUMBER+"='"+room+"' AND "+RESERVATION_START_TIME+"="+start, new String[]{});
                         }
                     });
          builder.setNegativeButton("Close", new DialogInterface.OnClickListener() {
@@ -152,6 +174,61 @@ public class DisplayEventFragment extends DialogFragment {
         display.setArguments(args);
         return display;
     }
+    public class DeleteReservation extends AsyncTask<Void, Void, Integer> {
+        private final String requestURL;
+        private Context context;
 
+        DeleteReservation(Context context) {
+
+            requestURL = String.format("https://hidden-caverns-60306.herokuapp.com/deleteReservation/%s/%s/%d", buildingID, room,start);
+            System.out.println(requestURL);
+            this.context = context;
+        }
+
+        @Override
+        protected Integer doInBackground(Void... params) {
+            try {
+                URL requestReserveMachineURL = new URL(requestURL);
+
+                HttpsURLConnection connection = (HttpsURLConnection) requestReserveMachineURL.openConnection();
+                connection.setRequestMethod("DELETE");
+                connection.setDoOutput(true);
+                connection.setRequestProperty("Content-Type", "application/json");
+                connection.setRequestProperty("Accept", "application/json");
+
+
+                String responseMessage = connection.getResponseMessage();
+                System.out.println(connection.getResponseCode()+" "+responseMessage);
+                if (connection.getResponseCode() == 200)
+                    return 1;
+                else if(connection.getResponseCode() == 410)
+                    return -1;
+                else if(connection.getResponseCode() == 412)
+                    return -2;
+                else if(connection.getResponseCode() == 400)
+                    return -3;
+                else
+                    return -4;
+            } catch (Exception e) {
+                System.out.println(e.toString());
+                return -1;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Integer type) {
+            super.onPostExecute(type);
+            if(type == -1)
+                Toast.makeText(context, "ERROR: Reservation not found", Toast.LENGTH_SHORT).show();
+            else if(type == -2)
+                Toast.makeText(context, "ERROR: Bad parameters", Toast.LENGTH_SHORT).show();
+            else if(type == -3)
+                Toast.makeText(context, "ERROR: Failed preconditions", Toast.LENGTH_SHORT).show();
+            else if(type == -4)
+                Toast.makeText(context, "ERROR: Something bad happened", Toast.LENGTH_SHORT).show();
+            else if(type == 1)
+                Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show();
+        }
+    }
 
 }

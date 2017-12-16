@@ -24,6 +24,8 @@ import java.io.IOException;
 
 import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_ID;
 import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_NAME;
+import static com.cs477.dormbuddy.LocalUserHelper.RESERVATION_START_TIME;
+import static com.cs477.dormbuddy.LocalUserHelper.TABLE_RESERVATION;
 import static com.cs477.dormbuddy.LocalUserHelper.USER_NAME;
 import static com.cs477.dormbuddy.LocalUserHelper.USER_ICON;
 import static com.cs477.dormbuddy.LocalUserHelper.USER_LOGGED_IN;
@@ -81,6 +83,7 @@ public class ProfileBuddyActivity extends AppCompatActivity {
         ContentValues cv = new ContentValues(1);
         cv.put(USER_LOGGED_IN, 0); //gives illusion of being logged out but user info is still in table
         db.update(TABLE_USER, cv, USER_LOGGED_IN + "=" + 1, null);
+        db.delete(TABLE_RESERVATION,"", new String[]{});
         db.close();
         mCursor.close();
         startActivity(new Intent(this, CredentialsActivity.class));

@@ -113,15 +113,16 @@
         android:textSize="20sp"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"/>
-        <Button
-            android:id="@+id/startButton"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:backgroundTint="@color/colorGreen"
-            android:text="Start Event"
-            android:layout_weight="0"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            />
+
+    <Button
+        android:id="@+id/startButton"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_weight="0"
+        android:backgroundTint="@color/colorGreen"
+        android:onClick="createReservation"
+        android:text="Create" />
 </LinearLayout>

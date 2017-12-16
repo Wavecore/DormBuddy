@@ -39,6 +39,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import org.json.*; //responses are in JSON
 
@@ -48,6 +49,9 @@ import static android.Manifest.permission.READ_CONTACTS;
 import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_ID;
 import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_NAME;
 import static com.cs477.dormbuddy.LocalUserHelper.ROOM_NUMBER;
+import static com.cs477.dormbuddy.LocalUserHelper.ROOM_TYPE;
+import static com.cs477.dormbuddy.LocalUserHelper.TABLE_BUILDING;
+import static com.cs477.dormbuddy.LocalUserHelper.TABLE_ROOM;
 import static com.cs477.dormbuddy.LocalUserHelper.USER_ICON;
 import static com.cs477.dormbuddy.LocalUserHelper.USER_IS_ADMIN;
 import static com.cs477.dormbuddy.LocalUserHelper.USER_NAME;
@@ -364,18 +368,14 @@ public class CredentialsActivity extends AppCompatActivity implements LoaderCall
                 connection.setConnectTimeout(5000);
                 connection.setReadTimeout(5000);
                 connection.connect();
-
                 //get the response
                 BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String content = "", line;
-
                 while ((line = rd.readLine()) != null) {
                     content += line + "\n";
                 }
-
                 //parse the response JSON
                 JSONObject response = new JSONObject(content);
-                //use .getJSONObject("object") to get inner JSONs
                 String Name = response.getString("Name");
 
                 if (Name.length() > 1) { //user successfully logged in if a name was returned
@@ -407,43 +407,13 @@ public class CredentialsActivity extends AppCompatActivity implements LoaderCall
                         db.insert(TABLE_USER, null, cv);
                     }
                     mCursor.close();
-
-
-
                     System.out.printf("%s, %s, %s, %s, %s\n", Name, BuildingID, GNumber, RoomNum, isAdmin);
                 }
-
-                /* array code snippet
-                JSONArray arr = obj.getJSONArray("posts");
-                for (int i = 0; i < arr.length(); i++)
-                {
-                    String post_id = arr.getJSONObject(i).getString("post_id");
-                }
-                */
-
-                //password is correct if content is returned lol*/
                 return Name.length() > 1;
             } catch (Exception e) {
                 System.out.println(e.toString());
                 return false;
             }
-
-            /*
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-            return true; //every password is correct*/
         }
 
         @Override
@@ -453,6 +423,10 @@ public class CredentialsActivity extends AppCompatActivity implements LoaderCall
 
             if (success) { //correct password
                 //go to house picking
+                RoomsTask roomsTask = new RoomsTask(context);
+                roomsTask.execute((Void) null);
+                BuildingsTask buildingsTask = new BuildingsTask(context);
+                buildingsTask.execute((Void) null);
                 startActivity(new Intent(context, MainActivity.class));
                 finish(); //finish ends this activity for good
             } else {
@@ -465,6 +439,126 @@ public class CredentialsActivity extends AppCompatActivity implements LoaderCall
         protected void onCancelled() {
             mAuthTask = null;
             showProgress(false);
+        }
+    }
+    public class RoomsTask extends AsyncTask<Void, Void, Boolean> {
+
+        private final String requestURL;
+        private Context context;
+        private String buildingID = "";
+        RoomsTask( Context context) {
+            Cursor bCursor = db.query(TABLE_USER, new String[]{BUILDING_ID}, USER_LOGGED_IN+"="+1, new String[] {}, null, null,
+                    null);
+            if(bCursor.moveToFirst())
+                buildingID = bCursor.getString(0);
+            bCursor.close();
+            requestURL = String.format("https://hidden-caverns-60306.herokuapp.com/rooms/%s", buildingID);
+            this.context = context;
+        }
+
+        //sends the request in background
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                URL url = new URL(requestURL);
+
+                //uses HttpsURLConnection to make the request(HttpClient is outdated and deprecated)
+                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setDoOutput(false);
+                connection.setConnectTimeout(5000);
+                connection.setReadTimeout(5000);
+                connection.connect();
+
+                //get the response
+                BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String content = "", line;
+
+                while ((line = rd.readLine()) != null) {
+                    content += line + "\n";
+                }
+
+                //parse the response JSON
+                JSONObject response = new JSONObject(content);
+                Iterator<?> keys = response.keys();
+                while(keys.hasNext()) {
+                    String roomNum = (String) keys.next();
+                    JSONObject roomJSON = (JSONObject) response.get(roomNum);
+                    String roomType = roomJSON.getString("Type");
+                    Cursor rCursor = db.query(TABLE_ROOM,new String[]{BUILDING_ID,ROOM_NUMBER}, BUILDING_ID+"='"+buildingID+"' AND "+ROOM_NUMBER+"='"+roomNum+"'",
+                            new String[]{},null,null,null);
+                    if(mCursor.getCount() == 0){
+                        ContentValues cv = new ContentValues(3);
+                        cv.put(BUILDING_ID,buildingID);
+                        cv.put(ROOM_NUMBER,roomNum);
+                        cv.put(ROOM_TYPE,roomType);
+                        db.insert(TABLE_ROOM,null,cv);
+
+                        System.out.printf("Added %s, %s, %s\n", buildingID, roomNum, roomType);
+                    }
+                    rCursor.close();
+                }
+                return true; //Rooms is now up-to-date
+            } catch (Exception e) {
+                System.out.println(e.toString());
+                return false;
+            }
+
+        }
+    }
+    public class BuildingsTask extends AsyncTask<Void, Void, Boolean> {
+
+        private final String requestURL;
+        private Context context;
+        BuildingsTask( Context context) {
+            requestURL = String.format("https://hidden-caverns-60306.herokuapp.com/building");
+            this.context = context;
+        }
+        //sends the request in background
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                URL url = new URL(requestURL);
+
+                //uses HttpsURLConnection to make the request(HttpClient is outdated and deprecated)
+                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setDoOutput(false);
+                connection.setConnectTimeout(5000);
+                connection.setReadTimeout(5000);
+                connection.connect();
+                //get the response
+                BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String content = "", line;
+                while ((line = rd.readLine()) != null) {
+                    content += line + "\n";
+                }
+                System.out.println(content);
+                //parse the response JSON
+                JSONObject response = new JSONObject(content);
+                Iterator<?> keys = response.keys();
+                while(keys.hasNext()) {
+                    String buildingID = (String) keys.next();
+                    String buildingName = response.getString(buildingID);
+                    System.out.println(String.format("ID: %s, Name: %s",buildingID,buildingName));
+                    Cursor rCursor = db.query(TABLE_BUILDING,new String[]{BUILDING_ID,BUILDING_NAME}, BUILDING_ID+"='"+buildingID+"'",
+                            new String[]{},null,null,null);
+                    if(mCursor.getCount() == 0){
+                        ContentValues cv = new ContentValues(3);
+                        cv.put(BUILDING_ID,buildingID);
+                        cv.put(BUILDING_NAME,buildingName);
+                        db.insert(TABLE_BUILDING,null,cv);
+
+                        System.out.printf("Added %s, %s\n", buildingID, buildingName);
+                    }
+                    rCursor.close();
+                }
+                return true; //Buildings are now up-to-date
+            } catch (Exception e) {
+                System.out.println(e.toString());
+                return false;
+            }
+
         }
     }
 }

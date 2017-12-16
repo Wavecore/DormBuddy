@@ -12,9 +12,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.Calendar;
+
 import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_ID;
 import static com.cs477.dormbuddy.LocalUserHelper.RESERVATION_END_TIME;
 import static com.cs477.dormbuddy.LocalUserHelper.RESERVATION_IS_EVENT;
+import static com.cs477.dormbuddy.LocalUserHelper.RESERVATION_START_TIME;
 import static com.cs477.dormbuddy.LocalUserHelper.TABLE_BUILDING;
 import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_NAME;
 
@@ -33,7 +36,26 @@ public class ReservationAdapter extends ArrayAdapter<Reservation> {
                 add(r[x]);
         }
     }
-
+    public void updateStudyAdapter(Context context){
+        this.clear();
+        Reservation[] r = Reservation.getStudy(context,Calendar.getInstance());
+        if(r != null){
+            for(int x = 0; x < r.length;x++)
+                add(r[x]);
+        }
+        System.out.println("Updated study");
+        this.notifyDataSetChanged();
+    }
+    public void updateEventAdapter(Context context){
+        this.clear();
+        Reservation[] r = Reservation.getUpcommingEvent(context,Calendar.getInstance());
+        if(r != null){
+            for(int x = 0; x < r.length;x++)
+                add(r[x]);
+        }
+        System.out.println("Updated events");
+        this.notifyDataSetChanged();
+    }
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {

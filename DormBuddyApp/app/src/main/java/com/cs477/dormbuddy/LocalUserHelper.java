@@ -13,7 +13,7 @@ import java.util.Calendar;
 
 //database helper that keeps user logged in and displays their templates
 public class LocalUserHelper extends SQLiteOpenHelper {
-    final static private Integer VERSION = 1037;
+    final static private Integer VERSION = 1045;
     //===============Buildings Table=====================
     final static String TABLE_BUILDING = "dormbuddy_building";
     final static String BUILDING_ID = "building_id";
@@ -89,8 +89,8 @@ public class LocalUserHelper extends SQLiteOpenHelper {
      */
     final private String CREATE_USER =
             "CREATE TABLE "+TABLE_USER+" (" +
-                    USER_ID + " TEXT PRIMARY KEY NOT NULL, " +
-                    USER_NET_ID + " TEXT NOT NULL, " +
+                    USER_ID + " TEXT  NOT NULL, " +
+                    USER_NET_ID + " TEXT PRIMARY KEY NOT NULL, " +
                     USER_NAME + " TEXT NOT NULL, " +
                     USER_LOGGED_IN + " INTEGER, " +
                     BUILDING_ID + " TEXT NOT NULL, " +
@@ -123,7 +123,7 @@ public class LocalUserHelper extends SQLiteOpenHelper {
             "CREATE TABLE "+TABLE_RESERVATION+" ("+
                     BUILDING_ID +" TEXT NOT NULL, "+
                     ROOM_NUMBER+" TEXT NOT NULL, "+
-                    USER_ID+ " INTEGER, "+
+                    USER_NET_ID+ " TEXT NOT NULL, "+
                     RESERVATION_TITLE+ " TEXT, "+
                     RESERVATION_DESCRIPTION+" TEXT, "+
                     RESERVATION_ICON+ " BLOB, "+
@@ -133,7 +133,7 @@ public class LocalUserHelper extends SQLiteOpenHelper {
                     "PRIMARY KEY ("+BUILDING_ID+", "+ROOM_NUMBER+","+RESERVATION_START_TIME+","+RESERVATION_END_TIME+"), "+
                     "FOREIGN KEY ("+BUILDING_ID+") REFERENCES "+TABLE_ROOM+" ("+BUILDING_ID+") ON DELETE SET NULL DEFERRABLE,"+
                     "FOREIGN KEY ("+ROOM_NUMBER+") REFERENCES "+TABLE_ROOM+" ("+ROOM_NUMBER+") ON DELETE SET NULL DEFERRABLE,"+
-                    "FOREIGN KEY ("+USER_ID+") REFERENCES "+TABLE_USER+" ("+USER_ID+") ON DELETE SET NULL DEFERRABLE);";
+                    "FOREIGN KEY ("+USER_NET_ID+") REFERENCES "+TABLE_USER+" ("+USER_NET_ID+") ON DELETE SET NULL DEFERRABLE);";
     final private String CREATE_MAP =
             "CREATE TABLE "+TABLE_MARKERS+" ("+
                     MARKER_ID +" INTEGER PRIMARY KEY AUTOINCREMENT, "+
@@ -171,6 +171,7 @@ public class LocalUserHelper extends SQLiteOpenHelper {
     }
     private void addInitialEntries(SQLiteDatabase db){
         // Insert Buildings
+       /*
         db.execSQL("INSERT INTO "+TABLE_BUILDING+" ("+BUILDING_ID+", "+BUILDING_NAME+") VALUES( 'FAKE', 'Fake Building');");    //ID 0
         db.execSQL("INSERT INTO "+TABLE_BUILDING+" ("+BUILDING_ID+", "+BUILDING_NAME+") VALUES('BEAC','Beacon Hall');");    //ID 1
         db.execSQL("INSERT INTO "+TABLE_BUILDING+" ("+BUILDING_ID+", "+BUILDING_NAME+") VALUES('BLUE','Blue Ridge');");     //ID 2
@@ -227,24 +228,11 @@ public class LocalUserHelper extends SQLiteOpenHelper {
         db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'DOMI','453','LAUNDRY' );");
         db.execSQL("INSERT INTO "+TABLE_ROOM+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+ROOM_TYPE+") VALUES( 'DOMI','333','LAUNDRY' );");
         // Insert Reservations
-        /*
-         BUILDING_ID +" INTEGER, "+
-                    ROOM_NUMBER+" TEXT NOT NULL, "+
-                    USER_ID+ " INTEGER, "+
-                    RESERVATION_TITLE+ " TEXT, "+
-                    RESERVATION_DESCRIPTION+" TEXT, "+
-                    RESERVATION_ICON+ " BLOB, "+
-                    RESERVATION_IS_EVENT+" BOOLEAN, "+
-                    RESERVATION_START_TIME+ " INTEGER NOT NULL, "+
-                    RESERVATION_END_TIME+ " INTEGER NOT NULL, "+
-                    "PRIMARY KEY ("+BUILDING_ID+", "+ROOM_NUMBER+","+RESERVATION_START_TIME+","+RESERVATION_END_TIME+"), "+
-                    "FOREIGN KEY ("+BUILDING_ID+") REFERENCES "+TABLE_ROOM+" ("+BUILDING_ID+") ON DELETE SET NULL DEFERRABLE,"+
-                    "FOREIGN KEY ("+ROOM_NUMBER+") REFERENCES "+TABLE_ROOM+" ("+ROOM_NUMBER+") ON DELETE SET NULL DEFERRABLE,"+
-                    "FOREIGN KEY ("+USER_ID+") REFERENCES "+TABLE_USER+" ("+USER_ID+") ON DELETE SET NULL DEFERRABLE);";
-         */
-        db.execSQL("INSERT INTO "+TABLE_RESERVATION+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+USER_ID+", "+RESERVATION_TITLE+", "+RESERVATION_DESCRIPTION+
-                ", "+RESERVATION_ICON+", "+RESERVATION_IS_EVENT+", "+RESERVATION_START_TIME+", "+RESERVATION_END_TIME+") VALUES( 'COMM','333',1123,'Test123123','descriptiosnsdfsdf',null,0,"+
+
+        db.execSQL("INSERT INTO "+TABLE_RESERVATION+" ("+BUILDING_ID+", "+ROOM_NUMBER+", "+USER_NET_ID+", "+RESERVATION_TITLE+", "+RESERVATION_DESCRIPTION+
+                ", "+RESERVATION_ICON+", "+RESERVATION_IS_EVENT+", "+RESERVATION_START_TIME+", "+RESERVATION_END_TIME+") VALUES( 'COMM','333','jdoe','Test123123','descriptiosnsdfsdf',null,0,"+
                 (Calendar.getInstance().getTime().getTime()+100000000)+","+(Calendar.getInstance().getTime().getTime()+500000000)+" );");
+       */
         // Insert Markers
         db.execSQL("INSERT INTO "+TABLE_MARKERS+" ("+MARKER_LATITUDE+", "+MARKER_LONGITUDE+", "+MARKER_NAME+", "+MARKER_IS_CAMPUS
                 +", "+MARKER_IS_IMPORTANT+")"+"VALUES( 38.82962607382459,-77.30722703039646,'JC', 1, 1 );");

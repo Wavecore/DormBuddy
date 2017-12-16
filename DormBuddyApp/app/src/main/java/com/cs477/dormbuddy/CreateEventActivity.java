@@ -3,6 +3,7 @@ package com.cs477.dormbuddy;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -11,6 +12,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.Image;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,6 +20,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
@@ -27,11 +30,18 @@ import android.widget.Toast;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_ID;
 import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_NAME;
+import static com.cs477.dormbuddy.LocalUserHelper.RESERVATION_DESCRIPTION;
+import static com.cs477.dormbuddy.LocalUserHelper.RESERVATION_TITLE;
 import static com.cs477.dormbuddy.LocalUserHelper.ROOM_NUMBER;
 import static com.cs477.dormbuddy.LocalUserHelper.ROOM_TYPE;
 import static com.cs477.dormbuddy.LocalUserHelper.ROOM_TYPE_DORM;
@@ -41,6 +51,7 @@ import static com.cs477.dormbuddy.LocalUserHelper.TABLE_ROOM;
 import static com.cs477.dormbuddy.LocalUserHelper.TABLE_USER;
 import static com.cs477.dormbuddy.LocalUserHelper.USER_ID;
 import static com.cs477.dormbuddy.LocalUserHelper.USER_LOGGED_IN;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_NET_ID;
 
 public class CreateEventActivity extends AppCompatActivity implements SelectTimeSlotFragment.OnCompleteListener {
 
@@ -51,24 +62,32 @@ public class CreateEventActivity extends AppCompatActivity implements SelectTime
     private Calendar startTime;
     private Calendar endTime;
     private EditText editText;
-    private int user_id;
-    private int building_id;
+    private String user_id;
+    private String building_id;
+    private EditText titleText;
+    private Spinner eventLocation;
+    private EditText descpText;
+    private boolean isEvent = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_event);
+        Intent intent = getIntent();
+        isEvent = intent.getBooleanExtra("isEvent",false);
         FragmentManager fm = getFragmentManager();
         dbHelper = new LocalUserHelper(this);
         db = dbHelper.getWritableDatabase();
+        titleText = (EditText)findViewById(R.id.eventNameEdit);
+        descpText = (EditText)findViewById(R.id.eventDescription);
         editText = (EditText)findViewById(R.id.eventTime);
         editText.setFocusable(false);
-        Cursor cCursor = db.query(TABLE_USER,new String[]{USER_ID,BUILDING_ID},USER_LOGGED_IN+" = 1", new String[]{},null, null,null);
+        Cursor cCursor = db.query(TABLE_USER,new String[]{USER_NET_ID,BUILDING_ID},USER_LOGGED_IN+" = 1", new String[]{},null, null,null);
         if(cCursor.moveToFirst()){
-            building_id = cCursor.getInt(1);
-            user_id = cCursor.getInt(0);
+            building_id = cCursor.getString(1);
+            user_id = cCursor.getString(0);
         }
         cCursor.close();
-        cCursor = db.query(TABLE_ROOM,new String[]{ROOM_NUMBER},BUILDING_ID+" = "+building_id+" AND "+ROOM_TYPE+" = '"+ROOM_TYPE_STUDY+"'", new String[]{},null, null,null);
+        cCursor = db.query(TABLE_ROOM,new String[]{ROOM_NUMBER},BUILDING_ID+" = '"+building_id+"' AND "+ROOM_TYPE+" = '"+ROOM_TYPE_STUDY+"'", new String[]{},null, null,null);
         ArrayAdapter<CharSequence> mAdapter = new ArrayAdapter<CharSequence>(this,R.layout.spinner_item,R.id.spinnerItem);
         mAdapter.add("Select a Room");
         if (cCursor.moveToFirst()) {
@@ -78,7 +97,7 @@ public class CreateEventActivity extends AppCompatActivity implements SelectTime
             }
         }
         cCursor.close();
-        Spinner eventLocation = (Spinner)findViewById(R.id.eventLocation);
+        eventLocation = (Spinner)findViewById(R.id.eventLocation);
         eventLocation.setAdapter(mAdapter);
         eventLocation.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -107,17 +126,20 @@ public class CreateEventActivity extends AppCompatActivity implements SelectTime
         editText.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                if(getSupportFragmentManager().findFragmentByTag(SelectTimeSlotFragment.SELECT_TIME_SLOT_TAG) == null) {
-                    //TODO: SELECT TIME SLOT INSTEAD OF TIME, CREATE DIALOG FRAGMENT
-                    Calendar mcurrentTime = Calendar.getInstance();
-                    SelectTimeSlotFragment selectTimeSlotFragment = SelectTimeSlotFragment.newInstance(startTime,endTime);
-                    selectTimeSlotFragment.show(getSupportFragmentManager(), SelectTimeSlotFragment.SELECT_TIME_SLOT_TAG);
-
+                if(editText.isFocusable()) {
+                    if (getSupportFragmentManager().findFragmentByTag(SelectTimeSlotFragment.SELECT_TIME_SLOT_TAG) == null) {
+                        Calendar mcurrentTime = Calendar.getInstance();
+                        SelectTimeSlotFragment selectTimeSlotFragment = SelectTimeSlotFragment.newInstance(startTime, endTime, building_id, (String) eventLocation.getSelectedItem());
+                        selectTimeSlotFragment.show(getSupportFragmentManager(), SelectTimeSlotFragment.SELECT_TIME_SLOT_TAG);
+                    }
                 }
             }
         });
     }
-
+    public void createReservation(View v){
+        ReserveRoom reserveRoom = new ReserveRoom(this);
+        reserveRoom.execute((Void) null);
+    }
 
     public void onComplete(Calendar start, Calendar end){
         startTime = start;
@@ -156,6 +178,81 @@ public class CreateEventActivity extends AppCompatActivity implements SelectTime
                 e.printStackTrace();
                 Toast.makeText(CreateEventActivity.this, "Something went wrong", Toast.LENGTH_LONG).show();
             }
+        }
+    }
+
+    public class ReserveRoom extends AsyncTask<Void, Void, Integer> {
+        private final String requestURL;
+        private String title;
+        private String roomNum;
+        private long start;
+        private long end;
+        private String description;
+        private Context context;
+
+        ReserveRoom(Context context) {
+            this.title = titleText.getText().toString();
+            this.roomNum = eventLocation.getSelectedItem().toString();
+            this.start = startTime.getTime().getTime();
+            this.end = endTime.getTime().getTime();
+            this.description = descpText.getText().toString();
+            requestURL = String.format("https://hidden-caverns-60306.herokuapp.com/makeReservation/%s/%s", building_id, roomNum);
+            System.out.println(requestURL);
+            this.context = context;
+        }
+
+        @Override
+        protected Integer doInBackground(Void... params) {
+            try {
+                URL requestReserveMachineURL = new URL(requestURL);
+
+                HttpsURLConnection connection = (HttpsURLConnection) requestReserveMachineURL.openConnection();
+                connection.setRequestMethod("PUT");
+                connection.setDoOutput(true);
+                connection.setRequestProperty("Content-Type", "application/json");
+                connection.setRequestProperty("Accept", "application/json");
+
+                //prepares the request body, using reservation type to determine new status of machine
+                String writeData = String.format("{\"BuildingID\":\"%s\",\"IsEvent\":%s, \"RoomNum\": \"%s\",\"TimeEnd\":%d,\"TimeStart\":%d,\"User\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}",
+                        building_id, new Boolean(isEvent).toString(), roomNum,end,start,user_id,RESERVATION_TITLE,title,RESERVATION_DESCRIPTION,description);
+                System.out.println(writeData);
+                OutputStreamWriter osw = new OutputStreamWriter(connection.getOutputStream());
+                osw.write(writeData);
+                osw.flush();
+                osw.close();
+
+                String responseMessage = connection.getResponseMessage();
+                System.out.println(connection.getResponseCode()+" "+responseMessage);
+                if (connection.getResponseCode() == 200)
+                    return 1;
+                else if(connection.getResponseCode() == 409)
+                    return -1;
+                else if(connection.getResponseCode() == 412)
+                    return -2;
+                else if(connection.getResponseCode() == 400)
+                    return -3;
+                else
+                    return -4;
+            } catch (Exception e) {
+                System.out.println(e.toString());
+                return -1;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Integer type) {
+            super.onPostExecute(type);
+            if(type == -1)
+                Toast.makeText(context, "ERROR: Reservation conflicts with another reservation", Toast.LENGTH_SHORT).show();
+            else if(type == -2)
+                Toast.makeText(context, "ERROR: Bad parameters", Toast.LENGTH_SHORT).show();
+            else if(type == -3)
+                Toast.makeText(context, "ERROR: Failed preconditions", Toast.LENGTH_SHORT).show();
+            else if(type == -4)
+                Toast.makeText(context, "ERROR: Something bad happened", Toast.LENGTH_SHORT).show();
+            else if(type == 1)
+                Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show();
+            finish();
         }
     }
 }
