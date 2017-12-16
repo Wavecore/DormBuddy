@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.Calendar;
+import java.util.Date;
 
 import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_ID;
 import static com.cs477.dormbuddy.LocalUserHelper.RESERVATION_END_TIME;
@@ -72,15 +73,22 @@ public class ReservationAdapter extends ArrayAdapter<Reservation> {
             TextView time = (TextView)v.findViewById(R.id.reservation_Time);
             TextView loca = (TextView)v.findViewById(R.id.reservation_Location);
             ImageView icon = (ImageView)v.findViewById(R.id.reservation_Icon);
+            TextView currentEvent = v.findViewById(R.id.is_happening_now);
 
             title.setText("Title: "+r.title);
 
                 loca.setText("Location: " + r.buildingID + " " + r.roomNum);
 
             time.setText("Time: "+Reservation.simpleResFormatter.format(r.startTime.getTime())+" to "+Reservation.simpleResFormatter.format(r.endTime.getTime()));
+            //events that have started
+            long now = new Date().getTime();
+            if (r.startTime.getTimeInMillis() < now && r.endTime.getTimeInMillis() > now) {
+                currentEvent.setVisibility(View.VISIBLE);
+            }
+
             if(r.image != null) //attempts to set the image to the user uploaded image
                 icon.setImageBitmap(r.image);
-            else if (isEvent) //events get a different icon
+            else if (isEvent) //events get a different icon than study reservations
                 icon.setImageResource(R.drawable.event);
         }
         return v;

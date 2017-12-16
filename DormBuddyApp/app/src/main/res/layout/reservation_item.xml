@@ -13,7 +13,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <TextView
@@ -33,5 +33,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Location:" />
+
+        <TextView
+            android:id="@+id/is_happening_now"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textColor="@color/colorGreen"
+            android:textSize="26sp"
+            android:text="HAPPENING NOW!" />
     </LinearLayout>
 </LinearLayout>
