@@ -10,7 +10,10 @@ import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 
 import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_ID;
@@ -31,7 +34,7 @@ import static com.cs477.dormbuddy.LocalUserHelper.USER_NET_ID;
  * Created by Wave on 12/2/2017.
  */
 
-public class Reservation {
+public class Reservation implements Comparable<Reservation>{
     public Calendar startTime;
     public Calendar endTime;
     public String title;
@@ -63,8 +66,8 @@ public class Reservation {
         Cursor cCursor = db.query(TABLE_RESERVATION,columns,RESERVATION_IS_EVENT+"=0 AND "+RESERVATION_END_TIME+">"+t,
                 new String[]{},null, null,null);                            //Query for all reservations that aren't events and haven't passed
         if(cCursor.moveToFirst()){
-            Reservation[] output = new Reservation[cCursor.getCount()];
-            int count = 0;
+            Reservation[] actualOutput = new Reservation[cCursor.getCount()];
+            ArrayList<Reservation> sortedOutput = new ArrayList<Reservation>();
             while ( !cCursor.isAfterLast() ) {
                 String buildingID = cCursor.getString(0);                     //BuildingID
                 String roomNum = cCursor.getString(1);                        //Room Number
@@ -76,14 +79,18 @@ public class Reservation {
                 long reservationStartTime = cCursor.getLong(7);
                 long reservationEndTime = cCursor.getLong(8);
                 System.out.println(reservationTitle);
-                output[count] = createReservation(reservationIsEvent,reservationStartTime,reservationEndTime,
-                        reservationTitle,reservationDescription, reservationIcon,buildingID,roomNum);
+                sortedOutput.add(createReservation(reservationIsEvent,reservationStartTime,reservationEndTime,
+                        reservationTitle,reservationDescription, reservationIcon,buildingID,roomNum));
                 cCursor.moveToNext();
-                count++;
+            }
+            Collections.sort(sortedOutput); //sorts all reservations
+            //copies sorted output to actual output
+            for (int count = 0; count < actualOutput.length; count++) {
+                actualOutput[count] = sortedOutput.get(count);
             }
             cCursor.close();
             db.close();
-            return output;
+            return actualOutput;
 
         }
         cCursor.close();
@@ -98,8 +105,8 @@ public class Reservation {
         Cursor cCursor = db.query(TABLE_RESERVATION,columns,RESERVATION_IS_EVENT+"=1 AND "+RESERVATION_END_TIME+">"+t,
                 new String[]{},null, null,null);                            //Query for all reservations that are events and haven't passed
         if(cCursor.moveToFirst()){
-            Reservation[] output = new Reservation[cCursor.getCount()];
-            int count = 0;
+            Reservation[] actualOutput = new Reservation[cCursor.getCount()];
+            ArrayList<Reservation> sortedOutput = new ArrayList<Reservation>();
             while ( !cCursor.isAfterLast() ) {
                 String buildingID = cCursor.getString(0);                     //BuildingID
                 String roomNum = cCursor.getString(1);                        //Room Number
@@ -110,19 +117,24 @@ public class Reservation {
                 boolean reservationIsEvent = 1==cCursor.getInt(6);
                 long reservationStartTime = cCursor.getLong(7);
                 long reservationEndTime = cCursor.getLong(8);
-                output[count] = createReservation(reservationIsEvent,reservationStartTime,reservationEndTime,
-                        reservationTitle,reservationDescription, reservationIcon,buildingID,roomNum);
+                sortedOutput.add(createReservation(reservationIsEvent,reservationStartTime,reservationEndTime,
+                        reservationTitle,reservationDescription, reservationIcon,buildingID,roomNum));
                 cCursor.moveToNext();
-                count++;
+            }
+            Collections.sort(sortedOutput); //sorts all reservations
+            //copies sorted output to actual output
+            for (int count = 0; count < actualOutput.length; count++) {
+                actualOutput[count] = sortedOutput.get(count);
             }
             cCursor.close();
             db.close();
-            return output;
+            return actualOutput;
         }
         cCursor.close();
         db.close();
         return null;
     }
+
     public static Reservation createReservation(boolean isEvent,long start, long end, String title, String description, byte[] image,String bID,String rNum){
         Calendar startTime = Calendar.getInstance();
         startTime.setTime(new Date(start));
@@ -141,5 +153,8 @@ public class Reservation {
         return null;
     }
 
-
+    //earlier event start times show up first
+    public int compareTo(Reservation other) {
+        return (int)(startTime.getTimeInMillis()-other.startTime.getTimeInMillis());
+    }
 }
