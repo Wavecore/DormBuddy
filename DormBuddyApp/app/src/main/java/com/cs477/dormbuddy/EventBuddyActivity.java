@@ -153,6 +153,7 @@ public class EventBuddyActivity extends AppCompatActivity implements DisplayEven
                 System.out.println(getStudyContent);
                 //Parse response in to JSON object
                 JSONObject getStudyResponse = new JSONObject(getStudyContent);
+                db.delete(TABLE_RESERVATION,"", new String[]{});
                 Iterator<?> keys = getStudyResponse.keys();
                 while(keys.hasNext()){
                     String keyString = (String) keys.next();

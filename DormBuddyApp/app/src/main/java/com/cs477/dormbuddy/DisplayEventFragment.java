@@ -207,7 +207,7 @@ public class DisplayEventFragment extends DialogFragment {
 
                 HttpsURLConnection connection = (HttpsURLConnection) requestReserveMachineURL.openConnection();
                 connection.setRequestMethod("DELETE");
-                connection.setDoOutput(true);
+                connection.setDoOutput(false);
                 connection.setRequestProperty("Content-Type", "application/json");
                 connection.setRequestProperty("Accept", "application/json");
 

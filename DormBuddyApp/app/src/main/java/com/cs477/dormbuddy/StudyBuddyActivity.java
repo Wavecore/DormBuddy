@@ -134,7 +134,9 @@ public class StudyBuddyActivity extends AppCompatActivity implements DisplayEven
                 System.out.println(getStudyContent);
                 //Parse response in to JSON object
                 JSONObject getStudyResponse = new JSONObject(getStudyContent);
+                System.out.println(getStudyResponse.toString());
                 Iterator<?> keys = getStudyResponse.keys();
+                db.delete(TABLE_RESERVATION,"", new String[]{});
                 while(keys.hasNext()){
                     String keyString = (String) keys.next();
                     System.out.println(keyString);
