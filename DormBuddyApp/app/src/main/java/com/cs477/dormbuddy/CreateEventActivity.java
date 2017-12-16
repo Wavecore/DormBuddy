@@ -137,8 +137,14 @@ public class CreateEventActivity extends AppCompatActivity implements SelectTime
         });
     }
     public void createReservation(View v){
-        ReserveRoom reserveRoom = new ReserveRoom(this);
-        reserveRoom.execute((Void) null);
+        if(eventLocation.getSelectedItemPosition() == 0)
+            Toast.makeText(this, "Select a location", Toast.LENGTH_SHORT).show();
+        else if(startTime == null || endTime == null)
+            Toast.makeText(this, "Select a time", Toast.LENGTH_SHORT).show();
+        else{
+            ReserveRoom reserveRoom = new ReserveRoom(this);
+            reserveRoom.execute((Void) null);
+        }
     }
 
     public void onComplete(Calendar start, Calendar end){
