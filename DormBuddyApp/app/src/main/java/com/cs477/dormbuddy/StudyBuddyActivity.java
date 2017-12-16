@@ -65,7 +65,7 @@ public class StudyBuddyActivity extends AppCompatActivity implements DisplayEven
 
         studyList = (ListView)findViewById(R.id.reservationList);
         Reservation[] reservations = Reservation.getStudy(this, Calendar.getInstance());
-        mAdapter = new ReservationAdapter(this, R.layout.reservation_item, reservations);
+        mAdapter = new ReservationAdapter(this, R.layout.reservation_item, reservations, false);
         studyList.setAdapter(mAdapter);
         studyList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

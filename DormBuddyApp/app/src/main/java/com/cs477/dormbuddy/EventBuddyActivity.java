@@ -80,7 +80,7 @@ public class EventBuddyActivity extends AppCompatActivity implements DisplayEven
 
         eventList = (ListView)findViewById(R.id.eventList);
         reservations = Reservation.getUpcommingEvent(this, Calendar.getInstance());
-        mAdapter = new ReservationAdapter(this, R.layout.reservation_item, reservations);
+        mAdapter = new ReservationAdapter(this, R.layout.reservation_item, reservations, true);
         eventList.setAdapter(mAdapter);
         eventList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

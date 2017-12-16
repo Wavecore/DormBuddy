@@ -27,10 +27,12 @@ import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_NAME;
 public class ReservationAdapter extends ArrayAdapter<Reservation> {
     public Reservation[] reservations;
     private Context context;
-    public ReservationAdapter(Context context, int resourceID, Reservation[] r){
+    public boolean isEvent;
+    public ReservationAdapter(Context context, int resourceID, Reservation[] r, boolean isEvent){
         super(context,resourceID);
         reservations = r;
         this.context = context;
+        this.isEvent = isEvent;
         if(r != null){
             for(int x = 0; x < r.length;x++)
                 add(r[x]);
@@ -76,8 +78,10 @@ public class ReservationAdapter extends ArrayAdapter<Reservation> {
                 loca.setText("Location: " + r.buildingID + " " + r.roomNum);
 
             time.setText("Time: "+Reservation.simpleResFormatter.format(r.startTime.getTime())+" to "+Reservation.simpleResFormatter.format(r.endTime.getTime()));
-            if(r.image != null)
+            if(r.image != null) //attempts to set the image to the user uploaded image
                 icon.setImageBitmap(r.image);
+            else if (isEvent) //events get a different icon
+                icon.setImageResource(R.drawable.event);
         }
         return v;
     }
