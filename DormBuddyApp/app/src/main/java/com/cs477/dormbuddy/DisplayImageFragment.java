@@ -58,7 +58,8 @@ public class DisplayImageFragment extends DialogFragment {
         } else { //else if its a locally stored large photo
             imageResource = getArguments().getInt("drawable");
             //shows a cropped version of the image resourse, depending on device dimensions
-            displayImage.setImageBitmap(decodeSampledBitmapFromResource(getResources(), imageResource, 1313, 1000));
+            // avoids overfilling heap in the process
+            displayImage.setImageBitmap(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), imageResource), 500,670,true));
             //save campus map
             builder.setPositiveButton("Save Photo", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
@@ -103,45 +104,6 @@ public class DisplayImageFragment extends DialogFragment {
         display.setArguments(args);
         display.isLocal = true;
         return display;
-    }
-
-    //resize the image
-    static Bitmap decodeSampledBitmapFromResource(Resources res, int resId,
-                                                         int reqWidth, int reqHeight) {
-
-        // First decode with inJustDecodeBounds=true to check dimensions
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeResource(res, resId, options);
-
-        // Calculate inSampleSize
-        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-
-        // Decode bitmap with inSampleSize set
-        options.inJustDecodeBounds = false;
-        return BitmapFactory.decodeResource(res, resId, options);
-    }
-
-    public static int calculateInSampleSize(
-            BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
-
-        if (height > reqHeight || width > reqWidth) {
-
-            // Calculate ratios of height and width to requested height and width
-            final int heightRatio = Math.round((float) height / (float) reqHeight);
-            final int widthRatio = Math.round((float) width / (float) reqWidth);
-
-            // Choose the smallest ratio as inSampleSize value, this will guarantee
-            // a final image with both dimensions larger than or equal to the
-            // requested height and width.
-            inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
-        }
-
-        return inSampleSize;
     }
 
     static class StoreImageInPhone extends AsyncTask<Void, Void, Boolean> {
