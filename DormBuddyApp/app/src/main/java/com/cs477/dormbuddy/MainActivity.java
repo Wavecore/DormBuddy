@@ -8,16 +8,16 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
-import static com.cs477.dormbuddy.LocalUserHelper.FULL_NAME;
-import static com.cs477.dormbuddy.LocalUserHelper.LOGGED_IN;
-import static com.cs477.dormbuddy.LocalUserHelper.TABLE_NAME;
-import static com.cs477.dormbuddy.LocalUserHelper._ID;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_NAME;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_LOGGED_IN;
+import static com.cs477.dormbuddy.LocalUserHelper.TABLE_USER;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_ID;
 
 public class MainActivity extends AppCompatActivity {
     private SQLiteDatabase db = null;
     private LocalUserHelper dbHelper = null;
     private Cursor mCursor;
-    final static String[] columns = { _ID, FULL_NAME, LOGGED_IN };
+    final static String[] columns = { USER_ID, USER_NAME, USER_LOGGED_IN };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,11 +26,12 @@ public class MainActivity extends AppCompatActivity {
         //check if user is logged in first, redirect them to log in if not
         dbHelper = new LocalUserHelper(this);
         db = dbHelper.getWritableDatabase();
-        mCursor = db.query(TABLE_NAME, columns, null, new String[] {}, null, null,
+        mCursor = db.query(TABLE_USER, columns, USER_LOGGED_IN+" = 1", new String[] {}, null, null,
                 null);
         try { //if the user ever logged in, there will be a row in the database, but check that they didnt log out
             mCursor.moveToPosition(0);
             int isLoggedIn = mCursor.getInt(2);
+            db.close();
             if (isLoggedIn == 1) {
                 Toast.makeText(this, "Greetings, buddy " + mCursor.getString(1), Toast.LENGTH_SHORT).show(); //welcome message
                 //user is logged in, therefore show activity_main
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(this, CredentialsActivity.class));
             }
         } catch (Exception e) { //otherwise direct to login
+            db.close();
             startActivity(new Intent(this, CredentialsActivity.class));
         }
     }
@@ -60,11 +62,22 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.profileBuddyImageButton:
                 intent = new Intent(this, ProfileBuddyActivity.class);
-                break;
+                //profile buddy is the only buddy that can kill this activity
+                startActivityForResult(intent, 200);
+                return;
             default:
                 Toast.makeText(this, "Error Retrieving Page", Toast.LENGTH_SHORT).show();
                 return;
         }
         startActivity(intent); //main activity never ends
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == 500) {
+            super.onActivityResult(requestCode, resultCode, data);
+            finish(); //finish this activity as log out was clicked
+            startActivity(new Intent(this, CredentialsActivity.class));
+        }
     }
 }

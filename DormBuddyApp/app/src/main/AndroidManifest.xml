@@ -7,7 +7,15 @@
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <!-- for dorm buddy's local user database -->
-    <uses-permission android:name= "android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <!--
+         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
+         Google Maps Android API v2, but you must specify either coarse or fine
+         location permissions for the 'MyLocation' functionality.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -16,24 +24,44 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".CredentialsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <!--Launched will may be become CredentialsActivity?-->
+                <!-- Launched will may be become CredentialsActivity? -->
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".CredentialsActivity"
-            android:label="@string/title_activity_credentials" />
+        <activity android:name=".MainActivity" />
         <activity android:name=".RegisterActivity" />
-        <activity android:name=".LaundryBuddyActivity" />
-        <activity android:name=".CycleSettingsActivity" />
+        <activity
+            android:name=".LaundryBuddyActivity"
+            android:label="Laundry Buddy"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".CycleTemplatesActivity"
+            android:label="Cycle Templates"
+            android:screenOrientation="portrait" />
         <activity android:name=".StudyBuddyActivity" />
         <activity android:name=".EventBuddyActivity" />
         <activity android:name=".CreateEventActivity" />
         <activity android:name=".ProfileBuddyActivity" />
-        <activity android:name=".MapBuddyActivity" />
+        <activity android:name=".MapBuddyActivity"
+            android:screenOrientation="portrait" />
+        <!--
+             The API key for Google Maps-based APIs is defined as a string resource.
+             (See the file "res/values/google_maps_api.xml").
+             Note that the API key is linked to the encryption key used to sign the APK.
+             You need a different API key for each encryption key, including the release key that is used to
+             sign the APK for publishing.
+             You can define the keys for the debug and release targets in src/debug/ and src/release/.
+        -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+        <activity
+            android:name=".InteractiveMapActivity"
+            android:screenOrientation="portrait"
+            android:label="@string/title_activity_interactive_map" />
     </application>
 
 </manifest>

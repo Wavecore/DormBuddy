@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
@@ -23,21 +24,24 @@ import java.io.IOException;
 
 import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_ID;
 import static com.cs477.dormbuddy.LocalUserHelper.BUILDING_NAME;
-import static com.cs477.dormbuddy.LocalUserHelper.FULL_NAME;
-import static com.cs477.dormbuddy.LocalUserHelper.ICON;
-import static com.cs477.dormbuddy.LocalUserHelper.LOGGED_IN;
+import static com.cs477.dormbuddy.LocalUserHelper.RESERVATION_START_TIME;
+import static com.cs477.dormbuddy.LocalUserHelper.TABLE_RESERVATION;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_NAME;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_ICON;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_LOGGED_IN;
 import static com.cs477.dormbuddy.LocalUserHelper.ROOM_NUMBER;
-import static com.cs477.dormbuddy.LocalUserHelper.TABLE_NAME;
-import static com.cs477.dormbuddy.LocalUserHelper._ID;
+import static com.cs477.dormbuddy.LocalUserHelper.TABLE_USER;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_ID;
+import static com.cs477.dormbuddy.LocalUserHelper.USER_NET_ID;
 
 public class ProfileBuddyActivity extends AppCompatActivity {
-    TextView nameView, gNumberView, buildingNameView, roomNumberView;
+    TextView nameView, gNumberView, buildingNameView, roomNumberView, netIdView;
     ImageView img; //user image
     private SQLiteDatabase db = null;
     private LocalUserHelper dbHelper = null;
     private Cursor mCursor;
     private String storedGNumber;
-    final static String[] columns = { _ID, FULL_NAME, LOGGED_IN, BUILDING_ID, BUILDING_NAME, ROOM_NUMBER, ICON };
+    final static String[] columns = { USER_ID, USER_NET_ID, USER_NAME, USER_LOGGED_IN, BUILDING_ID, BUILDING_NAME, ROOM_NUMBER, USER_ICON };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,31 +51,27 @@ public class ProfileBuddyActivity extends AppCompatActivity {
         gNumberView = findViewById(R.id.gNumberText);
         buildingNameView = findViewById(R.id.buildingText);
         roomNumberView = findViewById(R.id.roomText);
+        netIdView = findViewById(R.id.netIdText);
         dbHelper = new LocalUserHelper(this);
         db = dbHelper.getWritableDatabase();
-        mCursor = db.query(TABLE_NAME, columns, null, new String[] {}, null, null,
+        mCursor = db.query(TABLE_USER, columns, USER_LOGGED_IN+" = 1", new String[] {}, null, null,
                 null);
         try { //since user is logged in, just gobble up his user data
             mCursor.moveToPosition(0);
-            storedGNumber = "" + mCursor.getInt(0);
-            String gNumber = "G" + storedGNumber;
-            gNumberView.setText(gNumber);
-            nameView.setText(mCursor.getString(1));
-            buildingNameView.setText(mCursor.getString(4));
-            roomNumberView.setText(mCursor.getString(5));
-            byte[] userImage = mCursor.getBlob(6);
+            storedGNumber = mCursor.getString(0);
+            netIdView.setText(mCursor.getString(1));
+            gNumberView.setText(storedGNumber);
+            nameView.setText(mCursor.getString(2));
+            buildingNameView.setText(mCursor.getString(5));
+            roomNumberView.setText(mCursor.getString(6));
+            byte[] userImage = mCursor.getBlob(7);
             if (userImage.length > 0) {
                 displayImage(userImage); //image exists -- display it
             }
             mCursor.close();
-        } catch (Exception e) {
+        } catch (Exception e) { //otherwise user should log in
             startActivity(new Intent(this, CredentialsActivity.class));
         }
-    }
-
-    public void changeHousingClicked(View view) {
-        startActivity(new Intent(this, RegisterActivity.class));
-        finish();
     }
 
     public void uploadImage(View view) {
@@ -81,11 +81,12 @@ public class ProfileBuddyActivity extends AppCompatActivity {
     //user intentionally logging out just updates the logged in column
     public void logoutClicked(View view) {
         ContentValues cv = new ContentValues(1);
-        cv.put(LOGGED_IN, 0); //gives illusion of being logged out but user info is still in table
-        db.update(TABLE_NAME, cv, _ID + "=" + storedGNumber, null);
-        db.close();
+        cv.put(USER_LOGGED_IN, 0); //gives illusion of being logged out but user info is still in table
+        db.update(TABLE_USER, cv, USER_LOGGED_IN + "=" + 1, null);
+        db.delete(TABLE_RESERVATION,"", new String[]{});
         mCursor.close();
-        startActivity(new Intent(this, CredentialsActivity.class));
+        db.close();
+        setResult(500);
         finish();
     }
 
@@ -113,8 +114,8 @@ public class ProfileBuddyActivity extends AppCompatActivity {
                 bmp.compress(Bitmap.CompressFormat.PNG, 10, stream); //bmp gets compressed to the stream
                 ContentValues cv = new ContentValues(1);
                 byte[] byteArray = stream.toByteArray(); //stream becomes a byte array
-                cv.put(ICON, byteArray); //updates stored byte array for user local table
-                db.update(TABLE_NAME, cv, _ID + "=" + storedGNumber, null); //uploads image
+                cv.put(USER_ICON, byteArray); //updates stored byte array for user local table
+                db.update(TABLE_USER, cv, USER_LOGGED_IN + "=" + 1, null); //uploads image
                 displayImage(byteArray); //displays on screen
             } catch (FileNotFoundException e) {
                 e.printStackTrace();

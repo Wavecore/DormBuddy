@@ -11,40 +11,81 @@
         android:rowCount="3"
         android:orientation="vertical"
         style="@style/Theme.AppCompat.DayNight">
-        <ImageButton
-            android:contentDescription="Laundry Buddy"
-            android:src="@drawable/buddy"
-            android:id="@+id/laundryBuddyImageButton"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:onClick="buddyClicked"/>
-        <ImageButton
-            android:contentDescription="Study Buddy"
-            android:src="@drawable/buddy"
-            android:id="@+id/studyBuddyImageButton"
-            android:layout_width="wrap_content"
+            >
+            <ImageButton
+                android:id="@+id/laundryBuddyImageButton"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:adjustViewBounds="true"
+                android:background="@android:color/transparent"
+                android:contentDescription="Laundry Buddy"
+                android:layout_weight="1"
+                android:scaleType="fitXY"
+                android:onClick="buddyClicked"
+                android:src="@drawable/laundry_buddy" />
+            <ImageButton
+                android:id="@+id/mapBuddyImageButton"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:adjustViewBounds="true"
+                android:background="@android:color/transparent"
+                android:contentDescription="Map Buddy"
+                android:onClick="buddyClicked"
+                android:layout_weight="1"
+                android:scaleType="fitXY"
+                android:src="@drawable/map_buddy" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:onClick="buddyClicked"/>
-        <ImageButton
-            android:contentDescription="Profile Buddy"
-            android:src="@drawable/greenbuddy"
-            android:id="@+id/profileBuddyImageButton"
-            android:layout_width="wrap_content"
+            >
+            <ImageButton
+                android:id="@+id/studyBuddyImageButton"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:adjustViewBounds="true"
+                android:background="@android:color/transparent"
+                android:contentDescription="Study Buddy"
+                android:onClick="buddyClicked"
+                android:scaleType="fitXY"
+                android:layout_weight="1"
+                android:src="@drawable/study_buddy" />
+
+            <ImageButton
+                android:id="@+id/eventBuddyImageButton"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:adjustViewBounds="true"
+                android:background="@android:color/transparent"
+                android:contentDescription="Event Buddy"
+                android:onClick="buddyClicked"
+                android:scaleType="fitXY"
+                android:layout_weight="1"
+                android:src="@drawable/event_buddy" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:onClick="buddyClicked"/>
-        <ImageButton
-            android:contentDescription="Map Buddy"
-            android:src="@drawable/buddy"
-            android:id="@+id/mapBuddyImageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="buddyClicked"/>
-        <ImageButton
-            android:contentDescription="Event Buddy"
-            android:src="@drawable/buddy"
-            android:id="@+id/eventBuddyImageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="buddyClicked"/>
+            >
+            <ImageButton
+                android:id="@+id/profileBuddyImageButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:contentDescription="Profile Buddy"
+                android:adjustViewBounds="true"
+                android:onClick="buddyClicked"
+                android:scaleType="fitCenter"
+                android:layout_weight="1"
+                android:src="@drawable/profile_buddy" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                />
+        </LinearLayout>
     </GridLayout>
 </ScrollView>

@@ -4,46 +4,42 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="end"
+    android:gravity="left"
     tools:context="com.cs477.dormbuddy.LaundryBuddyActivity">
     <TextView
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:text="Laundry Buddy"
-        android:textSize="36sp"
+        android:textSize="36dp"
         android:textStyle="bold"
-        android:layout_marginBottom="10dp"
-        android:textAlignment="center"/>
+        android:textAlignment="center"
+        android:layout_weight="14"/>
     <TextView
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:text="Washers"
-        android:textSize="26sp"
+        android:textSize="26dp"
+        android:layout_weight="10"
         android:textAlignment="center"/>
-    <GridView
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
         android:id="@+id/washers"
-        android:layout_width="fill_parent"
-        android:layout_height="160dp"
-        android:numColumns="3"
-        android:rotationY="270">
-    </GridView>
+        android:layout_weight="54">
+    </android.support.v7.widget.RecyclerView>
     <TextView
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:text="Dryers"
-        android:textSize="26sp"
-        android:textAlignment="center"/>
-    <GridView
-        android:id="@+id/dryers"
-        android:layout_width="fill_parent"
-        android:layout_height="160dp"
-        android:numColumns="3"
-        android:rotationY="270">
-    </GridView>
-    <Button
+        android:textSize="26dp"
+        android:textAlignment="center"
+        android:layout_weight="10"/>
+    <android.support.v7.widget.RecyclerView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Probably a gear button"
-        android:backgroundTint="@color/colorAmber"
-        android:onClick="cyclePreferencesButtonClicked"/>
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        android:id="@+id/dryers"
+        android:layout_weight="54">
+    </android.support.v7.widget.RecyclerView>
 </LinearLayout>

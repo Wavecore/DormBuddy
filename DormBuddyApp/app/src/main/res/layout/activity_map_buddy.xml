@@ -12,38 +12,81 @@
         android:text="Map Buddy"
         android:textSize="36sp"
         android:textStyle="bold"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="6dp"
         android:textAlignment="center"/>
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <GridLayout
-            android:layout_marginBottom="10dp"
+        <LinearLayout
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
-            <!--two/three rectangular maps, at least one dorm map and one campus map, clickable to expand-->
-            <ImageButton
-                android:contentDescription="Dorm Map"
-                android:layout_marginTop="10dp"
-                android:src="@drawable/buddy"
-                android:layout_height="160dp"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:text="Interactive Maps"/>
+            <GridLayout
+                android:layout_marginBottom="6dp"
                 android:layout_width="fill_parent"
-                android:onClick="mapClicked"/>
-            <ImageButton
-                android:contentDescription="Campus Map"
-                android:layout_marginTop="10dp"
-                android:src="@drawable/buddy"
-                android:layout_height="160dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <!--two/three rectangular maps, at least one dorm map and one campus map, clickable to expand-->
+                <ImageView
+                    android:contentDescription="Interactive Campus Map"
+                    android:id="@+id/interactiveCampusMap"
+                    android:layout_marginTop="6dp"
+                    android:src="@drawable/interactive_campus_map"
+                    android:scaleType="fitXY"
+                    android:adjustViewBounds="true"
+                    android:layout_height="wrap_content"
+                    android:layout_width="fill_parent"
+                    android:onClick="mapClicked"/>
+                <ImageView
+                    android:contentDescription="Interactive Fairfax Map"
+                    android:id="@+id/interactiveFairfaxMap"
+                    android:layout_marginTop="6dp"
+                    android:src="@drawable/interactive_fairfax_map"
+                    android:scaleType="fitXY"
+                    android:adjustViewBounds="true"
+                    android:layout_height="wrap_content"
+                    android:layout_width="fill_parent"
+                    android:onClick="mapClicked"/>
+            </GridLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:text="Available Maps"/>
+            <GridLayout
+                android:layout_marginBottom="6dp"
                 android:layout_width="fill_parent"
-                android:onClick="mapClicked"/>
-            <ImageButton
-                android:contentDescription="Fairfax Map"
-                android:layout_marginTop="10dp"
-                android:src="@drawable/buddy"
-                android:layout_height="160dp"
-                android:layout_width="fill_parent"
-                android:onClick="mapClicked"/>
-        </GridLayout>
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <!--two/three rectangular maps, at least one dorm map and one campus map, clickable to expand-->
+                <ImageView
+                    android:contentDescription="Campus Map"
+                    android:id="@+id/campusMap"
+                    android:layout_marginTop="6dp"
+                    android:src="@drawable/campus_map"
+                    android:layout_width="fill_parent"
+                    android:scaleType="fitXY"
+                    android:adjustViewBounds="true"
+                    android:layout_height="wrap_content"
+                    android:onClick="mapClicked"/>
+                <ImageView
+                    android:contentDescription="Dorm Map"
+                    android:id="@+id/dormMap"
+                    android:layout_marginTop="6dp"
+                    android:src="@drawable/dorm_map"
+                    android:layout_width="fill_parent"
+                    android:scaleType="fitXY"
+                    android:adjustViewBounds="true"
+                    android:layout_height="wrap_content"
+                    android:onClick="mapClicked"/>
+            </GridLayout>
+        </LinearLayout>
     </ScrollView>
 </LinearLayout>
