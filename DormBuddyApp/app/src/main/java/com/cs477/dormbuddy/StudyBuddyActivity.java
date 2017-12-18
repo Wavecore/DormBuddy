@@ -119,8 +119,6 @@ public class StudyBuddyActivity extends AppCompatActivity implements DisplayEven
                 HttpsURLConnection connection = (HttpsURLConnection) requestMachinesURL.openConnection();
                 connection.setRequestMethod("GET");
                 connection.setDoOutput(false);
-                connection.setConnectTimeout(5000);
-                connection.setReadTimeout(5000);
                 connection.connect();
 
                 //get the responses
@@ -169,7 +167,6 @@ public class StudyBuddyActivity extends AppCompatActivity implements DisplayEven
                         System.out.println("Added new reservation "+reservationTitle+buildingID+roomNum);
                     }
                     resCursor.close();
-                    studyList.setBackground(null);
                 }
                 System.out.println("Finished loading study room");
                 return true;

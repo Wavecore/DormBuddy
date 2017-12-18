@@ -137,8 +137,6 @@ public class EventBuddyActivity extends AppCompatActivity implements DisplayEven
                 HttpsURLConnection connection = (HttpsURLConnection) requestMachinesURL.openConnection();
                 connection.setRequestMethod("GET");
                 connection.setDoOutput(false);
-                connection.setConnectTimeout(5000);
-                connection.setReadTimeout(5000);
                 connection.connect();
 
                 //get the responses
